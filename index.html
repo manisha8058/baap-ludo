@@ -115,11 +115,11 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 <div class="history-row"><span>Classic Battle<br><small>Today • 10:30 AM</small></span><b>+₹380</b></div>
 <div class="history-row"><span>Starter Room<br><small>Yesterday • 8:10 PM</small></span><b>-₹100</b></div>
 <div class="history-row"><span>Practice Match<br><small>Yesterday • 6:20 PM</small></span><b>+₹95</b></div>
-<p style="color:#777;font-size:12px">Demo records only. No real-money settlement is connected.</p></div></section>
+<p style="color:#777;font-size:12px"> records only. No real-money settlement is connected.</p></div></section>
 
 <section id="admin" class="page"><div class="content"><h2>Admin Panel</h2>
 <div class="admin-grid"><div class="admin-stat">Total Users<b>1,248</b></div><div class="admin-stat">Active Rooms<b>36</b></div><div class="admin-stat">Open Battles<b>18</b></div><div class="admin-stat">Support Tickets<b>7</b></div></div>
-<div class="admin-card"><h3>Manage Platform</h3><p>• Add/edit battle cards</p><p>• Review support requests</p><p>• Manage banners and notices</p><p>• View demo activity logs</p><button class="btn blue" onclick="alert('Admin controls demo only. Database/API connect karna hoga.')">Open Controls</button></div>
+<div class="admin-card"><h3>Manage Platform</h3><p>• Add/edit battle cards</p><p>• Review support requests</p><p>• Manage banners and notices</p><p>• View  activity logs</p><button class="btn blue" onclick="alert('Admin controls  only. Database/API connect karna hoga.')">Open Controls</button></div>
 <div class="notice">Admin access ko production mein secure server-side authentication aur role permissions ke saath configure karna zaroori hai.</div></div></section>
 
 <div class="login-screen" id="loginScreen">
@@ -127,19 +127,19 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 <input id="loginName" placeholder="Name / Username">
 <input id="loginPhone" placeholder="Mobile number" inputmode="numeric">
 <input id="loginPassword" placeholder="Password" type="password">
-<button class="btn purple" onclick="loginDemo()">Login</button>
+<button class="btn purple" onclick="login()">Login</button>
 <button class="switch" onclick="toggleRegister()" id="registerToggle">New user? Create account</button>
-<p style="font-size:11px;color:#888;text-align:center;margin-top:18px">Demo authentication only. Real OTP/password server setup is not connected.</p>
+<p style="font-size:11px;color:#888;text-align:center;margin-top:18px"> authentication only. Real OTP/password server setup is not connected.</p>
 </div></div>
 
 
-<section id="wallet" class="page"><div class="content"><div class="balance"><h2>My Balance</h2><p>Manage your funds and winnings</p><small>TOTAL BALANCE</small><h1>₹<span id="balance">14</span></h1></div><div class="cash-card"><h2>💰 Deposit Cash</h2><div class="value">₹14</div><button class="btn purple" onclick="alert('Demo only: payment gateway connect karna hoga.')">＋ Add Cash</button></div><div class="cash-card"><h2>🏆 Winning Cash</h2><div class="value">₹0</div><button class="btn green" onclick="alert('Demo only: withdrawal backend connect karna hoga.')">▣ Withdraw</button></div></div></section>
+<section id="wallet" class="page"><div class="content"><div class="balance"><h2>My Balance</h2><p>Manage your funds and winnings</p><small>TOTAL BALANCE</small><h1>₹<span id="balance">14</span></h1></div><div class="cash-card"><h2>💰 Deposit Cash</h2><div class="value">₹14</div><button class="btn purple" onclick="alert(' only: payment gateway connect karna hoga.')">＋ Add Cash</button></div><div class="cash-card"><h2>🏆 Winning Cash</h2><div class="value">₹0</div><button class="btn green" onclick="alert(' only: withdrawal backend connect karna hoga.')">▣ Withdraw</button></div></div></section>
 
 <section id="refer" class="page"><div class="content"><div class="refer-hero"><small>SPECIAL PROGRAM</small><h1>Refer & <span style="color:#9b8bff">Earn</span></h1><p>Share the joy with friends and unlock exclusive rewards for every sign-up!</p></div><div class="codebox"><h3>Referral Code</h3><div class="code"><span>804858</span><button class="btn" onclick="copyCode()">COPY</button></div></div><button class="btn green" style="width:100%;margin-top:35px" onclick="whatsapp()">◉ Whatsapp</button><h3 style="margin-top:35px">YOUR PERFORMANCE</h3><div class="stats"><div class="stat">🏆<br>Referred Players<b>6</b></div><div class="stat">💰<br>Referral Earning<b>₹485.5</b></div></div></div></section>
 
 <section id="support" class="page"><div class="content"><div class="help-hero"><h1>Help Center</h1><p>Got a question? We're available to assist you.</p></div><h3>CONTACT US AT BELOW PLATFORMS.</h3><div class="contact" onclick="whatsapp()"><div class="emoji">🟢</div><div><h2>WhatsApp Chat</h2><p>Instant reply within minutes</p></div><span>→</span></div><div class="contact" onclick="alert('Email support: support@baapludo.example')"><div class="emoji">✉️</div><div><h2>Email Support</h2><p>Get professional assistance</p></div><span>→</span></div><p style="color:#777">WhatsApp: 8058128380</p></div></section>
 
-<section id="profile" class="page"><div class="profile-head"><div class="avatar">🧑🏻</div><h2>Love Player ✎</h2></div><div class="content"><div class="profile-box"><h2 style="text-align:center">Complete Profile</h2><div class="detail">📞 <small>MOBILE NUMBER</small><b>8058128380</b></div><div class="detail">✉️ <small>EMAIL ADDRESS</small><b>support@baapludo.example</b></div><div class="kyc">📱 KYC Status: Demo Verified ✅</div></div><h3>Other Details</h3><div class="stats"><div class="stat">🎁<br>Referral Earning<b>485.5</b></div><div class="stat">⚔️<br>Battle Played<b>19</b></div><div class="stat">🪙<br>Coin Won<b>1723</b></div><div class="stat">💳<br>Total Withdrawal<b>0</b></div></div></div></section>
+<section id="profile" class="page"><div class="profile-head"><div class="avatar">🧑🏻</div><h2>Love Player ✎</h2></div><div class="content"><div class="profile-box"><h2 style="text-align:center">Complete Profile</h2><div class="detail">📞 <small>MOBILE NUMBER</small><b>8058128380</b></div><div class="detail">✉️ <small>EMAIL ADDRESS</small><b>support@baapludo.example</b></div><div class="kyc">📱 KYC Status:  Verified ✅</div></div><h3>Other Details</h3><div class="stats"><div class="stat">🎁<br>Referral Earning<b>485.5</b></div><div class="stat">⚔️<br>Battle Played<b>19</b></div><div class="stat">🪙<br>Coin Won<b>1723</b></div><div class="stat">💳<br>Total Withdrawal<b>0</b></div></div></div></section>
 
 <nav class="bottom"><button class="active" onclick="go('home',this)"><span>⌂</span>Home</button><button onclick="go('wallet',this)"><span>▣</span>Wallet</button><button onclick="go('refer',this)"><span>♧</span>Refer</button><button onclick="go('support',this)"><span>☎</span>Support</button><button onclick="go('profile',this)"><span>◎</span>Profile</button></nav>
 </div>
@@ -150,7 +150,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 <div class="drawer-item" onclick="goFromDrawer('home')">🖐 Play <button>›</button></div>
 <div class="drawer-item" onclick="goFromDrawer('wallet')">💰 My Wallet <button>›</button></div>
 <div class="drawer-item" onclick="goFromDrawer('refer')">🎁 Refer and Earn <button>›</button></div>
-<div class="drawer-item" onclick="alert('Demo history page')">◷ History <button>›</button></div>
+<div class="drawer-item" onclick="alert(' history page')">◷ History <button>›</button></div>
 <div class="drawer-item" onclick="goFromDrawer('support')">🧑‍💻 Support <button>›</button></div>
 <div class="drawer-item">🌐 English / Hindi <button>›</button></div>
 <div class="drawer-item" onclick="alert('Policies page placeholder')">📜 All Policy <button>›</button></div>
@@ -159,7 +159,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 <div class="drawer-item" onclick="goFromDrawer('history')">◷ History <button>›</button></div>
 <div class="drawer-item" onclick="goFromDrawer('admin')">🛠 Admin Panel <button>›</button></div>
-<div class="drawer-item" onclick="logoutDemo()">🚪 Logout <button>›</button></div>
+<div class="drawer-item" onclick="logout()">🚪 Logout <button>›</button></div>
 </aside>
 
 <script>
@@ -171,8 +171,8 @@ function go(id,btn){document.querySelectorAll('.page').forEach(p=>p.classList.re
 function goFromDrawer(id){closeDrawer();go(id)}
 function openDrawer(){document.getElementById('drawer').classList.add('open');document.getElementById('overlay').classList.add('show')}
 function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('overlay').classList.remove('show')}
-function play(amount){alert('Demo battle selected: ₹'+amount+'। Real-money game/backend included नहीं है।')}
-function setAmount(){alert('Amount filter demo: '+(document.getElementById('amount').value||'all'))}
+function play(amount){alert(' battle selected: ₹'+amount+'। Real-money game/backend included नहीं है।')}
+function setAmount(){alert('Amount filter : '+(document.getElementById('amount').value||'all'))}
 function copyCode(){navigator.clipboard?.writeText('804858');alert('Referral code: 804858')}
 function whatsapp(){window.open('https://wa.me/918058128380','_blank')}
 openBattles();document.getElementById('runningBattles').innerHTML=running.map(runningHtml).join('');
@@ -180,19 +180,19 @@ openBattles();document.getElementById('runningBattles').innerHTML=running.map(ru
 let registerMode=false;
 function toggleRegister(){
  registerMode=!registerMode;
- document.getElementById('loginSubtitle').textContent=registerMode?'Create your demo account':'Login to continue';
+ document.getElementById('loginSubtitle').textContent=registerMode?'Create your  account':'Login to continue';
  document.querySelector('#loginScreen .btn').textContent=registerMode?'Register':'Login';
  document.getElementById('registerToggle').textContent=registerMode?'Already registered? Login':'New user? Create account';
 }
-function loginDemo(){
+function login(){
  const name=document.getElementById('loginName').value.trim();
  const phone=document.getElementById('loginPhone').value.trim();
  const pass=document.getElementById('loginPassword').value.trim();
  if(!name||!phone||!pass){alert('Name, mobile aur password bhariye.');return}
  document.getElementById('loginScreen').style.display='none';
- alert(registerMode?'Demo account created successfully':'Demo login successful');
+ alert(registerMode?' account created successfully':' login successful');
 }
-function logoutDemo(){document.getElementById('loginScreen').style.display='flex';closeDrawer();go('home')}
+function logout(){document.getElementById('loginScreen').style.display='flex';closeDrawer();go('home')}
 
 function toggleFaq(btn){
   const answer = btn.nextElementSibling;
@@ -210,7 +210,7 @@ function saveAdminBattle(){
     alert('Entry fee और prize भरें');
     return;
   }
-  alert('Demo battle saved: Entry ₹'+entry+' | Prize ₹'+prize+' | Status '+status);
+  alert(' battle saved: Entry ₹'+entry+' | Prize ₹'+prize+' | Status '+status);
 }
 
 
@@ -233,14 +233,14 @@ function joinRoomCode(){
     result.style.color = '#ff9b9b';
     return;
   }
-  result.textContent = 'Demo room join request भेजी गई: ' + code;
+  result.textContent = ' room join request भेजी गई: ' + code;
   result.style.color = '#8dffb8';
 }
 
 </script>
 
 <div style="max-width:900px;margin:20px auto;padding:12px 16px;background:#171327;border:1px solid #3d315e;border-radius:12px;color:#aaa;font-size:12px;text-align:center">
-  V5 Update: Create Room Code, Copy Code और Join Room feature जोड़ा गया है। यह अभी practice/demo frontend है; real wallet, OTP, database और multiplayer backend अलग से connect करना होगा।
+  V5 Update: Create Room Code, Copy Code और Join Room feature जोड़ा गया है। यह अभी practice/ frontend है; real wallet, OTP, database और multiplayer backend अलग से connect करना होगा।
 </div>
 
 </body>
