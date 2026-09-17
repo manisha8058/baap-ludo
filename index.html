@@ -71,7 +71,12 @@
 .room-code{font-size:28px;letter-spacing:5px;font-weight:800;color:#ffd76b;text-align:center;padding:14px}
 .room-result{color:#8dffb8;text-align:center;font-size:13px;margin-top:10px}
 </style>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+const SUPABASE_URL = "https://ijsruvcalusegfkbnqsw.supabase.co";
+const SUPABASE_KEY = "sb_publishable_LsDSRgGwM-Dx7uSLaaJ48w_K6hvok2c";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  </script>
 </head>
 <body>
 <div class="app">
