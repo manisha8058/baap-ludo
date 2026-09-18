@@ -184,14 +184,46 @@ function toggleRegister(){
  document.querySelector('#loginScreen .btn').textContent=registerMode?'Register':'Login';
  document.getElementById('registerToggle').textContent=registerMode?'Already registered? Login':'New user? Create account';
 }
-function login(){
- const name=document.getElementById('loginName').value.trim();
- const phone=document.getElementById('loginPhone').value.trim();
- const pass=document.getElementById('loginPassword').value.trim();
- if(!name||!phone||!pass){alert('Name, mobile aur password bhariye.');return}
- document.getElementById('loginScreen').style.display='none';
- alert(registerMode?' account created successfully':' login successful');
+
+async function login(){
+  const name = document.getElementById('loginName').value.trim();
+  let phone = document.getElementById('loginPhone').value.trim();
+  const pass = document.getElementById('loginPassword').value.trim();
+
+  if(!name || !phone || !pass){
+    alert('Name, mobile aur password bhariye');
+    return;
+  }
+
+  if(/^\d{10}$/.test(phone)){
+    phone = '+91' + phone;
+  }
+
+  if(!/^\+\d{10,15}$/.test(phone)){
+    alert('Sahi mobile number dijiye');
+    return;
+  }
+
+  const result = registerMode
+    ? await supabaseClient.auth.signUp({
+        phone: phone,
+        password: pass,
+        options: { data: { name: name } }
+      })
+    : await supabaseClient.auth.signInWithPassword({
+        phone: phone,
+        password: pass
+      });
+
+  if(result.error){
+    alert(result.error.message);
+    return;
+  }
+
+  document.getElementById('loginScreen').style.display = 'none';
+  alert(registerMode ? 'Account created successfully' : 'Login successful');
 }
+
 function logout(){document.getElementById('loginScreen').style.display='flex';closeDrawer();go('home')}
 
 function toggleFaq(btn){
