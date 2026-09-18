@@ -124,8 +124,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 <div class="login-screen" id="loginScreen">
 <div class="login-card"><h1>BAAP <span style="color:#ef3e9c">LUDO</span></h1><p style="text-align:center;color:#77808d" id="loginSubtitle">Login to continue</p>
-<input id="loginName" placeholder="Name / Username">
-<input id="loginPhone" placeholder="Mobile number" inputmode="numeric">
+<input id="loginEmail" placeholder="Email" type="email">
 <input id="loginPassword" placeholder="Password" type="password">
 <button class="btn purple" onclick="login()">Login</button>
 <button class="switch" onclick="toggleRegister()" id="registerToggle">New user? Create account</button>
@@ -185,45 +184,33 @@ function toggleRegister(){
  document.getElementById('registerToggle').textContent=registerMode?'Already registered? Login':'New user? Create account';
 }
 
-async function login(){
-  const name = document.getElementById('loginName').value.trim();
-  let phone = document.getElementById('loginPhone').value.trim();
+async function login() {
+  const email = document.getElementById('loginEmail').value.trim();
   const pass = document.getElementById('loginPassword').value.trim();
 
-  if(!name || !phone || !pass){
-    alert('Name, mobile aur password bhariye');
-    return;
-  }
-
-  if(/^\d{10}$/.test(phone)){
-    phone = '+91' + phone;
-  }
-
-  if(!/^\+\d{10,15}$/.test(phone)){
-    alert('Sahi mobile number dijiye');
+  if (!email || !pass) {
+    alert('Email aur Password bhariye');
     return;
   }
 
   const result = registerMode
     ? await supabaseClient.auth.signUp({
-        phone: phone,
-        password: pass,
-        options: { data: { name: name } }
+        email: email,
+        password: pass
       })
     : await supabaseClient.auth.signInWithPassword({
-        phone: phone,
+        email: email,
         password: pass
       });
 
-  if(result.error){
+  if (result.error) {
     alert(result.error.message);
     return;
   }
 
   document.getElementById('loginScreen').style.display = 'none';
-  alert(registerMode ? 'Account created successfully' : 'Login successful');
+  alert(registerMode ? 'Account created' : 'Login successful');
 }
-
 function logout(){document.getElementById('loginScreen').style.display='flex';closeDrawer();go('home')}
 
 function toggleFaq(btn){
