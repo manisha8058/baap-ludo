@@ -117,10 +117,52 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 <div class="history-row"><span>Practice Match<br><small>Yesterday • 6:20 PM</small></span><b>+₹95</b></div>
 <p style="color:#777;font-size:12px"> records only. No real-money settlement is connected.</p></div></section>
 
-<section id="admin" class="page"><div class="content"><h2>Admin Panel</h2>
-<div class="admin-grid"><div class="admin-stat">Total Users<b>1,248</b></div><div class="admin-stat">Active Rooms<b>36</b></div><div class="admin-stat">Open Battles<b>18</b></div><div class="admin-stat">Support Tickets<b>7</b></div></div>
-<div class="admin-card"><h3>Manage Platform</h3><p>• Add/edit battle cards</p><p>• Review support requests</p><p>• Manage banners and notices</p><p>• View  activity logs</p><button class="btn blue" onclick="alert('Admin controls  only. Database/API connect karna hoga.')">Open Controls</button></div>
-<div class="notice">Admin access ko production mein secure server-side authentication aur role permissions ke saath configure karna zaroori hai.</div></div></section>
+  <section id="admin" class="page">
+  <div class="content">
+    <h2>Admin Panel</h2>
+
+    <div class="admin-grid">
+
+      <div class="admin-stat">
+        <strong id="adminUserCount">0</strong>
+        <span>Total Users</span>
+      </div>
+
+      <div class="admin-stat">
+        <strong id="adminRoomCount">0</strong>
+        <span>Total Rooms</span>
+      </div>
+
+      <div class="admin-stat">
+        <strong id="adminBattleCount">0</strong>
+        <span>Total Battles</span>
+      </div>
+
+    </div>
+
+    <div class="admin-card">
+      <h3>Users</h3>
+      <div id="adminUsers">
+        Loading users...
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <h3>Rooms</h3>
+      <div id="adminRooms">
+        Loading rooms...
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <h3>Battles</h3>
+      <div id="adminBattles">
+        Loading battles...
+      </div>
+    </div>
+
+  </div>
+</section>
 
 <div class="login-screen" id="loginScreen">
 <div class="login-card"><h1>BAAP <span style="color:#ef3e9c">LUDO</span></h1><p style="text-align:center;color:#77808d" id="loginSubtitle">Login to continue</p>
@@ -265,6 +307,67 @@ function showPage(pageId) {
     page.classList.add('active');
   }
 }
+  async function loadAdminData() {
+  const usersBox = document.getElementById('adminUsers');
+  const roomsBox = document.getElementById('adminRooms');
+  const battlesBox = document.getElementById('adminBattles');
+
+  usersBox.textContent = 'Loading users...';
+  roomsBox.textContent = 'Loading rooms...';
+  battlesBox.textContent = 'Loading battles...';
+
+  const users = await supabaseClient
+    .from('profiles')
+    .select('*')
+    .limit(20);
+
+  const rooms = await supabaseClient
+    .from('rooms')
+    .select('*')
+    .limit(20);
+
+  const battles = await supabaseClient
+    .from('battles')
+    .select('*')
+    .limit(20);
+
+  document.getElementById('adminUserCount').textContent =
+    users.error ? '0' : users.data.length;
+
+  document.getElementById('adminRoomCount').textContent =
+    rooms.error ? '0' : rooms.data.length;
+
+  document.getElementById('adminBattleCount').textContent =
+    battles.error ? '0' : battles.data.length;
+
+  usersBox.innerHTML = users.error
+    ? 'Users load nahi hue'
+    : users.data.length
+      ? users.data.map(u => `<pre>${JSON.stringify(u, null, 2)}</pre>`).join('')
+      : 'No users found';
+
+  roomsBox.innerHTML = rooms.error
+    ? 'Rooms load nahi hue'
+    : rooms.data.length
+      ? rooms.data.map(r => `<pre>${JSON.stringify(r, null, 2)}</pre>`).join('')
+      : 'No rooms found';
+
+  battlesBox.innerHTML = battles.error
+    ? 'Battles load nahi hui'
+    : battles.data.length
+      ? battles.data.map(b => `<pre>${JSON.stringify(b, null, 2)}</pre>`).join('')
+      : 'No battles found';
+}
+
+const oldShowPage = showPage;
+
+showPage = function(pageId) {
+  oldShowPage(pageId);
+
+  if (pageId === 'admin') {
+    loadAdminData();
+  }
+};
 </script>
 
 <div style="max-width:900px;margin:20px auto;padding:12px 16px;background:#171327;border:1px solid #3d315e;border-radius:12px;color:#aaa;font-size:12px;text-align:center">
