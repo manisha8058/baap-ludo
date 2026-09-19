@@ -255,7 +255,16 @@ function joinRoomCode(){
   result.textContent = ' room join request भेजी गई: ' + code;
   result.style.color = '#8dffb8';
 }
+function showPage(pageId) {
+  document.querySelectorAll('.page').forEach(page => {
+    page.classList.remove('active');
+  });
 
+  const page = document.getElementById(pageId);
+  if (page) {
+    page.classList.add('active');
+  }
+}
 </script>
 
 <div style="max-width:900px;margin:20px auto;padding:12px 16px;background:#171327;border:1px solid #3d315e;border-radius:12px;color:#aaa;font-size:12px;text-align:center">
