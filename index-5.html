@@ -1,0 +1,731 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>BAAP LUDO</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#000;font-family:Arial,Helvetica,sans-serif;color:#293242}
+:root{--purple:#21002f;--purple2:#4c0870;--pink:#f65ca5;--blue:#26a9ff;--light:#f7f8fc;--card:#dce9ff;--ink:#1b0828}
+.app{width:100%;max-width:665px;min-height:100vh;margin:auto;background:#fff;position:relative;padding-bottom:78px;overflow:hidden}
+.header{height:96px;background:linear-gradient(100deg,#09000e,#300046,#120016);border-bottom:4px solid #ff9ed0;display:flex;align-items:center;gap:18px;padding:12px 20px;position:sticky;top:0;z-index:20}
+.menu-btn{font-size:36px;color:#fff;background:none;border:0;width:48px}.logo{width:75px;height:75px;border-radius:50%;display:grid;place-items:center;color:#ffd66c;font-weight:900;font-size:13px;text-align:center;border:2px solid #b78b2f;background:radial-gradient(circle,#503b12,#0c0710 68%);box-shadow:0 0 12px #f8d66b55}
+.spacer{flex:1}.pill{display:flex;align-items:center;gap:7px;background:linear-gradient(#61d8ff,#168df0);border:1px solid #6fe6ff;box-shadow:0 0 15px #2bbcffaa;color:#fff;border-radius:30px;padding:12px 15px;font-size:17px;font-weight:bold;white-space:nowrap}
+.content{padding:12px 20px}.notice{background:linear-gradient(90deg,#260019,#17000e);color:white;border:1px solid #ffb0d8;border-radius:8px;padding:12px;font-size:14px;line-height:1.45;margin-bottom:18px}.section-title{font-size:20px;font-weight:800;margin:15px 0 14px;text-align:center;background:linear-gradient(90deg,#ff7284,#a74fff,#399aff);color:white;border-radius:7px;padding:14px;box-shadow:0 3px 5px #aaa}
+.page{display:none}.page.active{display:block}.live-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.live-label{color:#ff7d9a;font-size:12px;margin:0 0 15px 6px}.promo{height:190px;border-radius:7px;background:#090909;display:flex;align-items:center;justify-content:center;text-align:center;font-size:30px;font-weight:900;color:#ffd94a;border:1px solid #222;padding:10px}.promo.ludo{background:radial-gradient(circle at 50% 40%,#263e89,#03030a 65%);text-shadow:3px 3px #e9007d}.promo.support{background:#000;color:#42e83b;font-size:26px;text-shadow:2px 2px #ff2d5f;cursor:pointer;user-select:none}
+.amount{display:flex;gap:10px;margin:12px 0 18px}.amount input{min-width:0;flex:1;padding:15px;border:1px solid #aaa;border-radius:7px;font-size:16px}.btn{border:0;border-radius:28px;padding:13px 24px;font-weight:800;font-size:16px;cursor:pointer}.blue{background:linear-gradient(#69d9ff,#2198f4);color:#fff;box-shadow:0 4px 12px #888}.green{background:#20d85c;color:#fff}.purple{background:#5143e6;color:white}
+.battle{background:#e3edff;border:3px solid #6764ec;border-radius:20px;padding:13px 14px;margin:12px 0;display:flex;align-items:center;gap:10px}.battle-info{flex:1;min-width:0}.battle-info .tag{font-size:12px;color:#4c87d0;background:#f4f8ff;border-radius:3px;padding:4px 7px;margin-right:8px}.battle-info strong{font-size:16px}.labels{display:flex;gap:18px;margin-top:10px;font-size:12px}.labels b{display:block;font-size:19px;margin-top:5px}.labels .prize{color:#13b982}.battle .btn{min-width:105px}
+.running{background:#d5e5ff;border-radius:8px;padding:12px;margin:12px 0}.playing{text-align:center;font-weight:bold;color:#66758b}.names{background:#fff;border-radius:25px;padding:9px 15px;display:inline-block;color:#333;box-shadow:0 3px 7px #aaa}.running-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px}.money{background:#100018;color:#fff;border-radius:4px;padding:10px;text-align:center;flex:1;box-shadow:0 0 8px #9e83b8}.money small{display:block;font-size:10px}.money b{display:block;color:#ffd21f;font-size:20px;margin-top:5px}.controller{width:54px;height:54px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:26px;box-shadow:0 3px 7px #999}
+.profile-head{background:linear-gradient(135deg,#061b25,#0d3044);border-radius:0 0 18px 18px;padding:28px;text-align:center;color:white}.avatar{width:85px;height:85px;border-radius:50%;margin:auto;background:#ffad73;border:3px solid white;display:grid;place-items:center;font-size:42px}.profile-head h2{margin:10px 0 0}.profile-box{background:#d7e5ff;border-radius:28px;padding:20px;margin-top:18px}.detail{background:#fff;border-radius:20px;padding:15px;margin:12px 0}.detail small{display:block;color:#75808e}.kyc{background:#e6ffe9;color:#28a36d;padding:15px;border:1px solid #9ce4a4;border-radius:10px;text-align:center}.stats{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}.stat{background:#063142;color:white;border-radius:9px;text-align:center;padding:22px 8px}.stat b{display:block;font-size:27px;margin-top:12px}
+.balance{background:#fff;border-radius:25px;padding:28px;text-align:center;box-shadow:0 2px 12px #ddd}.balance h1{color:#12b889}.cash-card{background:#d6e5ff;border-radius:25px;padding:25px;margin-top:18px}.cash-card h2{margin:0;color:#64748a}.cash-card .value{font-size:34px;font-weight:bold;margin:10px 0 22px}.cash-card .btn{width:100%}
+.refer-hero,.help-hero{background:linear-gradient(120deg,#263bde,#7d35ed);color:#fff;border-radius:30px;padding:30px 28px;margin-bottom:30px}.refer-hero h1,.help-hero h1{font-size:34px;margin:12px 0}.refer-hero p,.help-hero p{font-size:17px;line-height:1.5;color:#e0e4ff}.codebox{padding:20px;border-radius:24px;box-shadow:0 3px 18px #ddd;text-align:center}.code{display:flex;justify-content:space-between;align-items:center;background:#f1f5fb;border:2px dashed #ccd4df;border-radius:17px;padding:15px;font-size:24px;font-weight:bold}.contact{display:flex;align-items:center;gap:18px;padding:25px;border-radius:25px;background:#fff;box-shadow:0 2px 12px #e5e5e5;margin:18px 0}.contact .emoji{font-size:38px}.contact h2{margin:0}.contact p{margin:5px 0;color:#7b8796}
+.drawer{position:fixed;left:0;top:0;width:min(408px,88%);height:100vh;background:linear-gradient(#2b0340,#08000e);z-index:50;color:white;transform:translateX(-105%);transition:.25s;padding:16px 11px;overflow:auto}.drawer.open{transform:translateX(0)}.drawer-top{height:105px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:4px solid #b65a9f}.drawer-logo{font-size:30px;font-weight:900;color:#fff;text-shadow:2px 2px #ff1f63}.drawer-item{display:flex;align-items:center;justify-content:space-between;background:#6a5a79;border-bottom:7px solid #9b2d86;border-radius:9px;padding:16px 18px;margin:10px 0;font-size:19px;font-weight:bold}.drawer-item button{background:none;border:0;font-size:24px}.overlay{display:none;position:fixed;inset:0;background:#0008;z-index:40}.overlay.show{display:block}
+.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(665px,100%);height:78px;background:linear-gradient(90deg,#08000c,#26003d,#08000c);display:flex;justify-content:space-around;align-items:center;z-index:30;border-top:1px solid #9d5fb7}.bottom button{border:0;background:none;color:#fff;font-size:12px;font-weight:bold;padding:7px 13px;border-radius:30px}.bottom button span{display:block;font-size:28px;margin-bottom:3px}.bottom button.active{background:#fff;color:#222}
+@media(max-width:390px){.content{padding:10px 12px}.header{padding:10px 12px;gap:8px}.pill{font-size:13px;padding:10px}.live-grid{gap:8px}.promo{height:145px;font-size:22px}.battle{padding:10px}.battle .btn{min-width:80px;padding:11px 10px}.labels{gap:8px}.labels b{font-size:16px}.bottom button{padding:5px 8px}.bottom button span{font-size:24px}}
+
+.login-screen{position:fixed;inset:0;background:linear-gradient(145deg,#120018,#4b0870);z-index:100;display:flex;align-items:center;justify-content:center;padding:22px}.login-card{width:100%;max-width:420px;background:#fff;border-radius:28px;padding:28px;box-shadow:0 15px 45px #0008}.login-card h1{text-align:center;color:#39004d}.login-card input{width:100%;padding:14px;margin:8px 0;border:1px solid #ccd1dc;border-radius:12px;font-size:16px}.login-card .btn{width:100%;margin-top:10px}.switch{display:block;text-align:center;color:#6b3edc;margin-top:16px;background:none;border:0;width:100%;font-size:14px}.admin-card{background:#172238;color:#fff;border-radius:20px;padding:18px;margin:12px 0}.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.admin-stat{background:#263653;border-radius:15px;padding:18px}.admin-stat b{display:block;font-size:25px;color:#70ddff;margin-top:8px}.history-row{display:flex;justify-content:space-between;gap:10px;padding:16px;background:#f0f5ff;border-radius:13px;margin:10px 0}.history-row b{color:#15ae7e}.logout{background:#f04468;color:#fff;width:100%;margin-top:20px}
+
+.kyc-card{background:#eef6ff;border-radius:18px;padding:20px;margin:18px 0;border:1px solid #d6e8ff}.kyc-card h2{margin:0 0 8px;color:#12285d}.kyc-card>p{color:#52698b;line-height:1.4}.aadhaar-upload{border:2px dashed #7bc5ff;border-radius:14px;background:#fff;padding:18px;display:flex;gap:16px;align-items:center}.aadhaar-copy{font-size:56px}.aadhaar-text h3{margin:0;color:#142c68;font-size:20px}.aadhaar-text p{margin:6px 0 12px;color:#61718b}.btn.blue{background:#168df0;color:#fff;border:0;padding:12px 18px;border-radius:9px;font-weight:700;cursor:pointer}.upload-result{margin-top:10px;font-size:13px;color:#667}.security-note{margin-top:14px;padding:12px;border-radius:12px;background:#dcecff;color:#4770a6;font-size:13px}.detail small{display:block;margin-left:24px;color:#788391}.detail b{display:block;margin-left:24px}.kyc{padding:11px;border-radius:10px;margin-top:12px;text-align:center}.stats .stat b{display:block;margin-top:8px}
+
+.referral-hero-new{background:linear-gradient(120deg,#155eef,#7427f5);padding:28px 24px;border-radius:28px}.referral-hero-new h1{font-size:32px;margin:12px 0}.referral-hero-new h1 span{color:#ffd84a}.ref-card{background:#fff;border:1px solid #dce5f5;border-radius:24px;padding:22px;box-shadow:0 8px 24px #00000012}.ref-card h3{margin:8px 0 10px;color:#152d62}.ref-row{display:flex;gap:10px;align-items:center;margin-bottom:18px}.ref-value,.ref-link{flex:1;min-width:0;background:#eef4ff;border:1px solid #d7e3f7;border-radius:14px;padding:14px;font-size:18px;font-weight:700;color:#15345f}.ref-link{font-size:14px;font-weight:500}.ref-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ref-actions .btn{width:100%;margin:0}.how-ref{background:#eaf6ff;border:1px solid #bfe6ff;border-radius:18px;padding:18px;margin-top:18px;color:#163b73}.how-ref h3{margin:0 0 8px}.how-ref p{margin:5px 0}.kyc-mini{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;border:1px solid #dce5f5;border-radius:18px;padding:16px;margin-top:18px}.kyc-mini p{margin:5px 0 0;color:#58709a;font-size:13px}.kyc-mini .btn{white-space:nowrap}@media(max-width:480px){.ref-actions{grid-template-columns:1fr}.ref-row{align-items:stretch}.ref-row .btn{padding:10px}.ref-link{font-size:12px}}
+</style>
+
+<!-- V2 additions -->
+<style>
+  .quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
+  .quick-btn{background:#1b1730;border:1px solid #3d315e;border-radius:12px;padding:10px 4px;color:#fff;font-size:11px;text-align:center;cursor:pointer}
+  .quick-btn .ico{display:block;font-size:20px;margin-bottom:5px}
+  .notice-list{display:flex;flex-direction:column;gap:10px}
+  .notice-item{background:#18142a;border:1px solid #33284e;border-radius:12px;padding:12px}
+  .notice-item b{color:#ffd76b}
+  .setting-row{display:flex;justify-content:space-between;align-items:center;background:#18142a;border:1px solid #33284e;border-radius:12px;padding:14px;margin:10px 0}
+  .setting-row .switch{width:44px;height:24px;border-radius:20px;background:#555;position:relative;cursor:pointer;margin-top:0;padding:0}
+  .setting-row .switch:after{content:"";width:18px;height:18px;border-radius:50%;background:white;position:absolute;top:3px;left:3px;transition:.2s}
+  .setting-row .switch.on{background:#31c48d}.setting-row .switch.on:after{left:23px}
+  .login-card .switch{width:100%;height:auto;border-radius:0;background:none;position:static;cursor:pointer;padding:0;margin-top:16px;font-size:14px}
+  .login-card .switch:after{content:none}
+  .empty-state{text-align:center;padding:35px 15px;color:#aaa}
+</style>
+
+
+<style>
+.faq-item{background:#18142a;border:1px solid #33284e;border-radius:12px;margin:10px 0;overflow:hidden}
+.faq-q{width:100%;padding:14px;background:transparent;border:0;color:#fff;text-align:left;font-weight:700;cursor:pointer}
+.faq-a{display:none;padding:0 14px 14px;color:#bbb;font-size:13px;line-height:1.5}
+.ref-card{background:linear-gradient(135deg,#292044,#151225);border:1px solid #59447f;border-radius:16px;padding:18px;text-align:center}
+.ref-code{font-size:24px;letter-spacing:4px;color:#ffd76b;font-weight:800;margin:12px}
+.primary-action{background:linear-gradient(90deg,#5d35d5,#8b4de8);color:#fff;border:0;border-radius:12px;padding:12px 18px;font-weight:700;cursor:pointer}
+</style>
+
+
+<style>
+.admin-wrap{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.admin-stat{background:#1b1730;border:1px solid #40315f;border-radius:14px;padding:15px}
+.admin-stat strong{display:block;font-size:24px;color:#ffd76b}
+.admin-table{width:100%;border-collapse:collapse;font-size:12px}
+.admin-table th,.admin-table td{padding:10px 6px;border-bottom:1px solid #33284e;text-align:left}
+.admin-badge{padding:4px 8px;border-radius:20px;background:#263e32;color:#7dffb2}
+.admin-action{background:#30204f;color:#fff;border:1px solid #59447f;border-radius:9px;padding:8px 10px;cursor:pointer}
+.admin-form{background:#18142a;border:1px solid #33284e;border-radius:14px;padding:14px;margin-top:12px}
+.admin-form input,.admin-form select{width:100%;box-sizing:border-box;background:#100d1e;color:#fff;border:1px solid #45345f;border-radius:9px;padding:11px;margin:6px 0 10px}
+</style>
+
+
+<style>
+.room-box{background:#18142a;border:1px solid #40315f;border-radius:16px;padding:16px;margin:12px 0}
+.room-box input{width:100%;box-sizing:border-box;background:#100d1e;color:#fff;border:1px solid #45345f;border-radius:10px;padding:12px;margin:8px 0}
+.room-code{font-size:28px;letter-spacing:5px;font-weight:800;color:#ffd76b;text-align:center;padding:14px}
+.room-result{color:#8dffb8;text-align:center;font-size:13px;margin-top:10px}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+function handleAadhaar(input){
+ const files=[...(input.files||[])];
+ const out=document.getElementById('aadhaarResult');
+ if(!files.length){out.textContent='No document uploaded';return;}
+ out.textContent=files.length>=2 ? 'Aadhaar front & back selected ✓' : 'Aadhaar image selected ✓ (front/back दोनों अपलोड करें)';
+}
+</script>
+  <script>
+const SUPABASE_URL = "https://ijsruvcalusegfkbnqsw.supabase.co";
+const SUPABASE_KEY = "sb_publishable_LsDSRgGwM-Dx7uSLaaJ48w_K6hvok2c";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window.supabaseClient = supabaseClient;
+  </script>
+
+<style>.admin-user-row,.admin-list-row{background:#18142a;border:1px solid #40315f;border-radius:12px;padding:12px;margin:8px 0;color:#fff}.admin-user-row{display:grid;gap:8px}.admin-controls{display:flex;gap:7px;flex-wrap:wrap}.admin-controls button{background:#30204f;color:#fff;border:1px solid #59447f;border-radius:8px;padding:8px;cursor:pointer}.danger{background:#7b2135!important}.ok{background:#176b48!important}</style>
+</head>
+<body>
+<div class="app">
+<header class="header"><button class="menu-btn" onclick="openDrawer()">☰</button><div class="logo">BAAP<br>LUDO</div><div class="spacer"></div><button class="pill" onclick="showPage('wallet')" aria-label="Open wallet">🪙 <span id="coinTop">00</span></button><button class="pill" onclick="showPage('wallet')" aria-label="Open wallet">🎁 <span id="bonusTop">00</span></button></header>
+
+
+<div class="quick-grid">
+  <button class="quick-btn" onclick="showPage('wallet')"><span class="ico">💰</span>Wallet</button>
+  <button class="quick-btn" onclick="showPage('history')"><span class="ico">🧾</span>History</button>
+  <button class="quick-btn" onclick="showPage('notifications')"><span class="ico">🔔</span>Alerts</button>
+  <button class="quick-btn" onclick="showPage('settings')"><span class="ico">⚙️</span>Settings</button>
+</div>
+
+<main id="home" class="page active">
+<div class="content">
+<div class="notice">आप सभी से निवेदन है कि जिस नाम से केवाईसी कर रहे हैं उसी नाम से डिपॉजिट करें। किसी अन्य व्यक्ति के नाम से डिपॉजिट करने पर आपकी आईडी को ब्लॉक किया जा सकता है।</div>
+<div class="live-grid"><div><div class="live-label">• LIVE</div><div class="promo ludo" onclick="showClassicBattles()" role="button" tabindex="0" title="Open Ludo Classic battles">🎲<br>LUDO<br>CLASSIC</div></div><div><div class="live-label">• LIVE</div><div class="promo support" onclick="go('support')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();go('support')}" role="button" tabindex="0" title="Open Support">☎<br>SUPPORT</div></div></div>
+<div id="classicContent" style="display:none">
+<div class="section-title">⚔️ Open Battles ⚔️</div>
+<div class="amount"><input id="amount" placeholder="Enter amount"><button class="btn blue" onclick="setAmount()">Set</button></div>
+<div id="openBattles"></div>
+<div class="section-title">⚔️ Running Battles ⚔️</div>
+<div id="runningBattles"></div>
+</div>
+</div>
+
+<div class="quick-grid">
+  <button id="adminQuickButton" class="quick-btn" style="display:none" onclick="openAdminPanel()"><span class="ico">🛠️</span>Admin</button>
+</div>
+
+
+<div class="quick-grid">
+  <button class="quick-btn" onclick="showPage('rooms')"><span class="ico">🔐</span>Room Code</button>
+</div>
+
+</main>
+<section id="history" class="page"><div class="content"><h2>Battle History</h2>
+<div class="history-row"><span>Classic Battle<br><small>Today • 10:30 AM</small></span><b>+₹380</b></div>
+<div class="history-row"><span>Starter Room<br><small>Yesterday • 8:10 PM</small></span><b>-₹100</b></div>
+<div class="history-row"><span>Play Match<br><small>Yesterday • 6:20 PM</small></span><b>+₹95</b></div>
+<p style="color:#777;font-size:12px"> records only. Play records only. No real-money deposit, wagering, or withdrawal is connected.</p></div></section>
+
+  <section id="admin" class="page">
+  <div class="content">
+    <h2>Admin Control Center</h2>
+    <p style="color:#66758b">Authorized admin controls are enforced by Supabase RPC/RLS.</p>
+    <div class="admin-grid">
+      <div class="admin-stat"><strong id="adminUserCount">0</strong><span>Total Users</span></div>
+      <div class="admin-stat"><strong id="adminRoomCount">0</strong><span>Total Rooms</span></div>
+      <div class="admin-stat"><strong id="adminBattleCount">0</strong><span>Total Battles</span></div>
+      <div class="admin-stat"><strong id="adminPendingKyc">0</strong><span>Pending KYC</span></div>
+    </div>
+    <div class="admin-card"><h3>👥 Users & Wallets</h3><div id="adminUsers">Loading users...</div></div>
+    <div class="admin-card"><h3>⚔️ Battles</h3><div id="adminBattles">Loading battles...</div>
+      <div class="admin-form"><b>Create Battle</b><input id="adminBattleTitle" placeholder="Battle title" value="Ludo Battle"><input id="adminEntry" type="number" min="0.01" step="0.01" placeholder="Entry fee"><input id="adminPrize" type="number" min="0.01" step="0.01" placeholder="Prize"><select id="adminStatus"><option value="open">Open</option><option value="cancelled">Cancelled</option></select><button class="primary-action" onclick="adminCreateBattle()">Create Battle</button></div>
+    </div>
+    <div class="admin-card"><h3>🔐 Rooms</h3><div id="adminRooms">Loading rooms...</div></div>
+    <div class="admin-card"><h3>🛡 KYC</h3><div id="adminKyc">Loading KYC...</div></div>
+    <div class="admin-card"><h3>📢 Site Notice</h3><div class="admin-form"><input id="adminNoticeTitle" placeholder="Notice title"><input id="adminNoticeBody" placeholder="Notice message"><button class="primary-action" onclick="adminSaveNotice()">Save Notice</button></div><div id="adminNotices"></div></div>
+  </div></section>
+
+<div class="login-screen" id="loginScreen">
+<div class="login-card"><h1>BAAP <span style="color:#ef3e9c">LUDO</span></h1><p style="text-align:center;color:#77808d" id="loginSubtitle">Login to continue</p>
+<input id="loginEmail" placeholder="Email" type="email">
+<input id="loginPassword" placeholder="Password" type="password">
+<div id="referralField" style="display:none"><input id="referralCode" placeholder="Referral Code (Optional)" type="text" autocomplete="off"></div>
+<button class="btn purple" onclick="login()">Login</button>
+<button class="switch" onclick="toggleRegister()" id="registerToggle">New user? Create account</button>
+<button class="switch" onclick="resetPassword()" id="forgotPassword" style="font-size:13px">Forgot password?</button>
+<button class="switch" onclick="resendVerification()" id="resendVerification" style="font-size:13px">Resend verification email</button>
+<p style="font-size:11px;color:#888;text-align:center;margin-top:18px">Supabase authentication enabled. Email verification/password reset may be required.</p>
+</div></div>
+
+
+<section id="wallet" class="page"><div class="content"><div class="balance"><h2>My Play Balance</h2><p>Manage your practice credits</p><small>PRACTICE CREDITS</small><h1>₹<span id="balance">00</span></h1></div><div class="cash-card"><h2>🎮 Wallet</h2><div class="value">₹00</div><button class="btn purple" onclick="alert('Play mode: no real-money deposit is available.')">＋ Wallet</button></div><div class="cash-card"><h2>🏆 Play Rewards</h2><div class="value">₹0</div><button class="btn green" onclick="alert('Play mode: no real-money withdrawal is available.')">▣ Rewards</button></div></div></section>
+
+<section id="refer" class="page"><div class="content">
+<div class="refer-hero referral-hero-new"><small>REFER &amp; EARN</small><h1>Invite Friends<br><span>Get Rewarded!</span></h1><p>Share your room/invite link with friends and play together in practice mode.</p></div>
+<div class="ref-card">
+  <h3>🔗 Your Referral Code</h3>
+  <div class="ref-row"><div class="ref-value">804858</div><button class="btn purple" onclick="copyCode()">▣ Copy</button></div>
+  <h3>🔗 Your Referral Link</h3>
+  <div class="ref-row"><input id="referralLink" class="ref-link" readonly value=""><button class="btn purple" onclick="copyReferralLink()">▣ Copy</button></div>
+  <div class="ref-actions"><button class="btn green" onclick="shareReferralWhatsApp()">◉ Share on WhatsApp</button><button class="btn blue" onclick="shareReferralLink()">↗ Share Link</button></div>
+</div>
+<div class="how-ref"><h3>👥 How It Works?</h3><p>1. Share your referral link with friends</p><p>2. They create an account using your link</p><p>3. You receive <b>practice rewards</b> on their eligible winnings</p></div>
+<div class="kyc-mini"><div><b>🛡️ KYC Verification</b><p>Verify your identity to unlock full features.</p></div><button class="btn blue" onclick="go('profile')">Verify Now →</button></div>
+<h3 style="margin-top:28px">YOUR PERFORMANCE</h3><div class="stats"><div class="stat">🏆<br>Referred Players<b>00</b></div><div class="stat">💰<br>Play Rewards<b>₹00.00</b></div><div class="stat">🪙<br>Coin Won<b>00</b></div><div class="stat">💳<br>Play Rewards<b>00</b></div></div>
+</div></section>
+
+<section id="support" class="page"><div class="content"><div class="help-hero"><h1>Help Center</h1><p>Got a question? We're available to assist you.</p></div><h3>CONTACT US AT BELOW PLATFORMS.</h3><div class="contact" onclick="whatsapp()"><div class="emoji">🟢</div><div><h2>WhatsApp Chat</h2><p>Instant reply within minutes</p></div><span>→</span></div><div class="contact" onclick="alert('Email support: support@baapludo.example')"><div class="emoji">✉️</div><div><h2>Email Support</h2><p>Get professional assistance</p></div><span>→</span></div><p style="color:#777">WhatsApp: 8058128380</p></div></section>
+
+<section id="notifications" class="page"><div class="content">
+<h2>Alerts</h2>
+<div class="notice-list">
+  <div class="notice-item"><b>🔔 Welcome</b><br>आपका BAAP LUDO डैशबोर्ड तैयार है।</div>
+  <div class="notice-item"><b>🛡️ Security</b><br>अपना पासवर्ड किसी के साथ साझा न करें।</div>
+  <div class="notice-item"><b>ℹ️ Demo Mode</b><br>अभी गेम केवल practice/entertainment mode में है; real-money payment या withdrawal उपलब्ध नहीं है।</div>
+</div></div></section>
+
+<section id="settings" class="page"><div class="content">
+<h2>Settings</h2>
+<div class="setting-row"><span>🔔 Notifications</span><button class="switch on" onclick="this.classList.toggle('on')" aria-label="Toggle notifications"></button></div>
+<div class="setting-row"><span>🌐 Language</span><button class="admin-action" onclick="alert('Language option जल्द जोड़ा जाएगा।')">Hindi / English</button></div>
+<div class="setting-row"><span>🔐 Account Security</span><button class="admin-action" onclick="alert('Password change के लिए Supabase Auth इस्तेमाल करें।')">Open</button></div>
+<button class="btn logout" onclick="logout()">Logout</button>
+</div></section>
+
+<section id="rooms" class="page"><div class="content">
+<h2>Room Code</h2>
+<div class="room-box">
+  <p><b>दोस्त के साथ Ludo Room</b></p>
+  <p style="font-size:13px;color:#b9b3c9">अपनी पसंद का 4–12 अक्षर/नंबर वाला Room Code बनाएं। जैसे GOLU123 या LUDO2026.</p>
+  <input id="customRoomInput" maxlength="12" autocomplete="off" autocapitalize="characters"
+    placeholder="अपना Room Code लिखें"
+    style="width:100%;box-sizing:border-box;background:#100d1e;color:#fff;border:1px solid #45345f;border-radius:10px;padding:12px;margin:8px 0;font-size:18px;letter-spacing:2px;text-align:center"
+    oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
+  <button class="btn purple" onclick="createRoomCode()">Create Room</button>
+  <div id="generatedRoom" class="room-code">------</div>
+  <button class="btn blue" onclick="copyRoomCode()">Copy Code</button>
+  <button class="btn green" onclick="shareRoomCode()">Share Room</button>
+  <div id="roomCreateResult" class="room-result"></div>
+</div>
+<div class="room-box">
+  <p><b>Existing Room में Join करें</b></p>
+  <input id="joinRoomInput" maxlength="12" autocomplete="off" autocapitalize="characters"
+    placeholder="Room Code डालें"
+    style="width:100%;box-sizing:border-box;background:#100d1e;color:#fff;border:1px solid #45345f;border-radius:10px;padding:12px;margin:8px 0;font-size:18px;letter-spacing:2px;text-align:center"
+    oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
+  <button class="btn green" onclick="joinRoomCode()">Join Room</button>
+  <div id="roomJoinResult" class="room-result"></div>
+</div>
+<div id="roomLobby" class="room-box" style="display:none">
+  <p><b>Room Lobby</b></p>
+  <div id="roomLobbyCode" class="room-code">------</div>
+  <div id="roomLobbyStatus" class="room-result">Waiting for player...</div>
+  <button class="btn blue" onclick="copyRoomCode()">Copy Code</button>
+</div>
+</div></section>
+
+<section id="profile" class="page"><div class="profile-head"><div class="avatar">🧑🏻</div><h2 id="profileNameEdit" onclick="saveProfileName()" style="cursor:pointer" title="Edit profile name">Love Player ✎</h2></div><div class="content"><div class="profile-box"><h2 style="text-align:center">Complete Profile</h2><div class="detail">👤 <small>USER EMAIL</small><b>user@example.com</b></div><div class="detail">✉️ <small>EMAIL ADDRESS</small><b>support@baapludo.example</b></div><div class="kyc" style="color:#e53935;background:#eaffea;border:1px solid #76d58a">📱 KYC Status: Not Verified ❌</div></div><div class="kyc-card"><h2>🛡️ KYC Verification</h2><p>Verify your identity to unlock full features, secure your account and get higher limits.</p><div class="aadhaar-upload"><div class="aadhaar-copy">🪪</div><div class="aadhaar-text"><h3>Upload Aadhaar Card</h3><p>Front and Back (Both Sides)</p><input id="aadhaarInput" type="file" accept="image/*" multiple style="display:none" onchange="handleAadhaar(this)"><button class="btn blue" type="button" onclick="document.getElementById('aadhaarInput').click()">📷 Upload Aadhaar Card</button><div id="aadhaarResult" class="upload-result">No document uploaded</div></div></div><div class="security-note">🛡️ Your data is used only for verification purposes.</div></div><h3>Other Details</h3><div class="stats"><div class="stat">🎁<br>Play Rewards<b>00</b></div><div class="stat">⚔️<br>Battle Played<b>00</b></div><div class="stat">🪙<br>Coin Won<b>00</b></div><div class="stat">💳<br>Play Rewards<b>00</b></div></div></div></section>
+
+<nav class="bottom"><button class="active" onclick="go('home',this)"><span>⌂</span>Home</button><button onclick="go('wallet',this)"><span>▣</span>Wallet</button><button onclick="go('refer',this)"><span>♧</span>Refer</button><button onclick="go('support',this)"><span>☎</span>Support</button><button onclick="go('profile',this)"><span>◎</span>Profile</button></nav>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer"><div class="drawer-top"><div class="drawer-logo">BAAP<br><span style="color:#ff315c">LUDO</span></div><button class="menu-btn" onclick="closeDrawer()">×</button></div>
+<div class="drawer-item" onclick="goFromDrawer('profile')">👤 My Profile <button>›</button></div>
+<div class="drawer-item" onclick="goFromDrawer('home')">🖐 Play <button>›</button></div>
+<div class="drawer-item" onclick="goFromDrawer('wallet')">💰 My Wallet <button>›</button></div>
+<div class="drawer-item" onclick="goFromDrawer('refer')">🎁 Invite Friends <button>›</button></div>
+<div class="drawer-item" onclick="goFromDrawer('history')">◷ History <button>›</button></div>
+<div class="drawer-item" onclick="goFromDrawer('support')">🧑‍💻 Support <button>›</button></div>
+<div class="drawer-item">🌐 English / Hindi <button>›</button></div>
+<div class="drawer-item" onclick="alert('Policies page placeholder')">📜 All Policy <button>›</button></div>
+<div class="drawer-item" onclick="closeDrawer()">↩ Back <button>›</button></div>
+<div class="drawer-item" onclick="alert('App download backend/link add karna hoga')">⬇ App Download <button>›</button></div>
+
+<div class="drawer-item" onclick="goFromDrawer('history')">◷ History <button>›</button></div>
+<div id="adminDrawerItem" class="drawer-item" style="display:none" onclick="openAdminPanel()">🛠 Admin Panel <button>›</button></div>
+<div class="drawer-item" onclick="logout()">🚪 Logout <button>›</button></div>
+</aside>
+
+<script>
+const battles=[['Play Room','100','180'],['Classic Play','200','360'],['Quick Match','50','90']];
+const running=[['Player 1','Player 2','100','180'],['Player 3','Player 4','200','360']];
+function openBattles(){document.getElementById('openBattles').innerHTML=battles.map(x=>`<div class="battle"><div class="battle-info"><span class="tag">LIVE</span><strong>${x[0]}</strong><div class="labels"><div>PLAY POINTS<b>₹${x[1]}</b></div><div>WINNING PRIZE<b class="prize">₹${x[2]}</b></div></div></div><button class="btn blue" onclick="play('${x[1]}')">Play</button></div>`).join('')}
+function runningHtml(x){return `<div class="running"><div class="playing">Playing For: <span class="names">${x[0]} &nbsp; <i>&</i> &nbsp; ${x[1]}</span></div><div class="running-row"><div class="money"><small>PLAY POINTS</small><b>₹ ${x[2]}</b></div><div class="controller">🎮</div><div class="money"><small>WINNING PRIZE</small><b>₹ ${x[3]}</b></div></div></div>`}
+function go(id,btn){const page=document.getElementById(id);if(!page){alert('यह पेज अभी उपलब्ध नहीं है।');return;}document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));page.classList.add('active');document.querySelectorAll('.bottom button').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');window.scrollTo(0,0)}
+function goFromDrawer(id){closeDrawer();go(id)}
+function openDrawer(){document.getElementById('drawer').classList.add('open');document.getElementById('overlay').classList.add('show')}
+function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('overlay').classList.remove('show')}
+function play(amount){
+  const m=document.getElementById('playerRoomModal');
+  if(!m) return;
+  m.style.display='flex';
+  document.getElementById('roomCodePanel').style.display='none';
+  document.getElementById('playerRoomStep').textContent='पहले दूसरा Player Start करें।';
+  document.getElementById('playRoomMessage').textContent='';
+}
+function showClassicBattles(){const box=document.getElementById('classicContent');if(box){box.style.display='block';box.scrollIntoView({behavior:'smooth',block:'start'});}}
+function setAmount(){alert('Amount filter : '+(document.getElementById('amount').value||'all'))}
+function getReferralLink(){
+  const base=(window.location.origin && window.location.origin!=='null') ? window.location.origin + window.location.pathname : 'https://baapludo.com/';
+  return base + '?ref=804858';
+}
+function initReferralLink(){const el=document.getElementById('referralLink'); if(el) el.value=getReferralLink();}
+function copyCode(){navigator.clipboard?.writeText('804858');alert('Referral code: 804858')}
+function copyReferralLink(){const link=getReferralLink(); navigator.clipboard?.writeText(link); alert('Referral link copied');}
+function shareReferralWhatsApp(){const link=encodeURIComponent(getReferralLink()); const text=encodeURIComponent('BAAP LUDO join karein. Referral link: ' + getReferralLink()); window.open('https://wa.me/?text='+text,'_blank');}
+async function shareReferralLink(){const link=getReferralLink(); if(navigator.share){try{await navigator.share({title:'BAAP LUDO Referral',text:'BAAP LUDO par join karein — referral link:',url:link});}catch(e){}}else{copyReferralLink();}}
+function whatsapp(){window.open('https://wa.me/918058128380','_blank')}
+openBattles();document.getElementById('runningBattles').innerHTML=running.map(runningHtml).join('');initReferralLink();
+
+let registerMode=false;
+function setLoginMode(){
+ registerMode=false;
+ const sub=document.getElementById('loginSubtitle'); if(sub) sub.textContent='Login to continue';
+ const btn=document.querySelector('#loginScreen .btn'); if(btn) btn.textContent='Login';
+ const tog=document.getElementById('registerToggle'); if(tog) tog.textContent='New user? Create account';
+ const ref=document.getElementById('referralField'); if(ref) ref.style.display='none';
+}
+function toggleRegister(){
+ registerMode=!registerMode;
+ document.getElementById('loginSubtitle').textContent=registerMode?'Create your account':'Login to continue';
+ document.querySelector('#loginScreen .btn').textContent=registerMode?'Register':'Login';
+ document.getElementById('registerToggle').textContent=registerMode?'Already registered? Login':'New user? Create account';
+ document.getElementById('referralField').style.display=registerMode?'block':'none';
+ if(registerMode){ const ref=new URLSearchParams(location.search).get('ref'); if(ref) document.getElementById('referralCode').value=ref; }
+}
+
+async function login() {
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const pass = document.getElementById('loginPassword').value;
+
+  if (!email || !pass) { alert('Email aur Password bhariye'); return; }
+
+  try {
+    let result;
+    if (registerMode) {
+      result = await supabaseClient.auth.signUp({
+        email, password: pass,
+        options: { data: { referral_code: (document.getElementById('referralCode')?.value.trim() || null) } }
+      });
+      if (result.error) { alert('Registration failed: ' + result.error.message); return; }
+      if (!result.data?.session) {
+        alert('Account create ho gaya. Agar email confirmation ON hai, pehle email verify karein, phir Login karein.');
+        setLoginMode();
+        return;
+      }
+    } else {
+      result = await supabaseClient.auth.signInWithPassword({email, password:pass});
+      if (result.error) {
+        const msg=String(result.error.message||'').toLowerCase();
+        if (msg.includes('invalid login credentials')) {
+          alert('Login details galat hain ya account/password match nahi ho raha. New user hain to Create account karein, ya Forgot password use karein.');
+        } else { alert('Login failed: ' + result.error.message); }
+        return;
+      }
+    }
+
+    const user=result.data?.user;
+    if(!user){alert('Account session create nahi hui. Please dobara try karein.');return;}
+
+    const profileCheck=await supabaseClient.from('profiles').select('id,role').eq('id',user.id).maybeSingle();
+    if(!profileCheck.data && !profileCheck.error){
+      const {error:profileError}=await supabaseClient.from('profiles').insert({
+        id:user.id, role:'user', kyc_status:'pending'
+      });
+      if(profileError && !String(profileError.message).toLowerCase().includes('duplicate')) console.warn('Profile setup:',profileError.message);
+    }
+
+    document.getElementById('loginScreen').style.display='none';
+    const adminProfile=await supabaseClient.from('profiles').select('role').eq('id',user.id).maybeSingle();
+    setAdminVisibility(user.email||email,adminProfile.data?.role==='admin');
+    if(typeof refreshV6==='function') await refreshV6();
+    alert(registerMode?'Account created successfully':'Login successful');
+  } catch(e) { console.error(e); alert('Connection/Auth error: ' + (e?.message || e)); }
+}
+
+async function resendVerification(){
+  const email=document.getElementById('loginEmail').value.trim().toLowerCase();
+  if(!email){alert('Pehle admin/account ka email address enter karein.');document.getElementById('loginEmail').focus();return;}
+  try{
+    const {error}=await supabaseClient.auth.resend({type:'signup',email});
+    if(error) throw error;
+    alert('Verification email dobara bhej diya gaya hai. Inbox ke saath Spam/Junk folder bhi check karein.');
+  }catch(e){
+    const msg=String(e?.message||e);
+    if(msg.toLowerCase().includes('rate limit')) alert('Verification email ki rate limit lag gayi hai. Thodi der baad dobara try karein.');
+    else alert('Verification email send nahi hua: '+msg);
+  }
+}
+
+async function resetPassword(){
+  const email=document.getElementById('loginEmail').value.trim().toLowerCase();
+  if(!email){alert('Pehle apna email address enter karein.');document.getElementById('loginEmail').focus();return;}
+  try{
+    const redirect=(location.protocol==='http:'||location.protocol==='https:')?location.href.split('#')[0]:undefined;
+    const {error}=await supabaseClient.auth.resetPasswordForEmail(email,redirect?{redirectTo:redirect}:undefined);
+    if(error) throw error;
+    alert('Password reset link aapke email par bhej diya gaya hai.');
+  }catch(e){alert('Password reset failed: ' + (e?.message||e));}
+}
+
+function logout(){setAdminVisibility('');setLoginMode();document.getElementById('loginScreen').style.display='flex';closeDrawer();go('home')}
+function openAdminPanel(){
+  if(!window.currentUserIsAdmin){alert('Admin access required');return;}
+  setLoginMode();
+  closeDrawer();
+  go('admin');
+  setTimeout(()=>loadAdminData(),50);
+}
+
+function toggleFaq(btn){
+  const answer = btn.nextElementSibling;
+  const open = answer.style.display === 'block';
+  answer.style.display = open ? 'none' : 'block';
+  btn.textContent = btn.textContent.replace(/[＋−]$/, open ? ' ＋' : ' −');
+}
+
+
+async function adminCall(fn,args){const {data,error}=await supabaseClient.rpc(fn,args||{});if(error){alert(error.message);throw error;}return data;}
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+async function adminCreateBattle(){const title=document.getElementById('adminBattleTitle').value.trim()||'Ludo Battle';const entry=Number(document.getElementById('adminEntry').value),prize=Number(document.getElementById('adminPrize').value),status=document.getElementById('adminStatus').value;if(entry<=0||prize<=0){alert('Entry fee और prize भरें');return;}await adminCall('admin_create_battle',{p_title:title,p_entry_fee:entry,p_prize:prize,p_status:status});await loadAdminData();}
+async function adminAdjustWallet(id){const amount=Number(prompt('Wallet adjustment (+ credit / - debit):','0'));if(!Number.isFinite(amount)||amount===0)return;const reason=prompt('Reason:','Admin adjustment')||'Admin adjustment';await adminCall('admin_adjust_wallet',{p_user_id:id,p_amount:amount,p_reason:reason});await loadAdminData();}
+async function adminResetPassword(id,name){
+  const password=prompt('New password for '+name+' (minimum 8 characters):','');
+  if(password===null)return;
+  if(password.length<8){alert('Password कम से कम 8 characters का होना चाहिए।');return;}
+  if(!confirm('इस user का password बदलना है?'))return;
+  try{
+    const {data:{session}}=await supabaseClient.auth.getSession();
+    if(!session?.access_token){alert('Admin login session expired.');return;}
+    const resp=await fetch(SUPABASE_URL+'/functions/v1/admin-reset-password',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body:JSON.stringify({user_id:id,new_password:password})
+    });
+    const out=await resp.json().catch(()=>({}));
+    if(!resp.ok)throw new Error(out.error||out.message||'Password reset failed');
+    alert('Password successfully reset.');
+  }catch(e){alert('Password reset failed: '+e.message);}
+}
+async function adminSetRole(id,current){const role=current==='admin'?'user':'admin';if(!confirm('Change role to '+role+'?'))return;await adminCall('admin_set_user_role',{p_user_id:id,p_role:role});await loadAdminData();}
+async function adminSetKyc(id,status){await adminCall('admin_set_kyc_status',{p_user_id:id,p_status:status});await loadAdminData();}
+async function adminSetRoom(id,status){await adminCall('admin_set_room_status',{p_room_id:id,p_status:status});await loadAdminData();}
+async function adminSetBattle(id,status){await adminCall('admin_set_battle_status',{p_battle_id:id,p_status:status});await loadAdminData();}
+async function adminSaveNotice(){const title=document.getElementById('adminNoticeTitle').value.trim(),body=document.getElementById('adminNoticeBody').value.trim();if(!title||!body){alert('Title और message भरें');return;}await adminCall('admin_save_notice',{p_title:title,p_body:body});document.getElementById('adminNoticeTitle').value='';document.getElementById('adminNoticeBody').value='';await loadAdminData();}
+async function loadAdminData(){if(!isAdminUser()){alert('Admin access required');return;}const [users,rooms,battles,kyc,notices]=await Promise.all([supabaseClient.from('profiles').select('id,display_name,role,kyc_status,created_at').order('created_at',{ascending:false}).limit(100),supabaseClient.from('rooms').select('*').order('created_at',{ascending:false}).limit(100),supabaseClient.from('battles').select('*').order('created_at',{ascending:false}).limit(100),supabaseClient.from('kyc_documents').select('*').order('created_at',{ascending:false}).limit(100),supabaseClient.from('site_notices').select('*').order('created_at',{ascending:false}).limit(20)]);if(users.error){alert(users.error.message);return;}document.getElementById('adminUserCount').textContent=users.data.length;document.getElementById('adminRoomCount').textContent=rooms.error?'0':rooms.data.length;document.getElementById('adminBattleCount').textContent=battles.error?'0':battles.data.length;document.getElementById('adminPendingKyc').textContent=kyc.error?'0':kyc.data.filter(x=>x.status==='pending').length;document.getElementById('adminUsers').innerHTML=users.data.map(u=>`<div class="admin-user-row"><b>${esc(u.display_name||'Unnamed')}</b><small>${esc(u.id)} · ${esc(u.role)} · KYC: ${esc(u.kyc_status)}</small><div class="admin-controls"><button onclick="adminAdjustWallet('${u.id}')">Wallet ±</button><button onclick="adminResetPassword('${u.id}','${esc(u.display_name||'User')}')" class="admin-action">Reset Password</button><button onclick="adminSetRole('${u.id}','${esc(u.role)}')">Role</button><button onclick="adminSetKyc('${u.id}','verified')" class="ok">KYC Verify</button><button onclick="adminSetKyc('${u.id}','rejected')" class="danger">KYC Reject</button></div></div>`).join('')||'<div class="empty-state">No users</div>';document.getElementById('adminRooms').innerHTML=rooms.error?esc(rooms.error.message):(rooms.data.map(r=>`<div class="admin-list-row"><b>${esc(r.code)}</b> · ${esc(r.status)}<div class="admin-controls"><button onclick="adminSetRoom('${r.id}','waiting')">Waiting</button><button onclick="adminSetRoom('${r.id}','playing')">Playing</button><button onclick="adminSetRoom('${r.id}','finished')">Finish</button><button onclick="adminSetRoom('${r.id}','cancelled')" class="danger">Cancel</button></div></div>`).join('')||'<div class="empty-state">No rooms</div>');document.getElementById('adminBattles').innerHTML=battles.error?esc(battles.error.message):(battles.data.map(b=>`<div class="admin-list-row"><b>${esc(b.title)}</b> · Entry ₹${esc(b.entry_fee)} · Prize ₹${esc(b.prize)} · ${esc(b.status)}<div class="admin-controls"><button onclick="adminSetBattle('${b.id}','open')">Open</button><button onclick="adminSetBattle('${b.id}','running')">Running</button><button onclick="adminSetBattle('${b.id}','finished')">Finish</button><button onclick="adminSetBattle('${b.id}','cancelled')" class="danger">Cancel</button></div></div>`).join('')||'<div class="empty-state">No battles</div>');document.getElementById('adminKyc').innerHTML=kyc.error?esc(kyc.error.message):(kyc.data.map(k=>`<div class="admin-list-row"><b>${esc(k.document_type)} / ${esc(k.side)}</b> · ${esc(k.status)} · User ${esc(k.user_id)}<div class="admin-controls"><button onclick="adminSetKyc('${k.user_id}','verified')" class="ok">Verify</button><button onclick="adminSetKyc('${k.user_id}','rejected')" class="danger">Reject</button></div></div>`).join('')||'<div class="empty-state">No KYC documents</div>');document.getElementById('adminNotices').innerHTML=notices.error?esc(notices.error.message):(notices.data.map(n=>`<div class="admin-list-row"><b>${esc(n.title)}</b><br>${esc(n.body)}</div>`).join('')||'<div class="empty-state">No notices</div>');}
+function isAdminUser(){return window.currentUserIsAdmin===true;}function setAdminVisibility(email,isAdmin){window.currentUserEmail=email||"";window.currentUserIsAdmin=!!isAdmin;const allowed=isAdminUser();const q=document.getElementById('adminQuickButton'),d=document.getElementById('adminDrawerItem');if(q)q.style.display=allowed?'block':'none';if(d)d.style.display=allowed?'flex':'none';}
+</script>
+
+<div style="max-width:900px;margin:20px auto;padding:12px 16px;background:#171327;border:1px solid #3d315e;border-radius:12px;color:#aaa;font-size:12px;text-align:center">
+  Play/Entertainment Mode: room codes, login and multiplayer-ready structure are present; real-money payments, wagering and withdrawals are not enabled.
+</div>
+
+
+<script>
+/* BAAP LUDO V6 - Supabase-backed user flows
+   Requires the SQL schema supplied with this build. Real payment gateway/settlement is intentionally not faked.
+*/
+(function(){
+  let v6User=null, v6Profile=null, v6Wallet=null; window.v6User=null;
+  const $=id=>document.getElementById(id);
+  const money=n=>'₹'+Number(n||0).toFixed(2);
+  async function refreshV6(){
+    const {data:{session}}=await supabaseClient.auth.getSession();
+    v6User=session?.user||null; window.v6User=v6User;
+    if(!v6User){ $('loginScreen').style.display='flex'; return; }
+    $('loginScreen').style.display='none';
+    const pr=await supabaseClient.from('profiles').select('*').eq('id',v6User.id).maybeSingle();
+    v6Profile=pr.data||null;
+    const w=await supabaseClient.from('wallets').select('*').eq('user_id',v6User.id).maybeSingle();
+    v6Wallet=w.data||null;
+    renderV6();
+    setAdminVisibility(v6User.email, v6Profile?.role==='admin');
+  }
+  function renderV6(){
+    const balance=Number(v6Wallet?.balance||0), winnings=Number(v6Wallet?.winning_balance||0), bonus=Number(v6Wallet?.bonus_balance||0);
+    ['balance'].forEach(id=>{if($(id)) $(id).textContent=balance.toFixed(2)});
+    if($('coinTop')) $('coinTop').textContent=balance.toFixed(2);
+    if($('bonusTop')) $('bonusTop').textContent=bonus.toFixed(2);
+    const cash=document.querySelectorAll('#wallet .cash-card .value'); if(cash[0]) cash[0].textContent=money(balance); if(cash[1]) cash[1].textContent=money(winnings);
+    const savedName=v6User?.user_metadata?.display_name || v6User?.email?.split('@')[0] || 'Player'; const ph=document.querySelector('#profile .profile-head h2'); if(ph) ph.textContent=savedName+' ✎';
+    const details=document.querySelectorAll('#profile .detail b'); if(details[0]) details[0].textContent=savedName; if(details[1]) details[1].textContent=v6User?.email||'';
+    const k=document.querySelector('#profile .kyc'); if(k){const ok=v6Profile?.kyc_status==='verified'; k.textContent='📱 KYC Status: '+(ok?'Verified ✓':'Not Verified ❌'); k.style.color=ok?'#168b50':'#e53935';}
+  }
+  window.v6LoadHistory=async function(){
+    const box=document.querySelector('#history .content'); if(!box||!v6User)return;
+    const {data,error}=await supabaseClient.from('wallet_transactions').select('id,type,amount,status,created_at,description').eq('user_id',v6User.id).order('created_at',{ascending:false}).limit(50);
+    if(error){box.innerHTML='<h2>Battle/Wallet History</h2><p>History load nahi hui.</p>';return;}
+    box.innerHTML='<h2>Transaction History</h2>'+(data?.length?data.map(x=>`<div class="history-row"><span>${x.description||x.type}<br><small>${new Date(x.created_at).toLocaleString()}</small></span><b style="color:${Number(x.amount)>=0?'#15ae7e':'#e04466'}">${Number(x.amount)>=0?'+':''}${money(x.amount)}</b></div>`).join(''):'<div class="empty-state">No transactions yet</div>');
+  };
+  window.v6LoadBattles=async function(){
+    const open=$('openBattles'), run=$('runningBattles'); if(!open||!run)return;
+    const {data,error}=await supabaseClient.from('battles').select('*').in('status',['open','running']).order('created_at',{ascending:false}).limit(50);
+    if(error){open.innerHTML='<div class="empty-state">Battles load nahi hui.</div>';run.innerHTML='';return;}
+    const rows=data||[]; open.innerHTML=rows.filter(x=>x.status==='open').map(x=>`<div class="battle"><div class="battle-info"><span class="tag">OPEN</span><strong>${x.title||'Ludo Battle'}</strong><div class="labels"><div>PLAY POINTS<b>${money(x.entry_fee)}</b></div><div>WINNING PRIZE<b class="prize">${money(x.prize)}</b></div></div></div><button class="btn blue" onclick="joinBattle('${x.id}')">Join</button></div>`).join('')||'<div class="empty-state">No open battles</div>';
+    run.innerHTML=rows.filter(x=>x.status==='running').map(x=>runningHtml([x.player_one_name||'Player 1',x.player_two_name||'Player 2',x.entry_fee,x.prize])).join('')||'<div class="empty-state">No running battles</div>';
+  };
+  window.joinBattle=async function(id){
+    if(!v6User){alert('Login required');return;}
+    const {data,error}=await supabaseClient.rpc('join_battle',{p_battle_id:id});
+    if(error){alert(error.message);return;} alert('Battle join request successful.'); await refreshV6(); await v6LoadBattles();
+  };
+  function showRoomLobby(code,status){
+    window.currentRoomCode=String(code);
+    $('roomLobby').style.display='block';
+    $('roomLobbyCode').textContent=String(code);
+    $('roomLobbyStatus').textContent=status||'Waiting for player...';
+  }
+  window.createRoomCode=async function(){
+    if(!v6User){alert('Login required');return;}
+    const code=($('customRoomInput')?.value||'').trim().toUpperCase();
+    if(!/^[A-Z0-9]{4,12}$/.test(code)){
+      $('roomCreateResult').textContent='Room Code 4–12 letters/numbers का होना चाहिए।';
+      return;
+    }
+    $('roomCreateResult').textContent='Room create हो रहा है...';
+    const {data,error}=await supabaseClient.rpc('create_room',{
+      p_room_name:'Ludo Room',
+      p_room_code:code
+    });
+    if(error){$('roomCreateResult').textContent=error.message;return;}
+    $('generatedRoom').textContent=code;
+    showRoomLobby(code,'Room तैयार है। यह code दूसरे player को भेजें.');
+    $('roomCreateResult').textContent='Room created successfully.';
+  };
+  window.joinRoomCode=async function(){
+    if(!v6User){alert('Login required');return;}
+    const code=($('joinRoomInput')?.value||'').trim().toUpperCase();
+    if(!/^[A-Z0-9]{4,12}$/.test(code)){
+      $('roomJoinResult').textContent='कृपया 4–12 letters/numbers वाला Room Code डालें।';
+      return;
+    }
+    $('roomJoinResult').textContent='Joining room...';
+    const {data,error}=await supabaseClient.rpc('join_room',{p_room_code:code});
+    if(error){$('roomJoinResult').textContent=error.message;return;}
+    showRoomLobby(code,'Room join हो गया। अब दोनों players इसी Room में हैं.');
+    $('roomJoinResult').textContent='Room joined successfully.';
+  };
+  window.shareRoomCode=async function(){
+    const code=window.currentRoomCode||$('generatedRoom').textContent;
+    if(!code || code==='------'){alert('पहले Room बनाइए।');return;}
+    const msg='मेरे Ludo Room में Join करें. Room Code: '+code;
+    if(navigator.share){try{await navigator.share({title:'BAAP LUDO Room',text:msg});return;}catch(e){}}
+    try{await navigator.clipboard.writeText(msg);$('roomCreateResult').textContent='Room invite copied.';}
+    catch(e){alert(msg);}
+  };
+  window.handleAadhaar=async function(input){
+    const files=[...(input.files||[])],out=$('aadhaarResult'); if(files.length<1){out.textContent='No document uploaded';return;} if(files.length>2){out.textContent='Maximum 2 images';return;}
+    if(!v6User){out.textContent='Login required';return;}
+    out.textContent='Uploading securely...';
+    try{for(let i=0;i<files.length;i++){const path=`${v6User.id}/${crypto.randomUUID()}-${i}.jpg`; const up=await supabaseClient.storage.from('kyc-private').upload(path,files[i],{upsert:false,contentType:files[i].type}); if(up.error)throw up.error; const ins=await supabaseClient.from('kyc_documents').insert({user_id:v6User.id,document_type:'aadhaar',side:i===0?'front':'back',storage_path:path,status:'pending'}); if(ins.error)throw ins.error;} out.textContent='Documents uploaded ✓ — verification pending.';}catch(e){out.textContent='Upload failed: '+e.message;}
+  };
+  window.saveProfileName=async function(){
+    const current=v6User?.user_metadata?.display_name||v6User?.email?.split('@')[0]||'Player';
+    const name=prompt('Enter your display name',current);
+    if(!name || !name.trim()) return;
+    const {data,error}=await supabaseClient.auth.updateUser({data:{display_name:name.trim()}});
+    if(error){alert(error.message);return;}
+    v6User=data?.user||v6User;
+    renderV6();
+    alert('Profile updated');
+  };
+  const oldShow=window.showPage; window.showPage=function(id){oldShow(id); if(id==='history')v6LoadHistory(); if(id==='home')v6LoadBattles(); if(id==='wallet')refreshV6(); if(id==='profile')refreshV6();};
+  supabaseClient.auth.onAuthStateChange((_e)=>setTimeout(refreshV6,0));
+  setTimeout(refreshV6,250);
+})();
+</script>
+
+
+<script>
+(function(){
+  function goRooms(){
+    var pages=document.querySelectorAll('.page');
+    pages.forEach(function(p){p.style.display='none';});
+    var room=document.getElementById('rooms');
+    if(room){room.style.display='block'; room.classList.add('active');}
+    window.scrollTo(0,0);
+  }
+  document.addEventListener('click',function(e){
+    var el=e.target.closest ? e.target.closest('[data-page="rooms"],[data-target="rooms"],.room-nav,.nav-room') : null;
+    if(el){e.preventDefault();e.stopPropagation();goRooms();return;}
+    var node=e.target;
+    for(var i=0;i<5 && node;i++,node=node.parentElement){
+      var t=(node.textContent||'').replace(/\s+/g,' ').trim();
+      if(t==='Room Code' || t==='Room Code 🏠' || t.indexOf('Room Code')===0){
+        e.preventDefault();e.stopPropagation();goRooms();return;
+      }
+    }
+  },true);
+})();
+</script>
+
+
+<div id="playerRoomModal" style="display:none;position:fixed;inset:0;background:rgba(2,7,24,.78);z-index:9999;padding:18px;align-items:center;justify-content:center">
+  <div style="background:linear-gradient(180deg,#08102b,#11183b);border:1px solid #5262ff;border-radius:24px;padding:20px;max-width:430px;width:100%;color:#fff;box-shadow:0 20px 60px rgba(0,0,0,.45)">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <div>
+        <div style="font-size:12px;color:#66f3a5;font-weight:800;letter-spacing:1.5px">2 PLAYER LUDO</div>
+        <h3 id="playerRoomTitle" style="margin:5px 0 0;font-size:24px">Room Create / Join</h3>
+      </div>
+      <button id="closePlayerRoomModal" type="button" style="width:42px;height:42px;border-radius:50%;border:1px solid #59627f;background:#171e43;color:#fff;font-size:22px">×</button>
+    </div>
+
+    <p id="playerRoomStep" style="color:#cbd3f2;margin:14px 0">पहले दूसरा Player Start करें।</p>
+    <button id="startSecondPlayerBtn" class="btn purple" type="button" style="width:100%;min-height:48px">Start Second Player</button>
+
+    <div id="roomActionPanel" style="display:none;margin-top:16px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <button id="createPlayRoomBtn" type="button" style="min-height:48px;border-radius:12px;border:1px solid #34e77f;background:#102b28;color:#55f49a;font-weight:800">CREATE ROOM</button>
+        <button id="showJoinPlayRoomBtn" type="button" style="min-height:48px;border-radius:12px;border:1px solid #6978ff;background:#17204b;color:#aab5ff;font-weight:800">JOIN ROOM</button>
+      </div>
+
+      <div id="createdRoomPanel" style="display:none;margin-top:16px;border-radius:18px;padding:16px;background:linear-gradient(135deg,#161a20,#05080d);border:2px solid #f6d46b">
+        <div style="color:#55f49a;font-weight:900;letter-spacing:1px">CREATE YOUR ROOM</div>
+        <div style="color:#9aa4c6;font-size:12px;margin-top:8px">अपनी पसंद का Room Code लिखें (4–12 letters/numbers)</div>
+        <input id="playCustomRoomInput" maxlength="12" autocomplete="off" autocapitalize="characters"
+          placeholder="जैसे GOLU123"
+          oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"
+          style="width:100%;box-sizing:border-box;padding:14px;margin-top:9px;border:1px solid #58628d;background:#05091b;color:#fff;border-radius:10px;font-size:20px;letter-spacing:3px;text-align:center">
+        <button id="confirmCreatePlayRoomBtn" type="button"
+          style="width:100%;min-height:48px;margin-top:10px;border:1px solid #34e77f;border-radius:10px;background:#102b28;color:#55f49a;font-weight:900">
+          CREATE ROOM
+        </button>
+        <div style="color:#9aa4c6;font-size:12px;margin-top:12px">ROOM ID</div>
+        <div style="font-size:12px;color:#9aa4c6;margin-top:8px">ROOM ID</div>
+        <div id="playRoomCode" style="font-size:32px;font-weight:900;letter-spacing:5px;text-align:center;color:#ff6a5d;padding:14px 6px;border-top:1px solid #5a2d35;border-bottom:1px solid #5a2d35;margin-top:8px;word-break:break-all">--------</div>
+        <button id="copyPlayRoomCode" type="button" style="width:100%;min-height:48px;margin-top:12px;border:1px solid #48ef75;border-radius:10px;background:#07130e;color:#4df47c;font-weight:900">COPY CODE ▣</button>
+        <button id="sharePlayRoomCode" type="button" style="width:100%;min-height:44px;margin-top:9px;border:1px solid #596fff;border-radius:10px;background:#10193c;color:#b8c1ff;font-weight:800">SHARE ROOM</button>
+      </div>
+
+      <div id="joinRoomPanel" style="display:none;margin-top:16px;border-radius:18px;padding:16px;background:#0d1430;border:1px solid #3b4a91">
+        <div style="font-weight:900;font-size:18px">JOIN ROOM</div>
+        <div style="color:#9da7ca;font-size:13px;margin:6px 0 12px">दूसरे Player का Room Code डालें।</div>
+        <input id="playJoinRoomInput" maxlength="12" autocomplete="off" autocapitalize="characters" placeholder="GOLU123"
+          oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')" style="width:100%;box-sizing:border-box;padding:14px;border:1px solid #58628d;background:#05091b;color:#fff;border-radius:10px;font-size:20px;letter-spacing:4px;text-align:center">
+        <button id="joinPlayRoomBtn" class="btn green" type="button" style="width:100%;margin-top:10px;min-height:48px">JOIN ROOM</button>
+      </div>
+      <div id="playRoomMessage" aria-live="polite" style="margin-top:12px;font-size:13px;color:#b9c4e8;min-height:20px"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const modal=$('playerRoomModal'), start=$('startSecondPlayerBtn'), actions=$('roomActionPanel');
+  const created=$('createdRoomPanel'), joinPanel=$('joinRoomPanel'), codeEl=$('playRoomCode'), msg=$('playRoomMessage');
+  let activeRoomCode='';
+
+  function setMsg(text,ok){ msg.textContent=text||''; msg.style.color=ok?'#55f49a':'#ffb4aa'; }
+  function normalizeRoomCode(value){
+    return String(value||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+  }
+
+  window.playRoomOpen=function(){
+    if(!modal)return;
+    modal.style.display='flex'; actions.style.display='none'; created.style.display='none'; joinPanel.style.display='none';
+    start.style.display='block'; start.disabled=false; setMsg('');
+    $('playerRoomStep').textContent='पहले दूसरा Player Start करें।';
+    if($('playCustomRoomInput')) $('playCustomRoomInput').value='';
+  };
+
+  if(start) start.addEventListener('click',function(){
+    actions.style.display='block';
+    start.style.display='none';
+    $('playerRoomStep').textContent='अब Room Create करें या दूसरे Player का Room Code डालकर Join करें।';
+  });
+
+  $('createPlayRoomBtn')?.addEventListener('click',function(){
+    created.style.display='block';
+    joinPanel.style.display='none';
+    $('playCustomRoomInput')?.focus();
+    setMsg('अपना Room Code लिखें, फिर CREATE ROOM दबाएँ।');
+  });
+
+  $('confirmCreatePlayRoomBtn')?.addEventListener('click',async function(){
+    if(!window.v6User){setMsg('पहले Login करें।');return;}
+    const code=normalizeRoomCode($('playCustomRoomInput')?.value);
+    if(!/^[A-Z0-9]{4,12}$/.test(code)){
+      setMsg('Room Code 4–12 letters/numbers का होना चाहिए।');
+      return;
+    }
+    setMsg('Room create हो रहा है…');
+    try{
+      const {data,error}=await window.supabaseClient?.rpc('create_room',{
+        p_room_name:'Ludo Room',
+        p_room_code:code
+      }) || {data:null,error:{message:'Supabase client उपलब्ध नहीं है।'}};
+      if(error) throw error;
+      activeRoomCode=code; window.currentPlayRoomCode=code; window.currentRoomCode=code;
+      codeEl.textContent=code;
+      setMsg('Room तैयार है। यह code दूसरे Player को भेजें।',true);
+    }catch(e){setMsg('Room create नहीं हुआ: '+(e?.message||e));}
+  });
+
+  $('showJoinPlayRoomBtn')?.addEventListener('click',function(){
+    joinPanel.style.display='block'; created.style.display='none'; $('playJoinRoomInput')?.focus(); setMsg('');
+  });
+
+  $('joinPlayRoomBtn')?.addEventListener('click',async function(){
+    if(!window.v6User){setMsg('पहले Login करें।');return;}
+    const code=normalizeRoomCode($('playJoinRoomInput')?.value);
+    if(!/^[A-Z0-9]{4,12}$/.test(code)){
+      setMsg('कृपया 4–12 letters/numbers वाला Room Code डालें।');
+      return;
+    }
+    setMsg('Room join हो रहा है…');
+    try{
+      const {data,error}=await window.supabaseClient?.rpc('join_room',{p_room_code:code}) || {data:null,error:{message:'Supabase client उपलब्ध नहीं है।'}};
+      if(error) throw error;
+      activeRoomCode=code; window.currentPlayRoomCode=code; window.currentRoomCode=code;
+      setMsg('Room join हो गया। अब दोनों Players इसी Room में हैं।',true);
+    }catch(e){setMsg('Join नहीं हुआ: '+(e?.message||e));}
+  });
+
+  $('copyPlayRoomCode')?.addEventListener('click',async function(){
+    const code=activeRoomCode||codeEl.textContent.trim(); if(!/^[A-Z0-9]{4,12}$/.test(code)){setMsg('पहले Room Create करें।');return;}
+    try{await navigator.clipboard.writeText(code);setMsg('Room Code copied ✓',true);}catch(e){setMsg('Room ID: '+code,true);}
+  });
+
+  $('sharePlayRoomCode')?.addEventListener('click',async function(){
+    const code=activeRoomCode||codeEl.textContent.trim(); if(!/^[A-Z0-9]{4,12}$/.test(code)){setMsg('पहले Room Create करें।');return;}
+    const text='मेरे Ludo Room में Join करें. Room ID: '+code;
+    try{if(navigator.share){await navigator.share({title:'Ludo Room',text});}else{await navigator.clipboard.writeText(text);setMsg('Room invite copied ✓',true);}}catch(e){}
+  });
+
+  $('closePlayerRoomModal')?.addEventListener('click',function(){modal.style.display='none';});
+  modal?.addEventListener('click',function(e){if(e.target===modal)modal.style.display='none';});
+
+  // Replace the table Play action with the new flow.
+  window.play=function(){ window.playRoomOpen(); };
+})();
+</script>
+</body>
+</html>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('*').forEach(function(el){
+    if((el.textContent||'').trim()==='Room Code' && el.children.length===0){
+      el.style.cursor='pointer';
+      el.addEventListener('click', function(){
+        if(typeof showPage==='function') showPage('rooms');
+        else if(typeof openPage==='function') openPage('rooms');
+        else {
+          document.querySelectorAll('.page').forEach(function(p){p.style.display='none';});
+          var r=document.getElementById('rooms'); if(r) r.style.display='block';
+        }
+      });
+    }
+  });
+});
+</script>
