@@ -89,6 +89,138 @@ function handleAadhaar(input){
 const SUPABASE_URL = "https://ijsruvcalusegfkbnqsw.supabase.co";
 const SUPABASE_KEY = "sb_publishable_LsDSRgGwM-Dx7uSLaaJ48w_K6hvok2c";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window.supabaseClient = supabaseClient;
+// 🔐 BAAP LUDO लाइव ऑटोमैटिक डेटाबेस कनेक्शन (Supabase Logic)
+const _supabase = window.supabaseClient;
+
+// 1. लाइव चैलेंजेस लोड और रेंडर करने का फंक्शन
+async function loadLiveBattlesFromDB() {
+  try {
+    const { data: rooms, error } = await _supabase
+      .from('rooms')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    const openContainer = document.getElementById('openBattles');
+    const runningContainer = document.getElementById('runningBattles');
+    
+    if(!openContainer || !runningContainer) return;
+
+    openContainer.innerHTML = '';
+    let runningHtml = '';
+    let hasOpen = false;
+
+    if (rooms && rooms.length > 0) {
+      rooms.forEach(room => {
+        if (room.status === 'open' || !room.player2) {
+          hasOpen = true;
+          openContainer.innerHTML += `
+            <div class="baap-battle-card">
+              <div class="battle-header">
+                <span class="challenge-by">👤 ${room.player1_name || 'Player'}</span>
+                <span class="vs-badge">VS</span>
+                <span class="challenge-to-waiting">Waiting... 🔄</span>
+              </div>
+              <div class="battle-body-details">
+                <div class="amt-box">
+                  <small>Entry Fee</small>
+                  <p class="fee-val">₹ ${room.entry_fee || room.amount || 100}</p>
+                </div>
+                <div class="amt-box">
+                  <small>Winning Prize</small>
+                  <p class="prize-val">₹ ${room.prize || 180}</p>
+                </div>
+              </div>
+              <div class="battle-actions-footer">
+                <button class="action-btn accept-btn" onclick="joinLiveBattleFromDB('${room.id}')">Play Challenge</button>
+              </div>
+            </div>
+          `;
+        } else {
+          runningHtml += `<div class="running-row" style="background:#f1f5fb; padding:10px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+            <span>🎮 ${room.player1_name} Vs ${room.player2_name}</span>
+            <span style="color:#20d85c; font-weight:bold;">₹${room.entry_fee || 100} Live</span>
+          </div>`;
+        }
+      });
+    }
+
+    if (!hasOpen) {
+      openContainer.innerHTML = '<p style="text-align:center; color:#888; font-size:14px;">कोई लाइव चैलेंज नहीं है। अपना चैलेंज सेट करें!</p>';
+    }
+    if (runningHtml !== '') {
+      runningContainer.innerHTML = runningHtml;
+    } else {
+      runningContainer.innerHTML = 'No active matches running.';
+    }
+  } catch (err) {
+    console.log("डेटाबेस से कनेक्ट करने में लोड एरर:", err.message);
+  }
+}
+
+// 2. नया चैलेंज बनाने का असली फंक्शन (Set Battle)
+async function createRoom() {
+  const amountInput = document.getElementById('battle-amount');
+  if (!amountInput || !amountInput.value || parseFloat(amountInput.value) <= 0) {
+    alert("कृपया सही चैलेंज राशि दर्ज करें!");
+    return;
+  }
+
+  const fee = parseFloat(amountInput.value);
+  const prize = Math.floor(fee * 1.8);
+
+  try {
+    const { data, error } = await _supabase
+      .from('rooms')
+      .insert([
+        { 
+          entry_fee: fee, 
+          prize: prize, 
+          status: 'open',
+          player1: window.currentUserId || 'guest-user',
+          player1_name: 'Player_' + Math.floor(1000 + Math.random() * 9000)
+        }
+      ]);
+
+    if (error) throw error;
+
+    alert(`🎉 चैलेंज ₹${fee} सफलतापूर्वक डेटाबेस में सेट हो गया है!`);
+    amountInput.value = '';
+    loadLiveBattlesFromDB();
+  } catch (err) {
+    alert("चैलेंज बनाने में विफलता: " + err.message);
+  }
+}
+
+// 3. चैलेंज स्वीकार करने का असली फंक्शन (Play Challenge)
+async function joinLiveBattleFromDB(roomId) {
+  try {
+    const { data, error } = await _supabase
+      .from('rooms')
+      .update({ 
+        status: 'playing',
+        player2: window.currentUserId || 'guest-player-2',
+        player2_name: 'Player_' + Math.floor(1000 + Math.random() * 9000)
+      })
+      .eq('id', roomId);
+
+    if (error) throw error;
+
+    alert("⚔ चैलेंज स्वीकार कर लिया गया है! रूम लॉबी में रीडायरेक्ट हो रहे हैं...");
+    if(typeof switchPage === 'function') {
+      switchPage('room-control-section');
+    }
+    loadLiveBattlesFromDB();
+  } catch (err) {
+    alert("चैलेंज जॉइन करने में एरर: " + err.message);
+  }
+}
+
+// 4. रियल-टाइम डेटा सिंकिंग (हर 3 सेकंड में आटोमैटिक रिफ्रेश)
+setInterval(loadLiveBattlesFromDB, 3000);
+window.addEventListener('load', loadLiveBattlesFromDB);
+    
   </script>
 
 <style>.admin-user-row,.admin-list-row{background:#18142a;border:1px solid #40315f;border-radius:12px;padding:12px;margin:8px 0;color:#fff}.admin-user-row{display:grid;gap:8px}.admin-controls{display:flex;gap:7px;flex-wrap:wrap}.admin-controls button{background:#30204f;color:#fff;border:1px solid #59447f;border-radius:8px;padding:8px;cursor:pointer}.danger{background:#7b2135!important}.ok{background:#176b48!important}</style>
