@@ -477,7 +477,49 @@ async function adminSaveNotice(){const title=document.getElementById('adminNotic
 async function loadAdminData(){if(!isAdminUser()){alert('Admin access required');return;}const [users,rooms,battles,kyc,notices]=await Promise.all([supabaseClient.from('profiles').select('id,display_name,role,kyc_status,created_at').order('created_at',{ascending:false}).limit(100),supabaseClient.from('rooms').select('*').order('created_at',{ascending:false}).limit(100),supabaseClient.from('battles').select('*').order('created_at',{ascending:false}).limit(100),supabaseClient.from('kyc_documents').select('*').order('created_at',{ascending:false}).limit(100),supabaseClient.from('site_notices').select('*').order('created_at',{ascending:false}).limit(20)]);if(users.error){alert(users.error.message);return;}document.getElementById('adminUserCount').textContent=users.data.length;document.getElementById('adminRoomCount').textContent=rooms.error?'0':rooms.data.length;document.getElementById('adminBattleCount').textContent=battles.error?'0':battles.data.length;document.getElementById('adminPendingKyc').textContent=kyc.error?'0':kyc.data.filter(x=>x.status==='pending').length;document.getElementById('adminUsers').innerHTML=users.data.map(u=>`<div class="admin-user-row"><b>${esc(u.display_name||'Unnamed')}</b><small>${esc(u.id)} · ${esc(u.role)} · KYC: ${esc(u.kyc_status)}</small><div class="admin-controls"><button onclick="adminAdjustWallet('${u.id}')">Wallet ±</button><button onclick="adminResetPassword('${u.id}','${esc(u.display_name||'User')}')" class="admin-action">Reset Password</button><button onclick="adminSetRole('${u.id}','${esc(u.role)}')">Role</button><button onclick="adminSetKyc('${u.id}','verified')" class="ok">KYC Verify</button><button onclick="adminSetKyc('${u.id}','rejected')" class="danger">KYC Reject</button></div></div>`).join('')||'<div class="empty-state">No users</div>';document.getElementById('adminRooms').innerHTML=rooms.error?esc(rooms.error.message):(rooms.data.map(r=>`<div class="admin-list-row"><b>${esc(r.code)}</b> · ${esc(r.status)}<div class="admin-controls"><button onclick="adminSetRoom('${r.id}','waiting')">Waiting</button><button onclick="adminSetRoom('${r.id}','playing')">Playing</button><button onclick="adminSetRoom('${r.id}','finished')">Finish</button><button onclick="adminSetRoom('${r.id}','cancelled')" class="danger">Cancel</button></div></div>`).join('')||'<div class="empty-state">No rooms</div>');document.getElementById('adminBattles').innerHTML=battles.error?esc(battles.error.message):(battles.data.map(b=>`<div class="admin-list-row"><b>${esc(b.title)}</b> · Entry ₹${esc(b.entry_fee)} · Prize ₹${esc(b.prize)} · ${esc(b.status)}<div class="admin-controls"><button onclick="adminSetBattle('${b.id}','open')">Open</button><button onclick="adminSetBattle('${b.id}','running')">Running</button><button onclick="adminSetBattle('${b.id}','finished')">Finish</button><button onclick="adminSetBattle('${b.id}','cancelled')" class="danger">Cancel</button></div></div>`).join('')||'<div class="empty-state">No battles</div>');document.getElementById('adminKyc').innerHTML=kyc.error?esc(kyc.error.message):(kyc.data.map(k=>`<div class="admin-list-row"><b>${esc(k.document_type)} / ${esc(k.side)}</b> · ${esc(k.status)} · User ${esc(k.user_id)}<div class="admin-controls"><button onclick="adminSetKyc('${k.user_id}','verified')" class="ok">Verify</button><button onclick="adminSetKyc('${k.user_id}','rejected')" class="danger">Reject</button></div></div>`).join('')||'<div class="empty-state">No KYC documents</div>');document.getElementById('adminNotices').innerHTML=notices.error?esc(notices.error.message):(notices.data.map(n=>`<div class="admin-list-row"><b>${esc(n.title)}</b><br>${esc(n.body)}</div>`).join('')||'<div class="empty-state">No notices</div>');}
 function isAdminUser(){return window.currentUserIsAdmin===true;}function setAdminVisibility(email,isAdmin){window.currentUserEmail=email||"";window.currentUserIsAdmin=!!isAdmin;const allowed=isAdminUser();const q=document.getElementById('adminQuickButton'),d=document.getElementById('adminDrawerItem');if(q)q.style.display=allowed?'block':'none';if(d)d.style.display=allowed?'flex':'none';}
 </script>
+<!-- 📥 लाइव ऑटोमैटिक क्यूआर कोड पॉप-अप (Modal) -->
+<div id="qrModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 10px;">
+  <div style="background: #ffffff; padding: 25px 20px; border-radius: 20px; width: 100%; max-width: 350px; text-align: center; position: relative; box-shadow: 0px 10px 30px rgba(0,0,0,0.5);">
+    <span style="position: absolute; right: 15px; top: 5px; font-size: 32px; cursor: pointer; color: #888;" onclick="closeQrModal()">&times;</span>
+    <h3 style="color: #333; margin: 0 0 5px 0; font-size: 20px; font-family: Arial, sans-serif;">स्कैन करके पैसे जोड़ें</h3>
+    <p style="font-size: 13px; color: #d93838; font-weight: bold; margin: 10px 0 15px; line-height: 1.4; font-family: Arial, sans-serif;">⚠️ ध्यान दें: पेमेंट करने के बाद स्क्रीनशॉट लेकर तुरंत नीचे दिए बटन से एडमिन को व्हाट्सएप पर भेजें।</p>
+    <div style="background: #fff; padding: 10px; border-radius: 12px; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+      <div id="qrcode-container"></div>
+    </div>
+    <div style="background: #f3f4f6; padding: 10px; border-radius: 10px; margin: 15px 0; border: 1px dashed #cbd5e1;">
+      <span style="font-size: 13px; color: #555; font-weight: 600; font-family: Arial, sans-serif;">
+        UPI ID: <strong style="color: #4c0870; font-size: 14px;">8058128380-2.wallet@phonepe</strong>
+      </span>
+    </div>
+    <a href="https://wa.meैंने%20Ludo%20App%20वॉलेट%20के%20लिए%20पेमेंट%20कर%20दिया%20है।%20कृपया%20मेरा%20बैलेंस%20अपडेट%20कर%20दें।" target="_blank" style="display: block; background: #25D366; color: white; padding: 13px; border-radius: 10px; text-decoration: none; font-weight: bold; font-size: 15px; font-family: Arial, sans-serif; box-shadow: 0 4px 6px rgba(37, 211, 102, 0.3);">
+      🟢 WhatsApp पर स्क्रीनशॉट भेजें
+    </a>
+  </div>
+</div>
+<script src="https://cloudflare.com"></script>
+<script>
+setTimeout(function() {
+  if (document.getElementById("qrcode-container")) {
+    new QRCode(document.getElementById("qrcode-container"), {
+      text: "upi://pay?pa=8058128380-2.wallet@phonepe&pn=Radha&mc=0000&mode=02&purpose=00",
+      width: 200, height: 200, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
+    });
+  }
+}, 1000);
+function openQrModal() { document.getElementById('qrModal').style.display = 'flex'; }
+function closeQrModal() { document.getElementById('qrModal').style.display = 'none'; }
 
+// अलर्ट बाईपास लॉजिक जो "not configured" वाले संदेश को रोककर QR कोड खोलेगा
+const originalAlert = window.alert;
+window.alert = function(msg) {
+  if (msg && (msg.includes("not configured") || msg.includes("Play mode") || msg.includes("deposit") || msg.includes("Wallet") || msg.includes("wallet"))) {
+    openQrModal();
+  } else {
+    originalAlert(msg);
+  }
+};
+</script>
+  
 <div style="max-width:900px;margin:20px auto;padding:12px 16px;background:#171327;border:1px solid #3d315e;border-radius:12px;color:#aaa;font-size:12px;text-align:center">
   System status: authentication, rooms, wallet records and multiplayer-ready Supabase flows are connected. Payment gateway/settlement is not configured in this file.
 </div>
