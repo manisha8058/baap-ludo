@@ -107,18 +107,17 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
 
 <main id="home" class="page active">
 <div class="content">
-<!-- 🎲 BAAP LUDO प्रीमियम लाइव चैलेंज सेक्शन -->
+<!-- <!-- 🎲 BAAP LUDO लाइव ऑटोमैटिक चैलेंज सेक्शन -->
 <div class="section-title" style="margin-top: 15px;">🎲 BAAP LUDO LIVE BATTLES 🎲</div>
 
-<!-- चैलेंज एंट्री बॉक्स -->
+<!-- चैलेंज बनाने का बॉक्स (सीधे बैकएंड से कनेक्टेड) -->
 <div class="amount" style="display: flex; gap: 10px; margin: 12px 0 18px;">
   <input type="number" id="battle-amount" placeholder="Enter entry fee amount..." style="min-width: 0; flex: 1; padding: 15px; border: 1px solid #aaa; border-radius: 7px; font-size: 16px;">
-  <button class="btn blue" onclick="setAmount()" style="border: 0; border-radius: 28px; padding: 13px 24px; font-weight: 800; font-size: 16px; cursor: pointer; background: linear-gradient(#69d9ff,#2198f4); color: #fff; box-shadow: 0 4px 12px #888;">Set Battle</button>
+  <button class="btn blue" onclick="if(typeof createBattle === 'function'){ createBattle(); }else{ alert('Database starting...'); }" style="border: 0; border-radius: 28px; padding: 13px 24px; font-weight: 800; font-size: 16px; cursor: pointer; background: linear-gradient(#69d9ff,#2198f4); color: #fff; box-shadow: 0 4px 12px #888;">Set Battle</button>
 </div>
 
-<!-- ओपन चैलेंज लिस्ट कंटेनर (Supabase से लाइव कनेक्टेड) -->
+<!-- लाइव ओपन चैलेंज लिस्ट (Supabase रियल-टाइम डेटा यहाँ ऑटोमैटिक रेंडर होगा) -->
 <div id="openBattles">
-  <!-- 🎲 डिफ़ॉल्ट डेमो चैलेंज कार्ड -->
   <div class="baap-battle-card">
     <div class="battle-header">
       <span class="challenge-by">👤 FxJOE</span>
@@ -136,48 +135,14 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
       </div>
     </div>
     <div class="battle-actions-footer">
-      <button class="action-btn accept-btn" onclick="alert('चैलेंज स्वीकार करने के लिए पर्याप्त बैलेंस नहीं है। कृपया वॉलेट में पैसे जोड़ें।')">Play Challenge</button>
+      <button class="action-btn accept-btn" onclick="if(typeof joinBattle === 'function'){ joinBattle(); }else{ alert('Please wait...'); }">Play Challenge</button>
     </div>
   </div>
 </div>
 
 <div class="section-title">🏃 Running Battles</div>
-<div id="runningBattles" class="playing" style="text-align: center; font-weight: bold; color: #66758b;">Loading active matches...</div>
+<div id="runningBattles" class="playing" style="text-align: center; font-weight: bold; color: #66758b; margin-bottom: 20px;">Loading active matches...</div>
 
-<style>
-/* 🎨 BAAP LUDO प्रीमियम थीम स्टाइल्स */
-.baap-battle-card {
-  background: linear-gradient(145deg, #1f1a3a, #0d0b18);
-  border: 2px solid #ff9ed0; 
-  border-radius: 15px;
-  padding: 15px;
-  margin: 15px 0;
-  box-shadow: 0 5px 15px rgba(255, 158, 208, 0.2);
-  color: #fff;
-  font-family: Arial, sans-serif;
-}
-.battle-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: bold;
-  border-bottom: 1px solid #332d54;
-  padding-bottom: 10px;
-  font-size: 15px;
-}
-.vs-badge {
-  background: #26a9ff; 
-  padding: 3px 8px;
-  border-radius: 5px;
-  font-size: 11px;
-}
-.challenge-to-waiting { color: #ffd66c; }
-.battle-body-details {
-  display: flex;
-  justify-content: space-around;
-  margin: 12px 0;
-  text-align: center;
-}
 .amt-box small { color: #ff9ed0; font-size: 11px; display: block; margin-bottom: 4px; }
 .fee-val { color: #20d85c; font-size: 18px; font-weight: bold; margin: 0; }
 .prize-val { color: #ffd66c; font-size: 18px; font-weight: bold; margin: 0; }
