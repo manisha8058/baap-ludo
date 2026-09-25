@@ -199,7 +199,28 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
     <p style="font-size:11px; color:red; font-weight:bold; margin-bottom:12px; font-family: Arial, sans-serif;">⚠️ पेमेंट करने के बाद नीचे 12 अंकों का UTR नंबर दर्ज करें।</p>
     
     <div style="background: #fff; padding: 10px; border-radius: 12px; display: inline-block; border: 1px solid #ddd;">
-      <img src="https://quickchart.io" alt="Scan to Pay" style="width: 200px; height: 200px; display: block; margin: 0 auto; border-radius: 8px;">
+      <!-- 📥 स्टेप 1: रीयलटाइम इन-बिल्ट क्यूआर कंटेनर बॉक्स -->
+<div id="baap-ludo-qrcode" style="display: flex; justify-content: center; align-items: center; padding: 10px; background: #ffffff; margin: 0 auto; width: 180px; height: 180px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></div>
+
+<!-- ⚡ स्टेप 2: इन-बिल्ट लाइव क्यूआर जनरेटर इंजन स्क्रिप्ट -->
+<script src="https://cloudflare.com"></script>
+<script>
+// पॉप-अप खुलते ही यह कोड सीधे आपके ब्राउज़र के अंदर 0 सेकंड में क्यूआर कोड छाप देगा
+setTimeout(function() {
+  const qrBox = document.getElementById("baap-ludo-qrcode");
+  if (qrBox && qrBox.innerHTML === "") {
+    new QRCode(qrBox, {
+      text: "upi://pay?pa=8058128380-2.wallet@phonepe&pn=Radha&mc=0000&mode=02&purpose=00",
+      width: 180,
+      height: 180,
+      colorDark : "#000000",
+      colorLight : "#ffffff",
+      correctLevel : QRCode.CorrectLevel.H
+    });
+  }
+}, 400);
+</script>
+
       
 
     </div>
