@@ -912,14 +912,21 @@ document.body.insertAdjacentHTML('beforeend', withdrawPanelHTML);
 const originalAlertSystem = window.alert;
 window.alert = function(msg) {
   if (!msg) return;
+  
+  // 1. यदि खिलाड़ी ने खुद वॉलेट पेज पर जाकर विड्रॉल नहीं किया है, तो फॉर्म अपने आप कभी नहीं खुलेगा
   if (msg.includes("no real-money") || msg.includes("Withdraw") || msg.includes("withdraw")) { 
-    document.getElementById('baap-withdraw-form-panel').style.display = 'block';
-  } else if (msg.includes("not configured") || msg.includes("Play mode") || msg.includes("deposit")) {
+    console.log("विड्रॉल फॉर्म को होम स्क्रीन पर ऑटो-लोड होने से सुरक्षित रोका गया।");
+  } 
+  // 2. अगर डिपॉजिट का मैसेज है तो क्यूआर कोड खोलें
+  else if (msg.includes("not configured") || msg.includes("Play mode") || msg.includes("deposit")) {
     document.getElementById('qrModal').style.display = 'flex';
-  } else {
+  } 
+  // 3. बाकी बचे हुए जरूरी सिस्टम मैसेजेस
+  else {
     try { setMsg(msg); } catch(e) { console.log("Msg: " + msg); }
   }
 };
+
  {
   document.getElementById('baap-withdraw-form-panel').style.display = 'block';
 };
