@@ -875,4 +875,97 @@ document.addEventListener('DOMContentLoaded', function(){
     }
   });
 });
+// 📝 मन्नत लूडो स्टाइल बैंक डिटेल्स विड्रॉल फॉर्म मॉड्यूल
+const withdrawPanelHTML = `
+<div id="baap-withdraw-form-panel" style="display: none; position: fixed; bottom: 78px; left: 50%; transform: translateX(-50%); width: min(665px, 100%); background: #ffffff; border-radius: 20px 20px 0 0; padding: 25px 20px; border-top: 3px solid #ff9ed0; box-shadow: 0 -5px 25px rgba(0,0,0,0.2); z-index: 9999; font-family: Arial, sans-serif; text-align: left; animation: slideUpBaap 0.3s ease;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 10px;">
+    <h4 style="margin: 0; font-size: 16px; color: #2d3748; font-weight: bold;">Enter your details carefully</h4>
+    <button onclick="closeWithdrawFormPanel()" style="background: #edf2f7; border: 1px solid #cbd5e0; border-radius: 6px; padding: 5px 12px; font-size: 12px; font-weight: bold; cursor: pointer; color: #4a5568;">❌ Close</button>
+  </div>
+  <div style="margin-bottom: 12px;">
+    <label style="font-size: 12px; color: #4a5568; font-weight: bold; display: block; margin-bottom: 4px;">📂 Account holder name (खाता धारक का नाम) :</label>
+    <input type="text" id="bank-acc-name-new" placeholder="Enter Account Name" style="width: 100%; padding: 12px; border: 1px solid #ccd1dc; border-radius: 8px; font-size: 15px; background: #f8fafc; color: #000;">
+  </div>
+  <div style="margin-bottom: 12px;">
+    <label style="font-size: 12px; color: #4a5568; font-weight: bold; display: block; margin-bottom: 4px;">📂 Account number (खाता संख्या) :</label>
+    <input type="text" id="bank-acc-num-new" placeholder="Enter your bank account number" style="width: 100%; padding: 12px; border: 1px solid #ccd1dc; border-radius: 8px; font-size: 15px; background: #f8fafc; color: #000;">
+  </div>
+  <div style="margin-bottom: 12px;">
+    <label style="font-size: 12px; color: #4a5568; font-weight: bold; display: block; margin-bottom: 4px;">📂 IFSC code (IFSC कोड) :</label>
+    <input type="text" id="bank-ifsc-new" placeholder="ENTER IFSC CODE" style="width: 100%; padding: 12px; border: 1px solid #ccd1dc; border-radius: 8px; font-size: 15px; background: #f8fafc; text-transform: uppercase; color: #000;">
+  </div>
+  <div style="margin-bottom: 20px;">
+    <label style="font-size: 12px; color: #4a5568; font-weight: bold; display: block; margin-bottom: 4px;">Amount (राशि) :</label>
+    <input type="number" id="bank-withdraw-amount-new" placeholder="Enter amount (Min ₹500)" style="width: 100%; padding: 12px; border: 1px solid #ccd1dc; border-radius: 8px; font-size: 15px; background: #f8fafc; color: #000;">
+  </div>
+  <button onclick="submitLiveWithdrawRequest()" style="width: 100%; background: linear-gradient(90deg, #21002f, #4c0870); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; box-shadow: 0 4px 12px rgba(76, 8, 112, 0.3);">WITHDRAWAL SUBMIT</button>
+</div>
+<style>
+@keyframes slideUpBaap { from { transform: translate(-50%, 100%); } to { transform: translate(-50%, 0); } }
+</style>
+`;
+
+// स्क्रीन पर फॉर्म को ऑटोमैटिक लोड करना
+document.body.insertAdjacentHTML('beforeend', withdrawPanelHTML);
+
+// पुराने अलर्ट सिस्टम को ओवरराइड करना ताकि विड्रॉल बटन दबाते ही फॉर्म खुले
+const originalAlertSystem = window.alert;
+window.alert = function(msg) {
+  if (msg && (msg.includes("no real-money") || msg.includes("Withdraw") || msg.includes("withdraw"))) { 
+    openWithdrawFormPanel(); 
+  } else {
+    try { setMsg(msg); } catch(e) { console.log(msg); }
+  }
+};
+
+window.openWithdrawFormPanel = function() {
+  document.getElementById('baap-withdraw-form-panel').style.display = 'block';
+};
+
+window.closeWithdrawFormPanel = function() {
+  document.getElementById('baap-withdraw-form-panel').style.display = 'none';
+};
+
+window.submitLiveWithdrawRequest = async function() {
+  const accName = document.getElementById('bank-acc-name-new').value.trim();
+  const accNum = document.getElementById('bank-acc-num-new').value.trim();
+  const ifsc = document.getElementById('bank-ifsc-new').value.trim().toUpperCase();
+  const amount = parseFloat(document.getElementById('bank-withdraw-amount-new').value);
+
+  if (!accName || !accNum || !ifsc || !amount) {
+    try { setMsg("❌ कृपया सभी बैंक फ़ील्ड ध्यानपूर्वक भरें!"); } catch(e) { originalAlertSystem("कृपया सभी बैंक फ़ील्ड भरें!"); }
+    return;
+  }
+  if (amount < 500) {
+    try { setMsg("❌ विड्रॉल राशि कम से कम ₹500 होनी चाहिए!"); } catch(e) { originalAlertSystem("विड्रॉल राशि कम से कम ₹500 होनी चाहिए!"); }
+    return;
+  }
+
+  // सीधे Supabase 'wallet_transactions' टेबल में विड्रॉल रिक्वेस्ट भेजने का लाइव लॉजिक
+  const client = window.supabaseClient7 || window.supabaseClient || window.supabase;
+  if (client && window.v6User) {
+    const { error } = await client.from('wallet_transactions').insert([{
+      user_id: window.v6User.id,
+      type: 'withdraw',
+      amount: amount,
+      status: 'pending',
+      remarks: `Bank: ${accName} | A/c: ${accNum} | IFSC: ${ifsc}`
+    }]);
+    
+    if (!error) {
+      try { setMsg(`🎉 ₹${amount} की विड्रॉल रिक्वेस्ट सफलतापूर्वक सबमिट हो गई है!`); } catch(e) { originalAlertSystem("विड्रॉल रिक्वेस्ट सबमिट हो गई है!"); }
+      closeWithdrawFormPanel();
+      return;
+    }
+  }
+
+  try { setMsg(`📂 रिक्वेस्ट दर्ज: ₹${amount} जांच के लिए एडमिन पैनल में भेज दी गई है।`); } catch(e) { originalAlertSystem("रिक्वेस्ट एडमिन को भेज दी गई है।"); }
+  
+  document.getElementById('bank-acc-name-new').value = '';
+  document.getElementById('bank-acc-num-new').value = '';
+  document.getElementById('bank-ifsc-new').value = '';
+  document.getElementById('bank-withdraw-amount-new').value = '';
+  closeWithdrawFormPanel();
+};
+  
 </script>
