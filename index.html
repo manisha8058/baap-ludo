@@ -911,14 +911,16 @@ document.body.insertAdjacentHTML('beforeend', withdrawPanelHTML);
 // पुराने अलर्ट सिस्टम को ओवरराइड करना ताकि विड्रॉल बटन दबाते ही फॉर्म खुले
 const originalAlertSystem = window.alert;
 window.alert = function(msg) {
-  if (msg && (msg.includes("no real-money") || msg.includes("Withdraw") || msg.includes("withdraw"))) { 
-    openWithdrawFormPanel(); 
+  if (!msg) return;
+  if (msg.includes("no real-money") || msg.includes("Withdraw") || msg.includes("withdraw")) { 
+    document.getElementById('baap-withdraw-form-panel').style.display = 'block';
+  } else if (msg.includes("not configured") || msg.includes("Play mode") || msg.includes("deposit")) {
+    document.getElementById('qrModal').style.display = 'flex';
   } else {
-    try { setMsg(msg); } catch(e) { console.log(msg); }
+    try { setMsg(msg); } catch(e) { console.log("Msg: " + msg); }
   }
 };
-
-window.openWithdrawFormPanel = function() {
+ {
   document.getElementById('baap-withdraw-form-panel').style.display = 'block';
 };
 
