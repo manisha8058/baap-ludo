@@ -6,131 +6,103 @@
 <title>BAAP LUDO</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#000;font-family:Arial,Helvetica,sans-serif;color:#293242}
-:root{--purple:#21002f;--purple2:#4c0870;--pink:#f65ca5;--blue:#26a9ff;--light:#f7f8fc;--card:#dce9ff;--ink:#1b0828}
+:root{--purple:#21002f;--purple2:#4c0870;--pink:#f65ca5;--blue:#26a9ff}
 .app{width:100%;max-width:665px;min-height:100vh;margin:auto;background:#fff;position:relative;padding-bottom:78px;overflow:hidden}
 .header{height:96px;background:linear-gradient(100deg,#09000e,#300046,#120016);border-bottom:4px solid #ff9ed0;display:flex;align-items:center;gap:18px;padding:12px 20px;position:sticky;top:0;z-index:20}
 .menu-btn{font-size:36px;color:#fff;background:none;border:0;width:48px;cursor:pointer}
-.logo{width:75px;height:75px;border-radius:50%;display:grid;place-items:center;color:#ffd66c;font-weight:900;font-size:13px;text-align:center;border:2px solid #b78b2f;background:radial-gradient(circle,#503b12,#0c0710 68%);box-shadow:0 0 12px #f8d66b55}
-.spacer{flex:1}.pill{display:flex;align-items:center;gap:7px;background:linear-gradient(#61d8ff,#168df0);border:1px solid #6fe6ff;box-shadow:0 0 15px #2bbcffaa;color:#fff;border-radius:30px;padding:12px 15px;font-size:17px;font-weight:bold;white-space:nowrap;cursor:pointer}
-.content{padding:12px 20px}.notice{background:linear-gradient(90deg,#260019,#17000e);color:white;border:1px solid #ffb0d8;border-radius:8px;padding:12px;font-size:14px;line-height:1.45;margin-bottom:18px}.section-title{font-size:20px;font-weight:800;margin:15px 0 14px;text-align:center;background:linear-gradient(90deg,#ff7284,#a74fff,#399aff);color:white;border-radius:7px;padding:14px;box-shadow:0 3px 5px #aaa}
+.logo{width:75px;height:75px;border-radius:50%;display:grid;place-items:center;color:#ffd66c;font-weight:900;font-size:13px;text-align:center;border:2px solid #b78b2f;background:radial-gradient(circle,#503b12,#0c0710 68%)}
+.spacer{flex:1}.pill{display:flex;align-items:center;gap:7px;background:linear-gradient(#61d8ff,#168df0);border:1px solid #6fe6ff;color:#fff;border-radius:30px;padding:12px 15px;font-size:17px;font-weight:bold;cursor:pointer}
+.content{padding:12px 20px}.notice{background:linear-gradient(90deg,#260019,#17000e);color:white;border:1px solid #ffb0d8;border-radius:8px;padding:12px;font-size:14px;line-height:1.45;margin-bottom:18px}.section-title{font-size:20px;font-weight:800;margin:15px 0 14px;text-align:center;background:linear-gradient(90deg,#ff7284,#a74fff,#399aff);color:white;border-radius:7px;padding:14px}
 .page{display:none}.page.active{display:block}
 .bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(665px,100%);height:78px;background:linear-gradient(90deg,#08000c,#26003d,#08000c);display:flex;justify-content:space-around;align-items:center;z-index:30;border-top:1px solid #9d5fb7}.bottom button{border:0;background:none;color:#fff;font-size:12px;font-weight:bold;padding:7px 13px;border-radius:30px;cursor:pointer}.bottom button span{display:block;font-size:28px;margin-bottom:3px}.bottom button.active{background:#fff;color:#222}
-
-/* 🎨 BAAP LUDO प्रीमियम थीम स्टाइल्स */
-.baap-battle-card, .baap-room-card {
-  background: linear-gradient(145deg, #1f1a3a, #0d0b18);
-  border: 2px solid #ff9ed0; border-radius: 15px; padding: 15px; margin: 15px 0;
-  box-shadow: 0 5px 15px rgba(255, 158, 208, 0.2); color: #fff; font-family: Arial, sans-serif;
-}
-.result-card { border-color: #26a9ff; box-shadow: 0 6px 20px rgba(38, 169, 255, 0.15); }
+.baap-battle-card, .baap-room-card {background: linear-gradient(145deg, #1f1a3a, #0d0b18);border: 2px solid #ff9ed0; border-radius: 15px; padding: 15px; margin: 15px 0; color: #fff; font-family: Arial, sans-serif;}
 .battle-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; border-bottom: 1px solid #332d54; padding-bottom: 10px; font-size: 15px; }
 .vs-badge { background: #26a9ff; padding: 3px 8px; border-radius: 5px; font-size: 11px; }
-.challenge-to-waiting { color: #ffd66c; }
 .battle-body-details { display: flex; justify-content: space-around; margin: 12px 0; text-align: center; }
-.amt-box small { color: #ff9ed0; font-size: 11px; display: block; margin-bottom: 4px; }
 .fee-val { color: #20d85c; font-size: 18px; font-weight: bold; margin: 0; }
 .prize-val { color: #ffd66c; font-size: 18px; font-weight: bold; margin: 0; }
-.battle-actions-footer .action-btn, .room-btn { width: 100%; background: linear-gradient(90deg, #26a9ff, #5143e6); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(38, 169, 255, 0.3); }
 .baap-history-tabs { display: flex; background: #f1f5fb; border-radius: 30px; padding: 5px; margin: 15px 0; border: 1px solid #ccd4df; }
 .history-tab-btn { flex: 1; border: none; background: none; padding: 10px; font-weight: bold; border-radius: 25px; cursor: pointer; color: #4a5568; }
 .history-tab-btn.active { background: linear-gradient(90deg, #21002f, #4c0870); color: white; }
 .history-content-block { display: none; } .history-content-block.active { display: block; }
-.history-card { background: #ffffff; border-radius: 16px; padding: 15px; margin: 12px 0; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; }
-.game-card-victory { border-left: 5px solid #00e676; background: #f0fff4; } .game-card-defeat { border-left: 5px solid #ff1744; background: #fff5f5; }
-.card-date-time { font-size: 12px; color: #718096; font-weight: bold; width: 85px; }
-.card-status-info, .tx-badge-status { flex: 1; padding: 0 10px; display: flex; flex-direction: column; gap: 4px; }
-.status-lbl { font-size: 18px; font-weight: 900; } .text-victory { color: #00c853; } .text-defeat { color: #ff1744; }
-.card-money-info { text-align: right; display: flex; flex-direction: column; align-items: flex-end; }
-.amt-bold { font-size: 16px; font-weight: bold; color:#2d3748; }
-.tx-status-badge { font-size: 10px; font-weight: bold; padding: 3px 8px; border-radius: 4px; color: white; }
-.badge-withdraw { background: #ff7675; } .badge-deposit { background: #20d85c; }
 .stat-card-box { background: linear-gradient(145deg, #0d1b2a, #1b263b); border-radius: 12px; padding: 18px 10px; text-align: center; color: white; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-@keyframes popScale { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 </style>
 </head>
 <body>
-
 <div class="app">
-  <!-- हेडर पिल्स -->
   <div class="header">
     <button class="menu-btn" onclick="showPage('support')">☰</button>
     <div class="logo">BAAP<br>LUDO</div>
     <div class="spacer"></div>
-    <div class="pill blue" onclick="showPage('wallet')">
-      <span style="font-size: 20px;">🪙</span> <span id="header-deposit-val">₹ 0.00</span>
-    </div>
-    <div class="pill purple" onclick="showPage('refer')">
-      <span style="font-size: 20px;">🎁</span> <span id="header-winning-val">₹ 0.00</span>
-    </div>
+    <div class="pill blue" onclick="showPage('wallet')"><span>🪙</span> <span id="header-deposit-val">₹ 0.00</span></div>
+    <div class="pill purple" onclick="showPage('refer')"><span>🎁</span> <span id="header-winning-val">₹ 0.00</span></div>
   </div>
 
-  <!-- 1. होम पेज -->
   <div id="home" class="page active">
     <div class="content">
-      <div class="notice">
-        आप सभी से निवेदन है कि जिस नाम से केवाईसी कर रहे हैं उसी नाम से डिपॉजिट करें। किसी अन्य व्यक्ति के नाम से डिपॉजिट करने पर आपकी आईडी को जीरो करके ब्लॉक कर दिया जाएगा।
-      </div>
-      
+      <div class="notice">आप सभी से निवेदन है कि जिस नाम से केवाईसी कर रहे हैं उसी नाम से डिपॉजिट करें। किसी अन्य व्यक्ति के नाम से डिपॉजिट करने पर आपकी आईडी को जीरो करके ब्लॉक कर दिया जाएगा।</div>
       <div class="section-title">🎲 BAAP LUDO LIVE BATTLES 🎲</div>
-      <div class="live-label">🔴 LIVE CHALLENGES</div>
-      
-      <div class="amount">
-        <input type="number" id="battle-amount" placeholder="Enter entry fee amount...">
-        <button class="btn blue" onclick="createBattle()">Set Battle</button>
-      </div>
-
+      <div style="display:flex; gap:10px; margin:12px 0 18px;"><input type="number" id="battle-amount" placeholder="Enter entry fee..." style="flex:1; padding:15px; border-radius:7px;"><button class="btn blue" onclick="alert('चैलेंज सेट हो गया है')">Set Battle</button></div>
       <div id="openBattles">
         <div class="baap-battle-card">
-          <div class="battle-header">
-            <span class="challenge-by">👤 FxJOE</span>
-            <span class="vs-badge">VS</span>
-            <span class="challenge-to-waiting">Waiting... 🔄</span>
-          </div>
-          <div class="battle-body-details">
-            <div class="amt-box">
-              <small>Entry Fee</small>
-              <p class="fee-val">₹ 100</p>
-            </div>
-            <div class="amt-box">
-              <small>Winning Prize</small>
-              <p class="prize-val">₹ 180</p>
-            </div>
-          </div>
-          <div class="battle-actions-footer">
-            <button class="action-btn accept-btn" onclick="joinBattle(100)">Play Challenge</button>
-          </div>
+          <div class="battle-header"><span>👤 FxJOE</span><span class="vs-badge">VS</span><span style="color:#ffd66c;">Waiting... 🔄</span></div>
+          <div class="battle-body-details"><div><small>Entry Fee</small><p class="fee-val">₹ 100</p></div><div><small>Winning Prize</small><p class="prize-val">₹ 180</p></div></div>
+          <button style="width:100%; background:linear-gradient(90deg,#26a9ff,#5143e6); color:#fff; padding:10px; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="showPage('room-lobby')">Play Challenge</button>
         </div>
       </div>
-
-      <div class="section-title">🏃 Running Battles</div>
-      <div id="runningBattles" class="playing">No active matches running.</div>
     </div>
   </div>
 
-  <!-- 2. वॉलेट पेज -->
   <div id="wallet" class="page">
     <div class="content">
       <div class="section-title">🎮 MY WALLET</div>
-      <div class="balance" style="background:#fff; border-radius:25px; padding:28px; text-align:center; box-shadow:0 2px 12px #ddd;">
-        <small>Total Available Balance</small>
-        <h1 id="total-balance-val" style="color:#12b889; margin:10px 0 0 0;">₹ 0.00</h1>
+      <div style="background:#fff; border-radius:25px; padding:28px; text-align:center; box-shadow:0 2px 12px #ddd;"><small>Total Balance</small><h1 id="total-balance-val" style="color:#12b889; margin:10px 0 0 0;">₹ 0.00</h1></div>
+      <div style="background:#d6e5ff; border-radius:25px; padding:25px; margin-top:18px;"><h2>Deposit Cash</h2><div style="font-size:34px; font-weight:bold; margin:10px 0 22px;">₹ 0.00</div><button class="btn blue" onclick="document.getElementById('qrModal').style.display='flex'" style="width:100%;">+ Add Cash</button></div>
+      <div style="background:#e6ffe9; border-radius:25px; padding:25px; margin-top:18px;"><h2>Winning Cash</h2><div style="font-size:34px; font-weight:bold; margin:10px 0 22px; color:#1e7e34;">₹ 0.00</div><button class="btn green" onclick="document.getElementById('withdraw-stage-2').style.display='block'" style="width:100%; background:#28a745;">📂 Withdraw</button></div>
+      <div id="withdraw-stage-2" style="display:none; background:#fff; border-radius:16px; padding:20px; border:1px solid #ccd1dc; margin-top:15px;">
+        <input type="text" placeholder="Account Holder Name" style="width:100%; padding:12px; margin-bottom:10px;"><input type="text" placeholder="Account Number" style="width:100%; padding:12px; margin-bottom:10px;"><input type="text" placeholder="IFSC CODE" style="width:100%; padding:12px; margin-bottom:10px;"><input type="number" placeholder="Enter amount" style="width:100%; padding:12px; margin-bottom:15px;">
+        <button onclick="alert('विड्रॉल रिक्वेस्ट सबमिट हो गई है')" style="width:100%; padding:14px; background:#4c0870; color:#fff; font-weight:bold; border:none; border-radius:8px; cursor:pointer;">WITHDRAWAL SUBMIT</button>
       </div>
-      <div class="cash-card" style="background:#d6e5ff; border-radius:25px; padding:25px; margin-top:18px;">
-        <h2 style="margin:0; color:#64748a;">Deposit Cash</h2>
-        <div class="value" id="deposit-cash-val" style="font-size:34px; font-weight:bold; margin:10px 0 22px;">₹ 0.00</div>
-        <button class="btn blue" onclick="openQrModalfixed()">+ Add Cash</button>
-      </div>
-      <div class="cash-card" style="background: #e6ffe9; border-radius:25px; padding:25px; margin-top:18px;">
-        <h2 style="margin:0; color:#1e7e34;">Winning Cash</h2>
-        <div class="value" id="winning-cash-val" style="font-size:34px; font-weight:bold; margin:10px 0 22px; color:#1e7e34;">₹ 0.00</div>
-        <button class="btn green" onclick="goToWithdrawStage2()" style="width:100%; background:#28a745;">📂 Withdraw</button>
-      </div>
+    </div>
+  </div>
 
-      <!-- बैंक विड्रॉल फॉर्म -->
-      <div id="withdraw-stage-2" style="display: none; background: #fff; border-radius: 16px; padding: 20px; border: 1px solid #ccd1dc; margin-top:15px;">
-        <h4 style="margin:0 0 15px 0;">Enter your Bank details carefully</h4>
-        <input type="text" id="bank-acc-name" placeholder="Account Holder Name" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px;">
-        <input type="text" id="bank-acc-num" placeholder="Account Number" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px;">
-        <input type="text" id="bank-ifsc" placeholder="IFSC CODE" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; text-transform:uppercase;">
-        <input type="number" id="bank-withdraw-amount" placeholder="Enter amount (Min ₹500)" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ccc; border-radius:8px;">
-        
+  <div id="room-lobby" class="page">
+    <div class="content">
+      <div class="section-title">⚔️ MATCH PLAY LOBBY</div>
+      <div class="baap-room-card"><h3>🎲 Ludo King Room Code</h3><input type="text" id="ludo-room-code-input" placeholder="ENTER CODE HERE" style="width:100%; padding:12px; text-align:center;"><button style="width:100%; margin-top:10px; padding:10px;" onclick="alert('रूम कोड अपडेट हो गया')">Update Code</button></div>
+    </div>
+  </div>
+
+  <div id="history" class="page">
+    <div class="content">
+      <div class="section-title">📜 HISTORY LOGS</div>
+      <div class="baap-history-tabs"><button class="history-tab-btn active" onclick="switchHistoryTab('game')">Game</button><button class="history-tab-btn" onclick="switchHistoryTab('transaction')">Transaction</button></div>
+      <div id="history-container-game" class="history-content-block active" style="text-align:center; padding:20px;">No matches found.</div>
+      <div id="history-container-transaction" class="history-content-block" style="text-align:center; padding:20px;">No transactions found.</div>
+    </div>
+  </div>
+
+  <div id="refer" class="page">
+    <div class="content">
+      <div class="section-title">🎁 REDEEM REFER BALANCE</div>
+      <div style="background:#e6fffa; padding:20px; text-align:center; border-radius:12px;"><h1>₹ 0.00</h1></div>
+      <input type="number" placeholder="Enter Amount" style="width:100%; padding:14px; margin:15px 0;"><button style="width:100%; padding:14px; background:#4c0870; color:#fff; border:none; cursor:pointer;" onclick="alert('रिडीम रिक्वेस्ट सबमिट हो गई')">Redeem</button>
+    </div>
+  </div>
+
+  <div id="profile" class="page">
+    <div class="content">
+      <div class="section-title">👤 PLAYER PROFILE</div>
+      <div class="baap-stats-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div class="stat-card-box"><small>Battle Played</small><b>27</b></div><div class="stat-card-box"><small>Coin Won</small><b>4167</b></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="support" class="page">
+    <div class="content"><div class="section-title">Help & Support</div><button style="width:100%; padding:20px; background:#25D366; color:#fff; font-weight:bold; border:none; border-radius:10px; cursor:pointer;" onclick="window.open('https://wa.me')">🟢 WhatsApp Support: +91 8058128380</button></div>
+  </div>
+
+  <div id="qrModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 10px;">
+    <div style="background: #ffffff; padding: 25px 20px; border-radius: 20px; width: 100%; max-width: 350px; text-align: center; position: relative;">
+      
