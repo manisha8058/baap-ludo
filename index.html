@@ -9,15 +9,14 @@
 :root{--purple:#21002f;--purple2:#4c0870;--pink:#f65ca5;--blue:#26a9ff;--light:#f7f8fc;--card:#dce9ff;--ink:#1b0828}
 .app{width:100%;max-width:665px;min-height:100vh;margin:auto;background:#fff;position:relative;padding-bottom:78px;overflow:hidden}
 .header{height:96px;background:linear-gradient(100deg,#09000e,#300046,#120016);border-bottom:4px solid #ff9ed0;display:flex;align-items:center;gap:18px;padding:12px 20px;position:sticky;top:0;z-index:20}
-.menu-btn{font-size:36px;color:#fff;background:none;border:0;width:48px}.logo{width:75px;height:75px;border-radius:50%;display:grid;place-items:center;color:#ffd66c;font-weight:900;font-size:13px;text-align:center;border:2px solid #b78b2f;background:radial-gradient(circle,#503b12,#0c0710 68%);box-shadow:0 0 12px #f8d66b55}
+.menu-btn{font-size:36px;color:#fff;background:none;border:0;width:48px;cursor:pointer}
+.logo{width:75px;height:75px;border-radius:50%;display:grid;place-items:center;color:#ffd66c;font-weight:900;font-size:13px;text-align:center;border:2px solid #b78b2f;background:radial-gradient(circle,#503b12,#0c0710 68%);box-shadow:0 0 12px #f8d66b55}
 .spacer{flex:1}.pill{display:flex;align-items:center;gap:7px;background:linear-gradient(#61d8ff,#168df0);border:1px solid #6fe6ff;box-shadow:0 0 15px #2bbcffaa;color:#fff;border-radius:30px;padding:12px 15px;font-size:17px;font-weight:bold;white-space:nowrap;cursor:pointer}
 .content{padding:12px 20px}.notice{background:linear-gradient(90deg,#260019,#17000e);color:white;border:1px solid #ffb0d8;border-radius:8px;padding:12px;font-size:14px;line-height:1.45;margin-bottom:18px}.section-title{font-size:20px;font-weight:800;margin:15px 0 14px;text-align:center;background:linear-gradient(90deg,#ff7284,#a74fff,#399aff);color:white;border-radius:7px;padding:14px;box-shadow:0 3px 5px #aaa}
-.page{display:none}.page.active{display:block}.live-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.live-label{color:#ff7d9a;font-size:12px;margin:0 0 15px 6px}.promo{height:190px;border-radius:7px;background:#090909;display:flex;align-items:center;justify-content:center;text-align:center;font-size:30px;font-weight:900;color:#ffd94a;border:1px solid #222;padding:10px}.promo.ludo{background:radial-gradient(circle at 50% 40%,#263e89,#03030a 65%);text-shadow:3px 3px #e9007d}.promo.support{background:#000;color:#42e83b;font-size:26px;text-shadow:2px 2px #ff2d5f;cursor:pointer;user-select:none}
-.amount{display:flex;gap:10px;margin:12px 0 18px}.amount input{min-width:0;flex:1;padding:15px;border:1px solid #aaa;border-radius:7px;font-size:16px}.btn{border:0;border-radius:28px;padding:13px 24px;font-weight:800;font-size:16px;cursor:pointer}.blue{background:linear-gradient(#69d9ff,#2198f4);color:#fff;box-shadow:0 4px 12px #888}.green{background:#20d85c;color:#fff}.purple{background:#5143e6;color:white}
+.page{display:none}.page.active{display:block}
 .bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(665px,100%);height:78px;background:linear-gradient(90deg,#08000c,#26003d,#08000c);display:flex;justify-content:space-around;align-items:center;z-index:30;border-top:1px solid #9d5fb7}.bottom button{border:0;background:none;color:#fff;font-size:12px;font-weight:bold;padding:7px 13px;border-radius:30px;cursor:pointer}.bottom button span{display:block;font-size:28px;margin-bottom:3px}.bottom button.active{background:#fff;color:#222}
-@media(max-width:390px){.content{padding:10px 12px}.header{padding:10px 12px;gap:8px}.pill{font-size:13px;padding:10px}.live-grid{gap:8px}.promo{height:145px;font-size:22px}.battle{padding:10px}.battle .btn{min-width:80px;padding:11px 10px}.labels{gap:8px}.labels b{font-size:16px}.bottom button{padding:5px 8px}.bottom button span{font-size:24px}}
 
-/* 🎨 BAAP LUDO प्रीमियम मन्नत-स्टाइल कस्टम CSS */
+/* 🎨 BAAP LUDO प्रीमियम थीम स्टाइल्स */
 .baap-battle-card, .baap-room-card {
   background: linear-gradient(145deg, #1f1a3a, #0d0b18);
   border: 2px solid #ff9ed0; border-radius: 15px; padding: 15px; margin: 15px 0;
@@ -45,8 +44,6 @@
 .amt-bold { font-size: 16px; font-weight: bold; color:#2d3748; }
 .tx-status-badge { font-size: 10px; font-weight: bold; padding: 3px 8px; border-radius: 4px; color: white; }
 .badge-withdraw { background: #ff7675; } .badge-deposit { background: #20d85c; }
-.referral-log-item { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 15px 5px; position: relative; }
-.ref-amount-pill { position: absolute; right: 10px; top: 15px; background: #e6fffa; color: #00a389; padding: 4px 10px; border-radius: 20px; font-weight: bold; }
 .stat-card-box { background: linear-gradient(145deg, #0d1b2a, #1b263b); border-radius: 12px; padding: 18px 10px; text-align: center; color: white; display: flex; flex-direction: column; align-items: center; gap: 5px; }
 @keyframes popScale { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 </style>
@@ -54,15 +51,15 @@
 <body>
 
 <div class="app">
-  <!-- हेडर -->
+  <!-- हेडर पिल्स -->
   <div class="header">
-    <button class="menu-btn" onclick="switchPage('support')">☰</button>
+    <button class="menu-btn" onclick="showPage('support')">☰</button>
     <div class="logo">BAAP<br>LUDO</div>
     <div class="spacer"></div>
-    <div class="pill blue" onclick="switchPage('wallet')">
+    <div class="pill blue" onclick="showPage('wallet')">
       <span style="font-size: 20px;">🪙</span> <span id="header-deposit-val">₹ 0.00</span>
     </div>
-    <div class="pill purple" onclick="switchPage('refer')">
+    <div class="pill purple" onclick="showPage('refer')">
       <span style="font-size: 20px;">🎁</span> <span id="header-winning-val">₹ 0.00</span>
     </div>
   </div>
@@ -120,4 +117,20 @@
       </div>
       <div class="cash-card" style="background:#d6e5ff; border-radius:25px; padding:25px; margin-top:18px;">
         <h2 style="margin:0; color:#64748a;">Deposit Cash</h2>
+        <div class="value" id="deposit-cash-val" style="font-size:34px; font-weight:bold; margin:10px 0 22px;">₹ 0.00</div>
+        <button class="btn blue" onclick="openQrModalfixed()">+ Add Cash</button>
+      </div>
+      <div class="cash-card" style="background: #e6ffe9; border-radius:25px; padding:25px; margin-top:18px;">
+        <h2 style="margin:0; color:#1e7e34;">Winning Cash</h2>
+        <div class="value" id="winning-cash-val" style="font-size:34px; font-weight:bold; margin:10px 0 22px; color:#1e7e34;">₹ 0.00</div>
+        <button class="btn green" onclick="goToWithdrawStage2()" style="width:100%; background:#28a745;">📂 Withdraw</button>
+      </div>
+
+      <!-- बैंक विड्रॉल फॉर्म -->
+      <div id="withdraw-stage-2" style="display: none; background: #fff; border-radius: 16px; padding: 20px; border: 1px solid #ccd1dc; margin-top:15px;">
+        <h4 style="margin:0 0 15px 0;">Enter your Bank details carefully</h4>
+        <input type="text" id="bank-acc-name" placeholder="Account Holder Name" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px;">
+        <input type="text" id="bank-acc-num" placeholder="Account Number" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px;">
+        <input type="text" id="bank-ifsc" placeholder="IFSC CODE" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; text-transform:uppercase;">
+        <input type="number" id="bank-withdraw-amount" placeholder="Enter amount (Min ₹500)" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ccc; border-radius:8px;">
         
