@@ -341,7 +341,8 @@ async function submitDepositUtrData() {
 <aside class="drawer" id="drawer"><div class="drawer-top"><div class="drawer-logo">BAAP<br><span style="color:#ff315c">LUDO</span></div><button class="menu-btn" onclick="closeDrawer()">×</button></div>
 <div class="drawer-item" onclick="goFromDrawer('profile')">👤 My Profile <button>›</button></div>
 <div class="drawer-item" onclick="goFromDrawer('home')">🖐 Play <button>›</button></div>
-<div class="drawer-item" onclick="goFromDrawer('wallet')">💰 My Wallet <button>›</button></div>
+<div class="drawer-item" onclick="goFromDrawer('wallet'); setTimeout(function(){ document.getElementById('baap-withdraw-form-panel').style.display = 'block'; }, 300);"> 🧡 My wallet </button></div>
+
 <div class="drawer-item" onclick="goFromDrawer('refer')">🎁 Invite Friends <button>›</button></div>
 <div class="drawer-item" onclick="goFromDrawer('history')">◷ History <button>›</button></div>
 <div class="drawer-item" onclick="goFromDrawer('support')">🧑‍💻 Support <button>›</button></div>
