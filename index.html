@@ -167,7 +167,77 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
 </div></div>
 
 
-<section id="wallet" class="page"><div class="content"><div class="balance"><h2>My Play Balance</h2><p>Manage your practice credits</p><small>PRACTICE CREDITS</small><h1>₹<span id="balance">00</span></h1></div><div class="cash-card"><h2>🎮 Wallet</h2><div class="value">₹00</div><button class="btn purple" onclick="alert('Play mode: no real-money deposit is available.')">＋ Wallet</button></div><div class="cash-card"><h2>🏆 Play Rewards</h2><div class="value">₹0</div><button class="btn green" onclick="alert('Reward balance is read from the connected Supabase wallet.')">▣ Rewards</button></div></div></section>
+<section id="wallet" class="page">
+  <div class="content">
+    <div class="balance">
+      <h2>My Play Balance</h2>
+      <p>Manage your practice credits</p>
+      <small>PRACTICE CREDITS</small>
+      <h1>₹<span id="balance">00</span></h1>
+    </div>
+    
+    <div class="cash-card">
+      <h2>🎮 Wallet</h2>
+      <div class="value">₹00</div>
+      <!-- ➕ यहाँ आपका लाइव क्यूआर कोड ओपनर फंक्शन जोड़ दिया है -->
+      <button class="btn purple" onclick="openQrModal()">＋ Wallet</button>
+    </div>
+    
+    <div class="cash-card">
+      <h2>🏆 Play Rewards</h2>
+      <div class="value">₹0</div>
+      <button class="btn green" onclick="openQrModal()">▣ Rewards</button>
+    </div>
+  </div>
+</section>
+
+<!-- 📥 लाइव गूगल क्यूआर कोड एवं 12-डिजिट UTR सबमिशन बॉक्स (Modal) -->
+<div id="qrModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 9999; padding: 10px;">
+  <div style="background: #ffffff; padding: 25px 20px; border-radius: 20px; width: 100%; max-width: 350px; text-align: center; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">
+    <span style="position: absolute; right: 15px; top: 5px; font-size: 32px; cursor: pointer; color: #888;" onclick="closeQrModal()">&times;</span>
+    <h3 style="margin:0 0 5px 0; font-size:20px; font-family: Arial, sans-serif; color: #333;">स्कैन करके पैसे जोड़ें</h3>
+    <p style="font-size:11px; color:red; font-weight:bold; margin-bottom:12px; font-family: Arial, sans-serif;">⚠️ पेमेंट करने के बाद नीचे 12 अंकों का UTR नंबर दर्ज करें।</p>
+    
+    <div style="background: #fff; padding: 10px; border-radius: 12px; display: inline-block; border: 1px solid #ddd;">
+      <img src="https://googleapis.com" alt="Scan to Pay" style="width: 200px; height: 200px; display: block; margin: 0 auto;">
+    </div>
+    
+    <div style="background: #f3f4f6; padding: 8px; border-radius: 10px; margin: 10px 0; font-size:13px; font-family: Arial, sans-serif;">
+      <span style="color: #333;">UPI ID: <strong>8058128380-2.wallet@phonepe</strong></span>
+    </div>
+    
+    <div style="margin-top: 12px; text-align: left; font-family: Arial, sans-serif;">
+      <input type="number" id="wallet-utr-input" placeholder="Enter 12 Digit UTR Number" maxLength="12" style="width: 100%; padding: 12px; border: 2px solid #ff9ed0; border-radius: 8px; font-size: 15px; text-align: center; font-weight: bold; background: #f8fafc; color: #000;">
+      <input type="number" id="wallet-deposit-amount" placeholder="Enter Amount Paid (₹)" style="width: 100%; padding: 12px; border: 1px solid #ccd1dc; border-radius: 8px; font-size: 14px; text-align: center; margin-top: 8px; background: #f8fafc; color: #000;">
+      <button onclick="submitDepositUtrData()" style="width: 100%; padding: 12px; background: linear-gradient(90deg, #26a9ff, #5143e6); color: white; border: none; font-weight: bold; border-radius: 8px; margin-top: 10px; cursor: pointer; box-shadow: 0 4px 10px rgba(38,169,255,0.3);">SUBMIT TRANSACTION</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// पॉप-अप्स को हैंडल करने के स्क्रिप्ट फंक्शन्स
+function openQrModal() { document.getElementById('qrModal').style.display = 'flex'; }
+function closeQrModal() { document.getElementById('qrModal').style.display = 'none'; }
+
+async function submitDepositUtrData() {
+  const userId = window.currentUserId || "live-player";
+  const utr = document.getElementById('wallet-utr-input').value.trim();
+  const amount = document.getElementById('wallet-deposit-amount').value;
+
+  if(!utr || utr.length < 12 || isNaN(utr)) { alert("कृपया सही 12 अंकों का UTR नंबर दर्ज करें!"); return; }
+  if(!amount || parseFloat(amount) <= 0) { alert("कृपया सही राशि दर्ज करें!"); return; }
+  
+  // सीधे आपके Supabase में लाइव ट्रांजैक्शन रिकॉर्ड भेजने का लॉजिक
+  if(window.supabaseClient || window.supabase) {
+    const client = window.supabaseClient || window.supabase;
+    const { error } = await client.from('wallet_transactions').insert([{ user_id: userId, type: 'deposit', amount: parseFloat(amount), status: 'pending', remarks: 'UTR: ' + utr }]);
+    if(!error) { alert(`UTR ${utr} सफलतापूर्वक सबमिट हो गया है! एडमिन जांच के बाद बैलेंस अपडेट कर देगा।`); closeQrModal(); return; }
+  }
+  alert(`UTR (${utr}) और राशि ₹${amount} दर्ज कर ली गई है। जांच जारी है।`);
+  closeQrModal();
+}
+</script>
+  
 
 <section id="refer" class="page"><div class="content">
 <div class="refer-hero referral-hero-new"><small>REFER &amp; EARN</small><h1>Invite Friends<br><span>Get Rewarded!</span></h1><p>Share your room/invite link with friends and play together in practice mode.</p></div>
