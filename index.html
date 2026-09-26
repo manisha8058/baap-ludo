@@ -190,6 +190,19 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
         <!-- ======================================================== -->
 
     </div>
+          <!-- ======================================================== -->
+        <!-- 3. पेंडिंग विड्रॉल अप्रूवल सेक्शन (NEW FEATURE) -->
+        <!-- ======================================================== -->
+        <div class="admin-card" style="margin-top: 20px; border: 2px solid #dc3545; border-radius: 12px; padding: 15px; background: #fff;">
+            <h3 style="color: #dc3545; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">💸 Pending Withdraw Requests</h3>
+            <button type="button" onclick="window.fetchPendingWithdrawals()" style="background: #2198f4; color: white; border: 0; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-bottom: 12px; font-size: 13px;">🔄 Refresh List</button>
+            
+            <div id="adminWithdrawList" style="max-height: 250px; overflow-y: auto; font-size: 14px;">
+                <p style="color: #666; text-align: center; padding: 10px;">कोई विड्रॉल रिक्वेस्ट पेंडिंग नहीं है...</p>
+            </div>
+        </div>
+        <!-- ======================================================== -->
+  
 </section>
   
 
