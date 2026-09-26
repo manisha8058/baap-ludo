@@ -912,26 +912,22 @@ document.body.insertAdjacentHTML('beforeend', withdrawPanelHTML);
 
 // पुराने अलर्ट सिस्टम को ओवरराइड करना ताकि विड्रॉल बटन दबाते ही फॉर्म खुले
 const originalAlertSystem = window.alert;
+// 🔒 पुराना ऑटो-अलर्ट सिस्टम पूरी तरह बंद (ताकि रीफ्रेश पर पॉप-अप न खुले)
 window.alert = function(msg) {
-  if (!msg) return;
-  
-  // 1. यदि खिलाड़ी ने खुद वॉलेट पेज पर जाकर विड्रॉल नहीं किया है, तो फॉर्म अपने आप कभी नहीं खुलेगा
-  if (msg.includes("no real-money") || msg.includes("Withdraw") || msg.includes("withdraw")) { 
-    console.log("विड्रॉल फॉर्म को होम स्क्रीन पर ऑटो-लोड होने से सुरक्षित रोका गया।");
-  } 
-  // 2. अगर डिपॉजिट का मैसेज है तो क्यूआर कोड खोलें
-  else if (msg.includes("not configured") || msg.includes("Play mode") || msg.includes("deposit")) {
-    document.getElementById('qrModal').style.display = 'flex';
-  } 
-  // 3. बाकी बचे हुए जरूरी सिस्टम मैसेजेस
-  else {
-    try { setMsg(msg); } catch(e) { console.log("Msg: " + msg); }
-  }
+  console.log("System Alert Safe Bypassed: " + msg);
 };
 
- {
-  document.getElementById('baap-withdraw-form-panel').style.display = 'block';
+// 📂 केवल असली विड्रॉल बटन दबाने पर फॉर्म खोलने का मैन्युअल फंक्शन
+window.openWithdrawFormPanel = function() {
+  const panel = document.getElementById('baap-withdraw-form-panel');
+  if (panel) panel.style.display = 'block';
 };
+
+window.closeWithdrawFormPanel = function() {
+  const panel = document.getElementById('baap-withdraw-form-panel');
+  if (panel) panel.style.display = 'none';
+};
+
 
 window.closeWithdrawFormPanel = function() {
   document.getElementById('baap-withdraw-form-panel').style.display = 'none';
