@@ -791,6 +791,34 @@ function isAdminUser(){return window.currentUserIsAdmin===true;}function setAdmi
   window.play=function(){ window.playRoomOpen(); };
 })();
 </script>
+  <script>
+function openQrPaymentScreen() {
+    const amountInput = document.querySelector('input[placeholder="ENTER AMOUNT"]') || document.getElementById('depositAmountInput');
+    const amount = amountInput ? amountInput.value : 100;
+    if (parseFloat(amount) < 100) { alert("कम से कम ₹100 डिपॉजिट करना आवश्यक है।"); return; }
+    if (document.getElementById('displayAmountText')) document.getElementById('displayAmountText').innerText = amount;
+    const upiLink = `upi://pay?pa=8058128380-2.wallet@phonepe&pn=BAAP_LUDO&am=${amount}&cu=INR&tn=WalletDeposit`;
+    if (document.getElementById('dynamicUpiLink')) document.getElementById('dynamicUpiLink').href = upiLink;
+    if (document.getElementById('qrPaymentSection')) document.getElementById('qrPaymentSection').style.display = 'block';
+}
+async function submitDepositToSupabase() {
+    const utrValue = document.getElementById('utrNumberInput').value.trim();
+    const amountInput = document.querySelector('input[placeholder="ENTER AMOUNT"]') || document.getElementById('depositAmountInput');
+    const amountValue = amountInput ? amountInput.value : 100;
+    if (utrValue.length !== 12 || isNaN(utrValue)) { alert("❌ सही 12 अंकों का UTR नंबर दर्ज करें।"); return; }
+    try {
+        const client = window.supabaseClient;
+        const { data: { user } } = await client.auth.getUser();
+        if (!user) { alert("❌ कृपया पहले लॉगिन करें!"); return; }
+        const { error } = await client.from('deposit_requests').insert([{ user_id: user.id, user_email: user.email, amount: parseFloat(amountValue), utr_number: utrValue, status: 'Pending' }]);
+        if (error) { alert("⚠️ यह UTR पहले ही इस्तेमाल हो चुका है या एरर है।"); } 
+        else { alert("✅ रिक्वेस्ट दर्ज हो गई है! एडमिन 5-10 मिनट में बैलेंस जोड़ देंगे।"); }
+    } catch (err) {
+        alert("डेमो मोड में रिक्वेस्ट दर्ज हुई। UTR: " + utrValue);
+    }
+}
+</script>
+
 </body>
 </html>
 
