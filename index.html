@@ -266,7 +266,51 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
 <button type="button" class="btn" style="width:100%;background:#000;color:#fff;border-radius:10px;font-size:18px" onclick="alert('Redeem request interface ready. Real-money withdrawal is not connected.')">Redeem</button>
 </div></section>
 
-<section id="wallet" class="page"><div class="content"><div class="balance"><h2>My Play Balance</h2><p>Manage your practice credits</p><small>PRACTICE CREDITS</small><h1>₹<span id="balance">00</span></h1></div><div class="cash-card"><h2>🎮 Wallet</h2><div class="value">₹00</div><button class="btn purple" onclick="alert('Play mode: no real-money deposit is available.')">＋ Wallet</button></div><div class="cash-card"><h2>💸 Withdrawal</h2><div class="value">₹0</div><button class="btn green" onclick="alert('Withdrawal option is ready in the interface. Real-money withdrawal is not connected yet.')">💸 Withdrawal</button></div></div></section>
+<section id="wallet" class="page">
+    <div class="content">
+        <div class="balance">
+            <h2>My Play Balance</h2>
+            <p>Manage your practice credits</p>
+            <small>PRACTICE CREDITS</small>
+            <h1>₹<span id="balance">00</span></h1>
+        </div>
+
+        <!-- ＋ Wallet बटन: इस पर क्लिक करते ही बिना एरर के सीधा Add Cash वाला पेज खुल जाएगा -->
+        <div class="cash-card">
+            <h2>🎮 Wallet</h2>
+            <div class="value">₹00</div>
+            <button type="button" class="btn purple" onclick="if(typeof showPage==='function') showPage('addcash'); else if(typeof openPage==='function') openPage('addcash'); else { document.querySelectorAll('.page').forEach(p=>p.style.display='none'); document.getElementById('addcash').style.display='block'; }">＋ Wallet</button>
+        </div>
+
+        <!-- Withdrawal बटन: इस पर क्लिक करते ही नीचे अमाउंट और UPI ID डालने का फॉर्म खुल जाएगा -->
+        <div class="cash-card">
+            <h2>💸 Withdrawal</h2>
+            <div class="value">₹0</div>
+            <button type="button" class="btn green" onclick="window.openWithdrawFormScreen()">💸 Withdrawal</button>
+        </div>
+
+        <!-- नया मुख्य विड्रॉल रिक्वेस्ट फॉर्म (शुरू में छुपा रहेगा, विड्रॉल बटन दबाने पर खुलेगा) -->
+        <div id="userWithdrawFormSection" style="display: none; text-align: center; border: 2px dashed #dc3545; border-radius: 15px; padding: 20px; margin-top: 20px; background: #fafafa; font-family: sans-serif; color: #333;">
+            <h3 style="color: #dc3545; margin-bottom: 5px;">Request Withdrawal</h3>
+            <p style="font-size: 13px; margin-top: 0; color: #555;">अपने जीते हुए पैसे सीधे अपने UPI अकाउंट में निकालें</p>
+            
+            <div style="margin-bottom: 12px; text-align: left;">
+                <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px; color:#333;">विड्रॉल अमाउंट (₹):</label>
+                <input type="number" id="userWithdrawAmountInput" value="100" min="100" max="20000" style="width: 100%; padding: 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; text-align: center; font-weight: bold;">
+            </div>
+
+            <div style="margin-bottom: 15px; text-align: left;">
+                <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px; color:#333;">अपनी UPI ID दर्ज करें (PhonePe/GPay/Paytm):</label>
+                <input type="text" id="userWithdrawUpiInput" placeholder="example@ybl" style="width: 100%; padding: 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; text-align: center;">
+            </div>
+            
+            <p style="color: #666; font-size: 11px; margin-bottom: 15px;">⚠️ कृपया ध्यान दें: गलत UPI ID डालने पर पैसे ट्रांसफर नहीं होंगे। एडमिन 5-10 मिनट में वेरिफिकेशन करके पैसे ट्रांसफर कर देंगे।</p>
+
+            <button type="button" style="width: 100%; background: #dc3545; color: #fff; border: 0; border-radius: 8px; padding: 13px 24px; font-weight: 800; font-size: 16px; cursor: pointer;" onclick="window.submitWithdrawalToSupabase()">Submit Withdraw Request</button>
+        </div>
+
+    </div>
+</section>
 
 <section id="refer" class="page"><div class="content">
 <div class="refer-hero referral-hero-new"><small>REFER &amp; EARN</small><h1>Invite Friends<br><span>Get Rewarded!</span></h1><p>Share your room/invite link with friends and play together in practice mode.</p></div>
