@@ -809,9 +809,8 @@ function isAdminUser(){return window.currentUserIsAdmin===true;}function setAdmi
 })();
 </script>
   <script>
-<script>
-function openQrPaymentScreen() {
-    // इनपुट बॉक्स की सही ID 'addCashAmount' को पकड़ते हैं
+// फंक्शन्स को ग्लोबल (window.) पर सेट कर दिया है ताकि आपका बटन इन्हें तुरंत ढूंढ ले
+window.openQrPaymentScreen = function() {
     const amountInput = document.getElementById('addCashAmount');
     const amount = amountInput ? amountInput.value : 100;
     
@@ -820,27 +819,24 @@ function openQrPaymentScreen() {
         return; 
     }
     
-    // नीचे दिखने वाले अमाउंट टेक्स्ट को यूजर के इनपुट (जैसे 500) से बदलें
     const displaySpan = document.getElementById('displayAmountText');
     if (displaySpan) {
         displaySpan.innerText = amount;
     }
     
-    // PhonePe डायरेक्ट पेमेंट लिंक में सही अमाउंट सेट करें
     const upiLink = `upi://pay?pa=8058128380-2.wallet@phonepe&pn=BAAP_LUDO&am=${amount}&cu=INR&tn=WalletDeposit`;
     const upiBtn = document.getElementById('dynamicUpiLink');
     if (upiBtn) {
         upiBtn.href = upiLink;
     }
     
-    // क्यूआर कोड वाले बॉक्स को स्क्रीन पर शो करें
     const qrSection = document.getElementById('qrPaymentSection');
     if (qrSection) {
         qrSection.style.display = 'block';
     }
-}
+};
 
-async function submitDepositToSupabase() {
+window.submitDepositToSupabase = async function() {
     const utrValue = document.getElementById('utrNumberInput').value.trim();
     const amountInput = document.getElementById('addCashAmount');
     const amountValue = amountInput ? amountInput.value : 100;
@@ -878,20 +874,19 @@ async function submitDepositToSupabase() {
     } catch (err) {
         alert("डेमो मोड में रिक्वेस्ट दर्ज हुई। UTR: " + utrValue + " Amount: " + amountValue);
     }
-}
+};
 
-// यह आपका पुराना ज़रूरी इवेंट लिसनर है जिसे हमने सुरक्षित रखा है
+// आपका पुराना रूम कोड वाला इवेंट लिसनर भी हमने इसी में सुरक्षित मर्ज कर दिया है
 document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.all').forEach(function(el) {
-        if (el.textContent.trim() === 'Room Code' && el.children.length === 0) {
+    document.querySelectorAll('*').forEach(function(el) {
+        if ((el.textContent || '').trim() === 'Room Code' && el.children.length === 0) {
             el.style.cursor = 'pointer';
             el.addEventListener('click', function() {
                 if (typeof showPage === 'function') showPage('rooms');
                 else if (typeof openPage === 'function') openPage('rooms');
                 else {
                     document.querySelectorAll('.page').forEach(function(p) { p.style.display = 'none'; });
-                    var r = document.getElementById('rooms');
-                    if (r) r.style.display = 'block';
+                    var r = document.getElementById('rooms'); if (r) r.style.display = 'block';
                 }
             });
         }
@@ -900,6 +895,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
+
 
 
 <script>
