@@ -227,7 +227,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
     <input id="addCashAmount" type="number" min="100" max="20000" value="100" style="width:100%;box-sizing:border-box;padding:12px;font-size:18px;border-radius:8px;border:1px solid #ccc;">
 
     <!-- यह बटन बिना किसी एरर के सीधा openQrPaymentScreen वाले कोड को चलाएगा -->
-    <button type="button" style="width:100%; background:linear-gradient(#69d9ff,#2198f4); color:#fff; border:0; border-radius:28px; padding:13px 24px; font-weight:800; font-size:16px; cursor:pointer; margin-top:15px;" onclick="openQrPaymentScreen()">Next →</button>
+<button type="button" style="width:100%; background:linear-gradient(#69d9ff,#2198f4); color:#fff; border:0; border-radius:28px; padding:13px 24px; font-weight:800; font-size:16px; cursor:pointer; margin-top:15px;" onclick="window.openQrPaymentScreen()">Next →</button>
 
     <!-- नया QR कोड और मैन्युअल पेमेंट यूआई -->
     <div id="qrPaymentSection" style="display: none; text-align: center; border: 2px dashed #4c0870; border-radius: 15px; padding: 20px; margin-top: 20px; background: #fafafa;">
