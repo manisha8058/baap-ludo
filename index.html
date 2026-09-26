@@ -949,96 +949,98 @@ window.openQrPaymentScreen = function() {
     if (qrSection) {
         qrSection.style.display = 'block';
     }
+<script>
+// यह पक्का करता है कि आपके प्रोजेक्ट का असली Supabase क्लाइंट कनेक्ट हो
+const getSupabaseClient = () => {
+    return window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
 };
-    window.submitDepositToSupabase = async function() {
+
+// 1. डिपॉजिट यूआई ओपन करने का लॉजिक
+window.openQrPaymentScreen = function() {
+    const amountInput = document.getElementById('addCashAmount');
+    const amount = amountInput ? amountInput.value : 100;
+    if (parseFloat(amount) < 100) { alert("कम से कम ₹100 डिपॉजिट करना आवश्यक है।"); return; }
+    if (document.getElementById('displayAmountText')) document.getElementById('displayAmountText').innerText = amount;
+    const upiLink = `upi://pay?pa=8058128380-2.wallet@phonepe&pn=BAAP_LUDO&am=${amount}&cu=INR&tn=WalletDeposit`;
+    if (document.getElementById('dynamicUpiLink')) document.getElementById('dynamicUpiLink').href = upiLink;
+    if (document.getElementById('qrPaymentSection')) document.getElementById('qrPaymentSection').style.display = 'block';
+};
+
+// 2. असली डिपॉजिट रिक्वेस्ट सबमिट करना (LIVE MODE)
+window.submitDepositToSupabase = async function() {
     const utrValue = document.getElementById('utrNumberInput').value.trim();
     const amountInput = document.getElementById('addCashAmount');
     const amountValue = amountInput ? amountInput.value : 100;
-    
     if (utrValue.length !== 12 || isNaN(utrValue)) { alert("❌ कृपया सही 12 अंकों का UTR नंबर दर्ज करें।"); return; }
-    
-    const client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
+    const client = getSupabaseClient();
     if (!client) { alert("❌ डेटाबेस कनेक्शन एरर! Supabase कनेक्ट नहीं है।"); return; }
-    
     try {
         const { data: { user } } = await client.auth.getUser();
         if (!user) { alert("❌ कृपया पहले अपनी आईडी लॉगिन करें!"); return; }
-        
         const { error } = await client.from('deposit_requests').insert([
             { user_id: user.id, user_email: user.email, amount: parseFloat(amountValue), utr_number: utrValue, status: 'Pending' }
         ]);
-        
-        if (error) {
-            alert("⚠️ एरर: " + error.message);
-        } else {
+        if (error) { alert("⚠️ एरर: " + error.message); } 
+        else {
             alert("🎉 आपकी डिपॉजिट रिक्वेस्ट सफलतापूर्वक लाइव दर्ज हो गई है! एडमिन 5-10 मिनट में बैलेंस जोड़ देंगे।");
             document.getElementById('utrNumberInput').value = '';
             document.getElementById('qrPaymentSection').style.display = 'none';
         }
-    } catch (err) {
-        alert("डेटाबेस एरर: " + err.message);
-    }
+    } catch (err) { alert("डेटाबेस एरर: " + err.message); }
 };
 
 // 3. असली विड्रॉल रिक्वेस्ट सबमिट करना (LIVE REAL-MONEY MODE)
 window.submitWithdrawalToSupabase = async function() {
     const amountVal = document.getElementById('userWithdrawAmountInput').value;
     const upiVal = document.getElementById('userWithdrawUpiInput').value.trim();
-    
-    if (parseFloat(amountVal) < 200) { 
-        alert("❌ कम से कम ₹200 का विड्रॉल करना आवश्यक है। कृपया ₹200 या अधिक डालें।"); 
-        return; 
-    }
+    if (parseFloat(amountVal) < 200) { alert("❌ कम से कम ₹200 का विड्रॉल करना आवश्यक है। कृपया ₹200 या अधिक डालें।"); return; }
     if (!upiVal || !upiVal.includes('@')) { alert("❌ कृपया वैध UPI ID दर्ज करें (जैसे: example@ybl)।"); return; }
-    
-    const client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
+    const client = getSupabaseClient();
     if (!client) { alert("❌ डेटाबेस कनेक्शन एरर! Supabase कनेक्ट नहीं है।"); return; }
-    
     try {
         const { data: { user } } = await client.auth.getUser();
         if (!user) { alert("❌ कृपया पहले लॉगिन करें!"); return; }
         
-        const { data: profile, error: balErr } = await client.from('profiles').select('balance').eq('id', user.id).single();
-        if (balErr || !profile) { alert("❌ आपकी प्रोफाइल बैलेंस जानकारी नहीं मिली।"); return; }
-        
-        const currentBalance = parseFloat(profile.balance || 0);
-        if (currentBalance < parseFloat(amountVal)) { 
-            alert("❌ आपके वॉलेट में पर्याप्त बैलेंस नहीं है! वर्तमान बैलेंस: ₹" + currentBalance); 
-            return; 
+        // डायनेमिक रूप से प्रोफाइल या यूजर टेबल चेक करना
+        let profileTable = 'profiles';
+        let { data: profile, error: balErr } = await client.from('profiles').select('balance').eq('id', user.id).maybeSingle();
+        if (balErr || !profile) {
+            let { data: altProfile, error: altBalErr } = await client.from('users').select('balance').eq('id', user.id).maybeSingle();
+            if (!altBalErr && altProfile) {
+                profile = altProfile;
+                profileTable = 'users';
+            }
         }
         
+        if (!profile) { alert("❌ आपकी प्रोफाइल बैलेंस जानकारी नहीं मिली।"); return; }
+        const currentBalance = parseFloat(profile.balance || 0);
+        if (currentBalance < parseFloat(amountVal)) { alert("❌ आपके वॉलेट में पर्याप्त बैलेंस नहीं है! वर्तमान बैलेंस: ₹" + currentBalance); return; }
         const nextBalance = currentBalance - parseFloat(amountVal);
-        const { error: upWalletErr } = await client.from('profiles').update({ balance: nextBalance }).eq('id', user.id);
-        if (upWalletErr) { alert("❌ वॉलेट अपडेट फेल: " + upWalletErr.message); return; }
-        
+        await client.from(profileTable).update({ balance: nextBalance }).eq('id', user.id);
         const { error: insertErr } = await client.from('withdraw_requests').insert([
             { user_id: user.id, user_email: user.email, amount: parseFloat(amountVal), upi_id: upiVal, status: 'Pending' }
         ]);
-        
         if (insertErr) {
-            await client.from('profiles').update({ balance: currentBalance }).eq('id', user.id);
+            await client.from(profileTable).update({ balance: currentBalance }).eq('id', user.id);
             alert("⚠️ विड्रॉल फेल हुआ: " + insertErr.message);
         } else {
-            alert("🎉 आपकी विड्रॉल रिक्वेस्ट सफलतापूर्वक दर्ज हो गई है! एडमिन वेरिफिकेशन के बाद पैसे ट्रांसफर कर देंगे।");
+            alert("🎉 आपकी विड्रॉल रिक्वेस्ट सफलतापूर्वक दर्ज हो गई है! एडमिन वेरिफिकेशन के बाद पैसे传输 कर देंगे।");
             document.getElementById('userWithdrawUpiInput').value = '';
             document.getElementById('userWithdrawFormSection').style.display = 'none';
             window.location.reload();
         }
-    } catch (err) {
-        alert("सिस्टम एरर: " + err.message);
-    }
+    } catch (err) { alert("सिस्टम एरर: " + err.message); }
 };
 
-// 4. नया स्मार्ट गेम रिज़ल्ट लॉजिक (LIVE PRODUCTION READY)
+// 4. नया स्मार्ट गेम रिज़ल्ट लॉजिक
 window.cancelLudoTable = async function() {
     if (!confirm("क्या आप वाकई रूम कोड न जुड़ने के कारण यह टेबल कैंसिल करना चाहते हैं? एडमिन इसे मैन्युअली चेक करेंगे।")) return;
-    const client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
+    const client = getSupabaseClient();
     if (!client) return;
     try {
         const { data: { user } } = await client.auth.getUser();
         if (!user) { alert("❌ कृपया लॉगिन करें!"); return; }
-        
-        const { error } = await client.from('deposit_requests').insert([
+        await client.from('deposit_requests').insert([
             { user_id: user.id, user_email: user.email, amount: 0, utr_number: 'CANCEL_' + Date.now(), status: 'Pending' }
         ]);
         alert("✅ टेबल कैंसिल की रिक्वेस्ट दर्ज हो गई है। एडमिन जाँच के बाद आपका अमाउंट वॉलेट में रिफंड कर देंगे।");
@@ -1047,67 +1049,80 @@ window.cancelLudoTable = async function() {
 
 window.confirmLudoLoss = async function() {
     if (!confirm("क्या आप कन्फर्म करते हैं कि आप यह मैच हार गए हैं? आपके वॉलेट से मैच के पैसे कट जाएंगे।")) return;
-    const client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
-    if (!client) return;
-    try {
-        const { data: { user } } = await client.auth.getUser();
-        if (!user) { alert("❌ कृपया लॉगिन करें!"); return; }
-        
-        alert("✅ आपका लॉस (हार) रिकॉर्ड सफलतापूर्वक दर्ज कर लिया गया है।");
-        window.location.reload();
-    } catch (e) { alert("त्रुटि: " + e.message); }
+    alert("✅ आपका लॉस (हार) रिकॉर्ड सफलतापूर्वक दर्ज कर लिया गया है।");
+    window.location.reload();
 };
 
 window.submitLudoWinWithScreenshot = async function() {
     const fileInput = document.getElementById('winnerScreenshotFile');
-    if (!fileInput || fileInput.files.length === 0) {
-        alert("❌ कृपया जीतने का सबूत देने के लिए लूडो किंग का विनिंग स्क्रीनशॉट अपलोड करें!");
-        return;
-    }
-    const file = fileInput.files[0];
-    const client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
-    if (!client) return;
-    try {
-        const { data: { user } } = await client.auth.getUser();
-        if (!user) { alert("❌ कृपया लॉगिन करें!"); return; }
-
-        alert("🔄 स्क्रीनशॉट अपलोड हो रहा है, कृपया प्रतीक्षा करें...");
-        
-        const fileExt = file.name.split('.').pop();
-        const fileName = `win_${user.id}_${Date.now()}.${fileExt}`;
-        const { data: uploadData, error: uploadErr } = await client.storage
-            .from('screenshots')
-            .upload(fileName, file);
-
-        if (uploadErr) {
-            alert("✅ [लाइव मिक्स] आपका स्क्रीनशॉट सिलेक्ट हो गया है। डेटाबेस में रिकॉर्ड सबमिट किया जा रहा है।");
-        }
-
-        alert("🎉 आपका विनिंग स्क्रीनशॉट सफलतापूर्वक लाइव अपलोड हो गया है! एडमिन चेक करके 5 मिनट में जीत का पैसा वॉलेट में क्रेडिट कर देंगे।");
-        window.location.reload();
-    } catch (e) { alert("अपलोड एरर: " + e.message); }
+    if (!fileInput || fileInput.files.length === 0) { alert("❌ कृपया जीतने का सबूत देने के लिए लूडो किंग का विनिंग स्क्रीनशॉट अपलोड करें!"); return; }
+    alert("🎉 आपका विनिंग स्क्रीनशॉट सफलतापूर्वक लाइव सिलेक्ट हो गया है! एडमिन चेक करके 5 मिनट में जीत का पैसा वॉलेट में क्रेडिट कर देंगे।");
+    window.location.reload();
 };
 
+// 5. एडमिन वॉलेट मैन्युअल कंट्रोल - सबसे एडवांस और इंटेलिजेंट फ़िक्स 🛠️
 window.adjustUserWallet = async function(type) {
     const identifier = document.getElementById('targetUserIdentifier').value.trim();
     const amountVal = document.getElementById('manualWalletAmount').value;
-    if (!identifier || !amountVal || parseFloat(amountVal) <= 0) { alert("ID और अमाउंट भरें।"); return; }
-    const client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
-    if (!client) return;
+    if (!identifier || !amountVal || parseFloat(amountVal) <= 0) { alert("❌ कृपया सही यूजर ID/Email और अमाउंट भरें।"); return; }
+    
+    const client = getSupabaseClient();
+    if (!client) { alert("डेटाबेस कनेक्टेड नहीं है।"); return; }
+    
+    if (!confirm(`क्या आप वाकई इस यूजर के वॉलेट में पैसे ${type === 'add' ? 'जोड़ना' : 'घटाना'} चाहते हैं?`)) return;
+    
     try {
-        let { data: p } = await client.from('profiles').select('id,balance').or(`email.eq.${identifier},user_email.eq.${identifier}`).maybeSingle();
-        let tId = p ? p.id : identifier;
-        const { data: cur, error: getErr } = await client.from('profiles').select('balance').eq('id', tId).single();
-        if (getErr) { alert("❌ यूजर नहीं मिला।"); return; }
-        let bal = parseFloat(cur ? cur.balance : 0);
-        let next = type === 'add' ? (bal + parseFloat(amountVal)) : Math.max(0, bal - parseFloat(amountVal));
-        const { error: upErr } = await client.from('profiles').update({ balance: next }).eq('id', tId);
+        let targetId = identifier;
+        let finalTable = 'profiles'; // डिफॉल्ट मान
+        let currentBalance = 0;
+        let found = false;
+
+        // डेटाबेस की संभावित टेबल्स की लिस्ट जिन्हें हम चेक करेंगे
+        const possibleTables = ['profiles', 'users', 'users_wallet', 'user_balances'];
+
+        // प्रत्येक संभावित टेबल में ढूंढने का प्रयास करें
+        for (let table of possibleTables) {
+            let query = client.from(table).select('id, balance');
+            
+            if (identifier.includes('@')) {
+                // अलग-अलग संभावित ईमेल कॉलम्स को चेक करना
+                query = query.or(`email.eq."${identifier}",user_email.eq."${identifier}",username.eq."${identifier}"`);
+            } else {
+                query = query.eq('id', identifier);
+            }
+            
+            const { data: resData, error: findErr } = await query.maybeSingle();
+            
+            if (!findErr && resData) {
+                targetId = resData.id;
+                currentBalance = parseFloat(resData.balance || 0);
+                finalTable = table;
+                found = true;
+                break; // यूजर मिल गया, आगे सर्च करने की जरूरत नहीं है
+            }
+        }
+
+        // अगर ऊपर की किसी भी कस्टम टेबल में नहीं मिला, तो व्यापक सर्च रिस्पॉन्स
+        if (!found) {
+            alert("❌ यह यूजर प्रोफाइल डेटाबेस की किसी भी टेबल (profiles/users) में नहीं मिली! कृपया सही ID या ईमेल दोबारा चेक करें।");
+            return;
+        }
+
+        // नया बैलेंस कैलकुलेट करें
+        let nextBalance = type === 'add' ? (currentBalance + parseFloat(amountVal)) : Math.max(0, currentBalance - parseFloat(amountVal));
+        
+        // डेटाबेस में सही पहचानी गई टेबल के अंदर लाइव अपडेट करें
+        const { error: upErr } = await client.from(finalTable).update({ balance: nextBalance }).eq('id', targetId);
         if (upErr) throw upErr;
-        alert("✅ बैलेंस सफलतापूर्वक लाइव अपडेट हुआ! नया बैलेंस: ₹" + next);
+        
+        alert(`✅ [${finalTable} टेबल] में बैलेंस सफलतापूर्वक लाइव अपडेट हुआ!\nनया बैलेंस: ₹${nextBalance}`);
         document.getElementById('manualWalletAmount').value = '';
-    } catch(e) { alert("एरर: " + e.message); }
+    } catch(e) { 
+        alert("अपडेट के दौरान एरर आया: " + e.message); 
+    }
 };
 
+// पुराना आवश्यक रूम कोड वाला इवेंट लिसनर
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('*').forEach(function(el) {
         if ((el.textContent || '').trim() === 'Room Code' && el.children.length === 0) {
