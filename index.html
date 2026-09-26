@@ -808,35 +808,98 @@ function isAdminUser(){return window.currentUserIsAdmin===true;}function setAdmi
 })();
 </script>
   <script>
+<script>
 function openQrPaymentScreen() {
-    const amountInput = document.querySelector('input[placeholder="ENTER AMOUNT"]') || document.getElementById('depositAmountInput');
+    // इनपुट बॉक्स की सही ID 'addCashAmount' को पकड़ते हैं
+    const amountInput = document.getElementById('addCashAmount');
     const amount = amountInput ? amountInput.value : 100;
-    if (parseFloat(amount) < 100) { alert("कम से कम ₹100 डिपॉजिट करना आवश्यक है।"); return; }
-    if (document.getElementById('displayAmountText')) document.getElementById('displayAmountText').innerText = amount;
+    
+    if (parseFloat(amount) < 100) { 
+        alert("कम से कम ₹100 डिपॉजिट करना आवश्यक है।"); 
+        return; 
+    }
+    
+    // नीचे दिखने वाले अमाउंट टेक्स्ट को यूजर के इनपुट (जैसे 500) से बदलें
+    const displaySpan = document.getElementById('displayAmountText');
+    if (displaySpan) {
+        displaySpan.innerText = amount;
+    }
+    
+    // PhonePe डायरेक्ट पेमेंट लिंक में सही अमाउंट सेट करें
     const upiLink = `upi://pay?pa=8058128380-2.wallet@phonepe&pn=BAAP_LUDO&am=${amount}&cu=INR&tn=WalletDeposit`;
-    if (document.getElementById('dynamicUpiLink')) document.getElementById('dynamicUpiLink').href = upiLink;
-    if (document.getElementById('qrPaymentSection')) document.getElementById('qrPaymentSection').style.display = 'block';
+    const upiBtn = document.getElementById('dynamicUpiLink');
+    if (upiBtn) {
+        upiBtn.href = upiLink;
+    }
+    
+    // क्यूआर कोड वाले बॉक्स को स्क्रीन पर शो करें
+    const qrSection = document.getElementById('qrPaymentSection');
+    if (qrSection) {
+        qrSection.style.display = 'block';
+    }
 }
+
 async function submitDepositToSupabase() {
     const utrValue = document.getElementById('utrNumberInput').value.trim();
-    const amountInput = document.querySelector('input[placeholder="ENTER AMOUNT"]') || document.getElementById('depositAmountInput');
+    const amountInput = document.getElementById('addCashAmount');
     const amountValue = amountInput ? amountInput.value : 100;
-    if (utrValue.length !== 12 || isNaN(utrValue)) { alert("❌ सही 12 अंकों का UTR नंबर दर्ज करें।"); return; }
+    
+    if (utrValue.length !== 12 || isNaN(utrValue)) { 
+        alert("❌ कृपया सही 12 अंकों का UTR नंबर दर्ज करें।"); 
+        return; 
+    }
+    
     try {
         const client = window.supabaseClient;
         const { data: { user } } = await client.auth.getUser();
-        if (!user) { alert("❌ कृपया पहले लॉगिन करें!"); return; }
-        const { error } = await client.from('deposit_requests').insert([{ user_id: user.id, user_email: user.email, amount: parseFloat(amountValue), utr_number: utrValue, status: 'Pending' }]);
-        if (error) { alert("⚠️ यह UTR पहले ही इस्तेमाल हो चुका है या एरर है।"); } 
-        else { alert("✅ रिक्वेस्ट दर्ज हो गई है! एडमिन 5-10 मिनट में बैलेंस जोड़ देंगे।"); }
+        if (!user) { 
+            alert("❌ कृपया पहले लॉगिन करें!"); 
+            return; 
+        }
+        
+        const { error } = await client.from('deposit_requests').insert([
+            { 
+                user_id: user.id, 
+                user_email: user.email, 
+                amount: parseFloat(amountValue), 
+                utr_number: utrValue, 
+                status: 'Pending' 
+            }
+        ]);
+        
+        if (error) { 
+            alert("⚠️ यह UTR पहले ही इस्तेमाल हो चुका है या डेटाबेस एरर है।"); 
+        } else { 
+            alert("✅ रिक्वेस्ट दर्ज हो गई है! एडमिन 5-10 मिनट में बैलेंस जोड़ देंगे।"); 
+            document.getElementById('utrNumberInput').value = '';
+            document.getElementById('qrPaymentSection').style.display = 'none';
+        }
     } catch (err) {
-        alert("डेमो मोड में रिक्वेस्ट दर्ज हुई। UTR: " + utrValue);
+        alert("डेमो मोड में रिक्वेस्ट दर्ज हुई। UTR: " + utrValue + " Amount: " + amountValue);
     }
 }
-</script>
 
+// यह आपका पुराना ज़रूरी इवेंट लिसनर है जिसे हमने सुरक्षित रखा है
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.all').forEach(function(el) {
+        if (el.textContent.trim() === 'Room Code' && el.children.length === 0) {
+            el.style.cursor = 'pointer';
+            el.addEventListener('click', function() {
+                if (typeof showPage === 'function') showPage('rooms');
+                else if (typeof openPage === 'function') openPage('rooms');
+                else {
+                    document.querySelectorAll('.page').forEach(function(p) { p.style.display = 'none'; });
+                    var r = document.getElementById('rooms');
+                    if (r) r.style.display = 'block';
+                }
+            });
+        }
+    });
+});
+</script>
 </body>
 </html>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function(){
