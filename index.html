@@ -133,27 +133,65 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
 <div class="history-row"><span>Starter Room<br><small>Yesterday • 8:10 PM</small></span><b>-₹100</b></div>
 <div class="history-row"><span>Play Match<br><small>Yesterday • 6:20 PM</small></span><b>+₹95</b></div>
 <p style="color:#777;font-size:12px"> records only. Play records only. No real-money deposit, wagering, or withdrawal is connected.</p></div></section>
+<section id="admin" class="page">
+    <div class="content">
+        <h2>Admin Control Center</h2>
+        <p style="color:#66758b">Authorized admin controls are enforced by Supabase RPC/RLS.</p>
+        
+        <div class="admin-grid">
+            <div class="admin-stat"><strong id="adminUserCount">0</strong><span>Total Users</span></div>
+            <div class="admin-stat"><strong id="adminRoomCount">0</strong><span>Total Rooms</span></div>
+            <div class="admin-stat"><strong id="adminBattleCount">0</strong><span>Total Battles</span></div>
+            <div class="admin-stat"><strong id="adminPendingKyc">0</strong><span>Pending KYC</span></div>
+        </div>
+        
+        <div class="admin-card"><h3>👥 Users & Wallets</h3><div id="adminUsers">Loading users...</div></div>
+        <div class="admin-card"><h3>⚔️ Battles</h3><div id="adminBattles">Loading battles...</div></div>
+        <div class="admin-form"><h3>➕ Create Battle</h3><input id="adminBattleTitle" placeholder="Battle Title" value="Ludo Battle"></div>
+        <div class="admin-card"><h3>🎲 Rooms</h3><div id="adminRooms">Loading rooms...</div></div>
+        <div class="admin-card"><h3>📝 KYC</h3><div id="adminKyc">Loading KYC...</div></div>
+        <div class="admin-card"><h3>🎮 Multiplayer Game Control</h3></div>
+        <div class="admin-card"><h3>⚙️ All Settings</h3></div>
+        <div class="admin-card"><h3>📢 Site Notice</h3></div>
 
-  <section id="admin" class="page">
-  <div class="content">
-    <h2>Admin Control Center</h2>
-    <p style="color:#66758b">Authorized admin controls are enforced by Supabase RPC/RLS.</p>
-    <div class="admin-grid">
-      <div class="admin-stat"><strong id="adminUserCount">0</strong><span>Total Users</span></div>
-      <div class="admin-stat"><strong id="adminRoomCount">0</strong><span>Total Rooms</span></div>
-      <div class="admin-stat"><strong id="adminBattleCount">0</strong><span>Total Battles</span></div>
-      <div class="admin-stat"><strong id="adminPendingKyc">0</strong><span>Pending KYC</span></div>
+        <!-- ======================================================== -->
+        <!-- 1. पेंडिंग डिपॉजिट अप्रूवल सेक्शन -->
+        <!-- ======================================================== -->
+        <div class="admin-card" style="margin-top: 20px; border: 2px solid #4c0870; border-radius: 12px; padding: 15px; background: #fff;">
+            <h3 style="color: #4c0870; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">💰 Pending Deposits (UTR Verification)</h3>
+            <button onclick="window.fetchPendingDeposits()" style="background: #2198f4; color: white; border: 0; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-bottom: 12px; font-size: 13px;">🔄 Refresh List</button>
+            
+            <div id="adminDepositList" style="max-height: 250px; overflow-y: auto; font-size: 14px;">
+                <p style="color: #666; text-align: center; padding: 10px;">कोई रिक्वेस्ट पेंडिंग नहीं है...</p>
+            </div>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- 2. किसी भी यूजर के पैसे बढ़ाने / घटाने का मैन्युअल सेक्शन -->
+        <!-- ======================================================== -->
+        <div class="admin-card" style="margin-top: 20px; border: 2px solid #e67e22; border-radius: 12px; padding: 15px; background: #fff;">
+            <h3 style="color: #e67e22; margin-bottom: 10px;">🔧 Manual Wallet Control (पैसे बढ़ाएं / घटाएं)</h3>
+            
+            <div style="margin-bottom: 10px;">
+                <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px;">खिलाड़ी की User ID या Email दर्ज करें:</label>
+                <input type="text" id="targetUserIdentifier" placeholder="Enter User ID or Email" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;">
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px;">अमाउंट (₹):</label>
+                <input type="number" id="manualWalletAmount" placeholder="Enter Amount" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;">
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button type="button" onclick="window.adjustUserWallet('add')" style="flex: 1; background: #28a745; color: white; border: 0; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">➕ पैसे बढ़ाएं (Add)</button>
+                <button type="button" onclick="window.adjustUserWallet('deduct')" style="flex: 1; background: #dc3545; color: white; border: 0; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">➖ पैसे घटाएं (Deduct)</button>
+            </div>
+        </div>
+        <!-- ======================================================== -->
+
     </div>
-    <div class="admin-card"><h3>👥 Users & Wallets</h3><div id="adminUsers">Loading users...</div></div>
-    <div class="admin-card"><h3>⚔️ Battles</h3><div id="adminBattles">Loading battles...</div>
-      <div class="admin-form"><b>Create Battle</b><input id="adminBattleTitle" placeholder="Battle title" value="Ludo Battle"><input id="adminEntry" type="number" min="0.01" step="0.01" placeholder="Entry fee"><input id="adminPrize" type="number" min="0.01" step="0.01" placeholder="Prize"><select id="adminStatus"><option value="open">Open</option><option value="cancelled">Cancelled</option></select><button class="primary-action" onclick="adminCreateBattle()">Create Battle</button></div>
-    </div>
-    <div class="admin-card"><h3>🔐 Rooms</h3><div id="adminRooms">Loading rooms...</div></div>
-    <div class="admin-card"><h3>🛡 KYC</h3><div id="adminKyc">Loading KYC...</div></div>
-    <div class="admin-card"><h3>🎮 Multiplayer Game Control</h3><p style="font-size:12px;color:#b9b0cc">Room/game controls require matching Supabase RPC functions.</p><div class="admin-form"><input id="adminGameRoomId" placeholder="Room ID"><select id="adminGameAction"><option value="start">Start Game</option><option value="pause">Pause Game</option><option value="resume">Resume Game</option><option value="finish">Finish Game</option><option value="cancel">Cancel Game</option></select><button class="primary-action" onclick="adminGameControl()">Apply Game Control</button></div><div id="adminGameMessage"></div></div>
-    <div class="admin-card"><h3>⚙️ All Settings</h3><div class="admin-form"><label>App Maintenance</label><select id="adminMaintenance"><option value="false">OFF</option><option value="true">ON</option></select><label>Classic Minimum Entry</label><input id="adminMinEntry" type="number" min="0" value="50"><label>Max Players Per Room</label><input id="adminMaxPlayers" type="number" min="2" value="4"><label>Notice / Announcement</label><select id="adminAnnouncements"><option value="true">Enabled</option><option value="false">Disabled</option></select><button class="primary-action" onclick="adminSaveSettings()">Save All Settings</button></div><div id="adminSettingsMessage"></div></div>
-    <div class="admin-card"><h3>📢 Site Notice</h3><div class="admin-form"><input id="adminNoticeTitle" placeholder="Notice title"><input id="adminNoticeBody" placeholder="Notice message"><button class="primary-action" onclick="adminSaveNotice()">Save Notice</button></div><div id="adminNotices"></div></div>
-  </div></section>
+</section>
+  
 
 <div class="login-screen" id="loginScreen">
 <div class="login-card"><h1>BAAP <span style="color:#ef3e9c">LUDO</span></h1><p style="text-align:center;color:#77808d" id="loginSubtitle">Login to continue</p>
@@ -875,8 +913,152 @@ window.submitDepositToSupabase = async function() {
         alert("डेमो मोड में रिक्वेस्ट दर्ज हुई। UTR: " + utrValue + " Amount: " + amountValue);
     }
 };
+// ========================================================
+// BAAP LUDO ADMIN CONTROL LOGIC (DEPOSIT & WALLET ADJUST)
+// ========================================================
 
-// आपका पुराना रूम कोड वाला इवेंट लिसनर भी हमने इसी में सुरक्षित मर्ज कर दिया है
+// 1. पेंडिंग डिपॉजिट रिक्वेस्ट डेटाबेस से खींचकर स्क्रीन पर दिखाना
+window.fetchPendingDeposits = async function() {
+    const container = document.getElementById('adminDepositList');
+    if (!container) return;
+    
+    try {
+        const client = window.supabaseClient;
+        if (!client) return;
+
+        const { data: deposits, error } = await client
+            .from('deposit_requests')
+            .select('*')
+            .eq('status', 'Pending')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (!deposits || deposits.length === 0) {
+            container.innerHTML = `<p style="color: #666; text-align: center; padding: 10px;">कोई रिक्वेस्ट पेंडिंग नहीं है...</p>`;
+            return;
+        }
+
+        let html = '<table style="width:100%; border-collapse:collapse; font-size:12px; margin-top:5px;">';
+        html += '<tr style="background:#eee; text-align:left;"><th style="padding:6px;">Email</th><th style="padding:6px;">Amount</th><th style="padding:6px;">UTR No.</th><th style="padding:6px;">Action</th></tr>';
+        
+        deposits.forEach(d => {
+            html += `<tr style="border-bottom:1px solid #ddd;">
+                <td style="padding:6px; word-break:break-all;">${d.user_email || 'N/A'}</td>
+                <td style="padding:6px; font-weight:bold; color:#28a745;">₹${d.amount}</td>
+                <td style="padding:6px; font-family:monospace;">${d.utr_number}</td>
+                <td style="padding:6px; display:flex; gap:4px;">
+                    <button onclick="window.processDeposit(${d.id}, '${d.user_id}', ${d.amount}, 'Approved')" style="background:#28a745; color:white; border:0; padding:4px 8px; border-radius:3px; cursor:pointer; font-weight:bold;">✓</button>
+                    <button onclick="window.processDeposit(${d.id}, '${d.user_id}', ${d.amount}, 'Rejected')" style="background:#dc3545; color:white; border:0; padding:4px 8px; border-radius:3px; cursor:pointer; font-weight:bold;">✗</button>
+                </td>
+            </tr>`;
+        });
+        html += '</table>';
+        container.innerHTML = html;
+
+    } catch (err) {
+        container.innerHTML = `<p style="color:red; text-align:center; padding:10px;">डेटा लोड करने में एरर आया।</p>`;
+    }
+};
+
+// 2. रिक्वेस्ट को Approve या Reject करना और यूजर के वॉलेट में कॉइन प्लस करना
+window.processDeposit = async function(requestId, userId, amount, newStatus) {
+    if (!confirm(`क्या आप इस रिक्वेस्ट को ${newStatus} करना चाहते हैं?`)) return;
+
+    try {
+        const client = window.supabaseClient;
+        if (!client) return;
+
+        if (newStatus === 'Approved') {
+            const { data: profile, error: fetchErr } = await client
+                .from('profiles') 
+                .select('balance')
+                .eq('id', userId)
+                .single();
+
+            if (fetchErr) throw new Error("यूजर प्रोफाइल नहीं मिली: " + fetchErr.message);
+
+            const oldBalance = parseFloat(profile.balance || 0);
+            const updatedBalance = oldBalance + parseFloat(amount);
+
+            const { error: updateWalletErr } = await client
+                .from('profiles')
+                .update({ balance: updatedBalance })
+                .eq('id', userId);
+
+            if (updateWalletErr) throw new Error("वॉलेट अपडेट फेल: " + updateWalletErr.message);
+        }
+
+        const { error: statusErr } = await client
+            .from('deposit_requests')
+            .update({ status: newStatus })
+            .eq('id', requestId);
+
+        if (statusErr) throw statusErr;
+
+        alert(`रिक्वेस्ट सफलतापूर्वक ${newStatus} कर दी गई है!`);
+        window.fetchPendingDeposits(); 
+
+    } catch (err) {
+        alert("त्रुटि: " + err.message + "\n(कृपया सुनिश्चित करें कि आपकी प्रोफाइल/वॉलेट टेबल का नाम 'profiles' और कॉलम 'balance' ही है)");
+    }
+};
+
+// 3. किसी भी यूजर के पैसे मैन्युअली बढ़ाना या घटाना (Manual Wallet Control)
+window.adjustUserWallet = async function(type) {
+    const identifier = document.getElementById('targetUserIdentifier').value.trim();
+    const amountVal = document.getElementById('manualWalletAmount').value;
+
+    if (!identifier || !amountVal || parseFloat(amountVal) <= 0) {
+        alert("❌ कृपया सही यूजर ID/Email और अमाउंट दर्ज करें।");
+        return;
+    }
+
+    if (!confirm(`क्या आप वाकई इस यूजर के वॉलेट में पैसे ${type === 'add' ? 'जोड़ना' : 'घटाना'} चाहते हैं?`)) return;
+
+    try {
+        const client = window.supabaseClient;
+        if (!client) return;
+
+        let query = client.from('profiles').select('id, balance');
+        if (identifier.includes('@')) {
+            query = query.eq('email', identifier);
+        } else {
+            query = query.eq('id', identifier);
+        }
+
+        const { data: userProfile, error: findErr } = await query.single();
+        if (findErr || !userProfile) {
+            alert("❌ यह यूजर प्रोफाइल डेटाबेस में नहीं मिली! कृपया सही ID या Email डालें।");
+            return;
+        }
+
+        const currentBalance = parseFloat(userProfile.balance || 0);
+        let finalBalance = currentBalance;
+
+        if (type === 'add') {
+            finalBalance = currentBalance + parseFloat(amountVal);
+        } else {
+            finalBalance = currentBalance - parseFloat(amountVal);
+            if (finalBalance < 0) finalBalance = 0; 
+        }
+
+        const { error: updateErr } = await client
+            .from('profiles')
+            .update({ balance: finalBalance })
+            .eq('id', userProfile.id);
+
+        if (updateErr) throw updateErr;
+
+        alert(`✅ सफलतापूर्वक बैलेंस अपडेट हो गया! नया बैलेंस: ₹${finalBalance}`);
+        document.getElementById('manualWalletAmount').value = '';
+        
+    } catch (err) {
+        alert("बैलेंस अपडेट करने में एरर आया: " + err.message);
+    }
+};
+
+// पुराना आवश्यक रूम कोड वाला इवेंट लिसनर जिसे हमने सुरक्षित मर्ज कर दिया है
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('*').forEach(function(el) {
         if ((el.textContent || '').trim() === 'Room Code' && el.children.length === 0) {
@@ -891,27 +1073,10 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     });
+    
+    // एडमिन पेज लोड होते ही ऑटोमैटिक पेंडिंग लिस्ट लोड करने के लिए
+    setTimeout(() => { if(window.fetchPendingDeposits) window.fetchPendingDeposits(); }, 2000);
 });
 </script>
 </body>
 </html>
-
-
-
-<script>
-document.addEventListener('DOMContentLoaded', function(){
-  document.querySelectorAll('*').forEach(function(el){
-    if((el.textContent||'').trim()==='Room Code' && el.children.length===0){
-      el.style.cursor='pointer';
-      el.addEventListener('click', function(){
-        if(typeof showPage==='function') showPage('rooms');
-        else if(typeof openPage==='function') openPage('rooms');
-        else {
-          document.querySelectorAll('.page').forEach(function(p){p.style.display='none';});
-          var r=document.getElementById('rooms'); if(r) r.style.display='block';
-        }
-      });
-    }
-  });
-});
-</script>
