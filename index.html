@@ -373,23 +373,44 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
   <div id="roomLobbyStatus" class="room-result">Waiting for player...</div>
   <button class="btn blue" onclick="copyRoomCode()">Copy Code</button>
 </div>
-<div id="matchStatusBox" class="room-box" style="margin-top:14px;text-align:center">
-  <h3 style="margin:0 0 12px;color:#fff">Match Status</h3>
-  <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-    <button id="matchWonBtn" type="button"
-      style="min-width:120px;padding:13px 18px;border:0;border-radius:28px;background:#315a87;color:#fff;font-size:16px;font-weight:800;box-shadow:0 4px 12px rgba(0,0,0,.25)">
-      I Won
-    </button>
-    <button id="matchLostBtn" type="button"
-      style="min-width:120px;padding:13px 18px;border:0;border-radius:28px;background:#f1c232;color:#fff;font-size:16px;font-weight:800;box-shadow:0 4px 12px rgba(0,0,0,.25)">
-      I Lost
-    </button>
-    <button id="matchCancelBtn" type="button"
-      style="min-width:120px;padding:13px 18px;border:0;border-radius:28px;background:#e94b45;color:#fff;font-size:16px;font-weight:800;box-shadow:0 4px 12px rgba(0,0,0,.25)">
-      Cancel
-    </button>
-  </div>
-  <div id="matchStatusResult" class="room-result" style="margin-top:12px"></div>
+<div id="matchStatusBox" class="room-box" style="margin-top: 15px; text-align: center; border: 2px dashed #ff7284; border-radius: 15px; padding: 20px; background: #fff5f6; font-family: sans-serif; color: #333;">
+    <h3 style="color: #ff7284; margin-bottom: 5px; margin-top: 0;">🎲 Ludo Match Result</h3>
+    <p style="font-size: 12px; color: #666; margin-top: 0;">मैच का सही स्टेटस चुनें। गलत रिजल्ट देने पर आईडी ब्लॉक होगी।</p>
+    
+    <!-- 1. रूम कोड न जुड़ने पर टेबल कैंसिल का बटन -->
+    <div style="margin-bottom: 20px; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #ffccd3;">
+        <p style="font-size: 11px; margin: 0 0 8px 0; color: #d32f2f; font-weight: bold;">⚠️ यदि दूसरा खिलाड़ी रूम कोड नहीं दे रहा या जॉइन नहीं कर रहा:</p>
+        <button type="button" style="width: 100%; background: #dc3545; color: white; border: 0; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px;" onclick="window.cancelLudoTable()">
+            🛑 Room Code Not Joined (Cancel Table)
+        </button>
+    </div>
+
+    <hr style="border: 0; border-top: 1px solid #ffccd3; margin: 15px 0;">
+
+    <!-- 2. विनर और लूज़र का मुख्य सेक्शन -->
+    <div style="display: flex; flex-direction: column; gap: 15px;">
+        
+        <!-- हारने वाले के लिए सीधा बटन (नो स्क्रीनशॉट नीडेड) -->
+        <div style="background: #eee; padding: 12px; border-radius: 8px; text-align: left;">
+            <p style="font-size: 12px; font-weight: bold; margin: 0 0 8px 0; color: #4c0870;">❌ यदि आप मैच हार गए हैं:</p>
+            <button type="button" style="width: 100%; background: #4c0870; color: white; border: 0; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer;" onclick="window.confirmLudoLoss()">
+                I Lost (कन्फर्म करें कि मैं हार गया)
+            </button>
+        </div>
+
+        <!-- जीतने वाले के लिए स्क्रीनशॉट अपलोड सेक्शन -->
+        <div style="background: #e6ffe9; padding: 15px; border-radius: 8px; text-align: left; border: 1px solid #9ce4a4;">
+            <p style="font-size: 12px; font-weight: bold; margin: 0 0 5px 0; color: #28a36d;">🏆 यदि आप मैच जीत गए हैं (स्क्रीनशॉट जरूरी):</p>
+            <p style="font-size: 11px; color: #555; margin: 0 0 8px 0;">लूडो किंग का विनिंग स्क्रीनशॉट अपलोड करें:</p>
+            
+            <input type="file" id="winnerScreenshotFile" accept="image/*" style="font-size: 12px; margin-bottom: 10px; width: 100%;">
+            
+            <button type="button" style="width: 100%; background: #28a36d; color: white; border: 0; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer;" onclick="window.submitLudoWinWithScreenshot()">
+                Submit Winner Screenshot
+            </button>
+        </div>
+
+    </div>
 </div>
 
 </div></section>
