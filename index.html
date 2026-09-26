@@ -99,7 +99,8 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
 
 
 <div class="quick-grid">
-  <button class="quick-btn" onclick="showPage('wallet')"><span class="ico">💰</span>Wallet</button>
+  <button class="btn green" onclick="openWithdrawFormPanel()" style="width: 100%; background: #28a745; font-weight: bold; border-radius: 28px;">📂 Withdraw</button>
+  
   <button class="quick-btn" onclick="showPage('history')"><span class="ico">🧾</span>History</button>
   <button class="quick-btn" onclick="showPage('notifications')"><span class="ico">🔔</span>Alerts</button>
   <button class="quick-btn" onclick="showPage('settings')"><span class="ico">⚙️</span>Settings</button>
