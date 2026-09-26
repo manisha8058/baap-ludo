@@ -171,9 +171,11 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
     <h2 style="margin:18px 0 3px">Choose Amount To Add</h2>
     <div style="font-size:17px;letter-spacing:1px;margin-bottom:8px">ENTER AMOUNT</div>
     <div style="font-size:22px;margin-bottom:5px">₹</div>
+    
+    <!-- इनपुट बॉक्स जिसकी आईडी बिल्कुल सही है -->
     <input id="addCashAmount" type="number" min="100" max="20000" value="100" style="width:100%;box-sizing:border-box;padding:12px;font-size:18px;border-radius:8px;border:1px solid #ccc;">
 
-    <!-- यहाँ क्लिक करते ही बिना किसी एरर के सीधा क्यूआर कोड वाला बॉक्स खुलेगा -->
+    <!-- यह बटन बिना किसी एरर के सीधा openQrPaymentScreen वाले कोड को चलाएगा -->
     <button type="button" style="width:100%; background:linear-gradient(#69d9ff,#2198f4); color:#fff; border:0; border-radius:28px; padding:13px 24px; font-weight:800; font-size:16px; cursor:pointer; margin-top:15px;" onclick="openQrPaymentScreen()">Next →</button>
 
     <!-- नया QR कोड और मैन्युअल पेमेंट यूआई -->
@@ -181,7 +183,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
         <h3 style="color: #4c0870; margin-bottom: 5px;">Scan QR & Pay</h3>
         <p style="font-size: 13px; margin-top: 0; color: #555;">अमाउंट: <b style="color: #f65ca5; font-size: 18px;">₹<span id="displayAmountText">100</span></b></p>
         
-        <!-- आपका PhonePe QR Code जो गिटहब में qr.png नाम से सेव है -->
+        <!-- आपका PhonePe QR Code -->
         <img src="qr.png" alt="PhonePe QR" style="width: 200px; height: 200px; margin: 10px auto; display: block;">
         
         <p style="font-size: 12px; font-weight: bold; margin-bottom: 8px;">या सीधे पेमेंट ऐप खोलने के लिए नीचे क्लिक करें:</p>
@@ -197,6 +199,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
         <button type="button" style="width: 100%; background: #20d85c; color: #fff; border: 0; border-radius: 8px; padding: 13px 24px; font-weight: 800; font-size: 16px; cursor: pointer;" onclick="submitDepositToSupabase()">Submit Request</button>
     </div>
 </div></section>
+
 
 <section id="redeem" class="page"><div class="content">
 <h2 style="text-align:center;margin:5px 0 18px">Redeem Your Refer Balance</h2>
