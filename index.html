@@ -7,14 +7,20 @@
 <script src="https://jsdelivr.net"></script>
 <script>
 // ========================================================
-// 🔑 आपकी असली और लाइव Supabase क्रेडेंशियल्स (चाबियाँ सबसे ऊपर फिक्स)
+// 🔑 आपकी असली और लाइव Supabase क्रेडेंशियल्स (100% फिक्स्ड)
 // ========================================================
 const SUPABASE_URL = "https://supabase.co"; 
 
-// ⚠️ यहाँ कोट्स "" के बीच में वह नई जेनरेट की हुई Secret Key पेस्ट कर दें जो आपने अभी कॉपी की है:
-const SUPABASE_SECRET_KEY = "sb_secret_tq33BONLcd-Uq3sxwXS6cA_IGLCh7-Y";
+// ⚠️ यहाँ कोट्स "" के बीच में अपनी वही नई जेनरेट की हुई Secret Key पेस्ट कर दें जो आपने अभी Supabase से कॉपी की थी:
+const SUPABASE_SECRET_KEY = "sb_secret_F4DmKAlfJzK20jwAP_rbag_UgLqldSi";
 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_SECRET_KEY);
+// सुपर एडमिन कनेक्शन इनिशियलाइजेशन (ताकि खिलाड़ी का डेटा बिना रुके तुरंत रजिस्टर हो जाए)
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_SECRET_KEY, {
+    auth: {
+        autoRefreshToken: false,
+        persistSession: false
+    }
+});
 const getSupabaseClient = () => { return supabase; };
 </script>
 <style>
@@ -49,7 +55,7 @@ const getSupabaseClient = () => { return supabase; };
         <button class="pill" onclick="window.transferReferToMainWallet()" style="background:linear-gradient(#ff85a2,#f65ca5); border:1px solid #ffb0d8; box-shadow:0 0 10px #f65ca5aa;">🎁 ₹<span id="mainReferBalanceText">0.00</span></button>
     </header>
 
-    <!-- 2. मन्नत लूडो स्टाइल स्पेशल एडमिन नोटिस बोर्ड -->
+    <!-- 2. स्पेशल एडमिन नोटिस बोर्ड -->
     <div id="mannatNoticeBoardWrapper" class="content" style="display:none; padding:12px 20px 0;">
         <div style="background: linear-gradient(135deg, #1a0628, #3b0b54); border: 2px solid #ff7284; border-radius: 12px; padding: 12px 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-family: sans-serif;">
             <div style="display: flex; align-items: flex-start; gap: 10px;">
@@ -59,7 +65,7 @@ const getSupabaseClient = () => { return supabase; };
         </div>
     </div>
 
-    <!-- 3. मोबाइल नंबर आधारित ऑथेंटिकेशन स्क्रीन (BAAP LUDO) -->
+    <!-- 3. ऑथेंटिकेशन स्क्रीन -->
     <div id="loginScreen" class="page active">
         <div class="login-screen">
             <!-- लॉगिन बॉक्स -->
@@ -106,6 +112,4 @@ const getSupabaseClient = () => { return supabase; };
                 <div class="value">₹0.00</div>
                 <div style="display:flex; gap:10px;">
                     <button type="button" class="btn green" style="flex:1;" onclick="window.showPage('addcash')">Deposit</button>
-                    <button type="button" class="btn blue" style="flex:1;" onclick="window.showPage('redeem')">Withdraw</button>
-                </div>
-            </div>
+                    
