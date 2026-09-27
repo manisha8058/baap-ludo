@@ -142,12 +142,152 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
 </div>
 
 </main>
-<section id="history" class="page"><div class="content"><h2>Battle History</h2>
-<div class="history-row"><span>Classic Battle<br><small>Today • 10:30 AM</small></span><b>+₹380</b></div>
-<div class="history-row"><span>Starter Room<br><small>Yesterday • 8:10 PM</small></span><b>-₹100</b></div>
-<div class="history-row"><span>Play Match<br><small>Yesterday • 6:20 PM</small></span><b>+₹95</b></div>
-<p style="color:#777;font-size:12px"> records only. Play records only. No real-money deposit, wagering, or withdrawal is connected.</p></div></section>
->
+<!-- ======================================================== -->
+<!-- 100% सेम टू सेम मन्नत लूडो स्टाइल 3-इन-1 हिस्ट्री स्क्रीन -->
+<!-- ======================================================== -->
+<section id="history" class="page">
+    <div class="content" style="font-family: sans-serif; max-width: 665px; margin: auto; padding: 15px;">
+        <h2 style="text-align: center; margin-bottom: 15px; color: #1b0828; font-weight: bold; font-size: 24px;">History</h2>
+        
+        <!-- मन्नत लूडो स्टाइल थ्री-टैब बटन्स -->
+        <div style="display: flex; background: #e3edff; padding: 5px; border-radius: 30px; justify-content: space-around; margin-bottom: 20px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);">
+            <button type="button" id="tabBtnGame" onclick="window.switchMannatHistoryTab('game')" style="flex: 1; border: 0; padding: 10px; border-radius: 25px; font-weight: bold; font-size: 14px; cursor: pointer; background: #4c0870; color: white;">Game</button>
+            <button type="button" id="tabBtnTxn" onclick="window.switchMannatHistoryTab('txn')" style="flex: 1; border: 0; padding: 10px; border-radius: 25px; font-weight: bold; font-size: 14px; cursor: pointer; background: none; color: #4c0870;">Transaction</button>
+            <button type="button" id="tabBtnRef" onclick="window.switchMannatHistoryTab('ref')" style="flex: 1; border: 0; padding: 10px; border-radius: 25px; font-weight: bold; font-size: 14px; cursor: pointer; background: none; color: #4c0870;">Referral</button>
+        </div>
+
+        <!-- 1. गेम हिस्ट्री लिस्ट कंटेनर -->
+        <div id="mannatHistoryGameList" style="display: block;">
+            <p style="text-align: center; color: #888; font-size: 13px; padding: 20px;">गेम इतिहास लोड हो रहा है...</p>
+        </div>
+
+        <!-- 2. ट्रांजेक्शन हिस्ट्री लिस्ट कंटेनर -->
+        <div id="mannatHistoryTxnList" style="display: none;">
+            <p style="text-align: center; color: #888; font-size: 13px; padding: 20px;">लेनदेन इतिहास लोड हो रहा है...</p>
+        </div>
+
+        <!-- 3. रेफरल हिस्ट्री लिस्ट कंटेनर -->
+        <div id="mannatHistoryRefList" style="display: none;">
+            <p style="text-align: center; color: #888; font-size: 13px; padding: 20px;">रेफरल इतिहास लोड हो रहा है...</p>
+        </div>
+    </div>
+</section>
+
+<script>
+// ========================================================
+// 🔄 मन्नत लूडो स्टाइल 3-इन-1 हिस्ट्री लाइव स्विचर और लोड लॉजिक
+// ========================================================
+window.switchMannatHistoryTab = function(tabName) {
+    const btnGame = document.getElementById('tabBtnGame');
+    const btnTxn = document.getElementById('tabBtnTxn');
+    const btnRef = document.getElementById('tabBtnRef');
+    
+    const listGame = document.getElementById('mannatHistoryGameList');
+    const listTxn = document.getElementById('mannatHistoryTxnList');
+    const listRef = document.getElementById('mannatHistoryRefList');
+    
+    if(!btnGame || !listGame) return;
+
+    [btnGame, btnTxn, btnRef].forEach(b => { if(b){ b.style.background = 'none'; b.style.color = '#4c0870'; } });
+    [listGame, listTxn, listRef].forEach(l => { if(l) l.style.display = 'none'; });
+
+    if (tabName === 'game') {
+        btnGame.style.background = '#4c0870'; btnGame.style.color = 'white'; listGame.style.display = 'block';
+        window.loadMannatGameHistory();
+    } else if (tabName === 'txn') {
+        btnTxn.style.background = '#4c0870'; btnTxn.style.color = 'white'; listTxn.style.display = 'block';
+        window.loadMannatTxnHistory();
+    } else if (tabName === 'ref') {
+        btnRef.style.background = '#4c0870'; btnRef.style.color = 'white'; listRef.style.display = 'block';
+        window.loadMannatRefHistory();
+    }
+};
+
+window.loadMannatGameHistory = async function() {
+    const box = document.getElementById('mannatHistoryGameList'); if(!box) return;
+    const client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null); if(!client) return;
+    try {
+        const { data: { user } } = await client.auth.getUser(); if(!user) return;
+        const { data: matches } = await client.from('battles').select('*').or(`creator_id.eq.${user.id},joiner_id.eq.${user.id}`).in('status',['Completed','Cancelled']).order('created_at',{ascending:false});
+        if(!matches || matches.length === 0){ box.innerHTML = "<p style='text-align:center;color:#999;font-size:13px;padding:20px;'>अभी कोई मैच रिकॉर्ड नहीं है।</p>"; return; }
+        
+        let html = '';
+        matches.forEach(m => {
+            const isWinner = m.winner_id === user.id;
+            const isCancelled = m.status === 'Cancelled';
+            let statusText = isWinner ? 'Victory' : 'Defeat';
+            let statusColor = isWinner ? '#13b982' : '#dc3545';
+            let profitText = isWinner ? `<div style="color:#13b982;font-weight:bold;font-size:11px;margin-top:5px;">Profit: +₹${m.winning_prize - m.entry_fee}</div>` : '';
+            if(isCancelled){ statusText = 'Cancelled'; statusColor = '#718096'; profitText = ''; }
+            const d = new Date(m.created_at).toLocaleDateString('en-IN') + ' ' + new Date(m.created_at).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+            
+            html += `
+                <div style="background:#fff; border:1px solid #e2e8f0; border-radius:15px; padding:15px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 3px 6px rgba(0,0,0,0.02); border-left: 5px solid ${statusColor};">
+                    <div>
+                        <small style="color:#718096;font-size:11px;">📅 ${d}</small>
+                        <div style="color:${statusColor}; font-weight:bold; font-size:16px; margin:4px 0;">${statusText}</div>
+                        <small style="color:#4a5568;font-size:12px;font-family:monospace;">Room: ${m.room_code || 'N/A'}</small>
+                    </div>
+                    <div style="text-align:right;">
+                        <small style="color:#718096;font-size:11px;">Stake</small>
+                        <div style="font-size:16px;font-weight:bold;color:#2d3748;">₹${m.entry_fee}</div>
+                        ${profitText}
+                    </div>
+                </div>`;
+        });
+        box.innerHTML = html;
+    } catch(e){ box.innerHTML = "<p>लोड एरर</p>"; }
+};
+
+window.loadMannatTxnHistory = async function() {
+    const box = document.getElementById('mannatHistoryTxnList'); if(!box) return;
+    const client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null); if(!client) return;
+    try {
+        const { data: { user } } = await client.auth.getUser(); if(!user) return;
+        const { data: deps } = await client.from('deposit_requests').select('created_at, amount, status, utr_number').eq('user_id',user.id);
+        const { data: withs } = await client.from('withdraw_requests').select('created_at, amount, status, upi_id').eq('user_id',user.id);
+        
+        let txns = [];
+        if(deps) deps.forEach(d => txns.push({ date: new Date(d.created_at), type: 'DEPOSIT', amt: d.amount, status: d.status, info: 'UTR: '+d.utr_number }));
+        if(withs) withs.forEach(w => txns.push({ date: new Date(w.created_at), type: 'WITHDRAW', amt: w.amount, status: w.status, info: 'UPI: '+w.upi_id }));
+        txns.sort((a,b) => b.date - a.date);
+        if(txns.length === 0){ box.innerHTML = "<p style='text-align:center;color:#999;font-size:13px;padding:20px;'>कोई ट्रांजेक्शन इतिहास नहीं है।</p>"; return; }
+        
+        let html = '';
+        txns.forEach(t => {
+            let sBg = t.status === 'Approved' ? '#28a745' : (t.status === 'Pending' ? '#ffc107' : '#dc3545');
+            let sign = t.type === 'DEPOSIT' ? '+' : '-';
+            let color = t.type === 'DEPOSIT' ? '#13b982' : '#dc3545';
+            const fd = t.date.toLocaleDateString('en-IN') + ' ' + t.date.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+            
+            html += `
+                <div style="background:#fff; border:1px solid #e2e8f0; border-radius:15px; padding:15px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 3px 6px rgba(0,0,0,0.02);">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <span style="font-size:24px;">${t.type==='DEPOSIT'?'📥':'📤'}</span>
+                        <div>
+                            <span style="background:${sBg}; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:bold;">${t.status.toUpperCase()}</span>
+                            <div style="font-size:11px; color:#718096; margin-top:4px;">${fd}</div>
+                            <small style="color:#4a5568;font-size:11px;">${t.info}</small>
+                        </div>
+                    </div>
+                    <div style="font-size:18px; font-weight:bold; color:${color};">${sign} ₹${t.amt}</div>
+                </div>`;
+        });
+        box.innerHTML = html;
+    } catch(e){ box.innerHTML = "<p>लोड एरर</p>"; }
+};
+
+window.loadMannatRefHistory = async function() {
+    const box = document.getElementById('mannatHistoryRefList'); if(!box) return;
+    const client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null); if(!client) return;
+    try {
+        const { data: { user } } = await client.auth.getUser(); if(!user) return;
+        const { data: refs } = await client.from('refer_history').select('*').eq('user_id',user.id).order('created_at',{ascending:false});
+        if(!refs || refs.length === 0){ box.innerHTML = "<p style='text-align:center;color:#999;font-size:13px;padding:20px;'>अभी कोई रेफ़रल कमाई इतिहास नहीं है।</p>"; return; }
+        
+        let html = '';
+        refs.forEach(r => {
+
 <section id="admin" class="page">
     <div class="content" style="font-family: sans-serif; color: #333; padding: 10px;">
         <h2 style="color: #4c0870; margin-bottom: 5px;">🛠️ Admin Control Center</h2>
