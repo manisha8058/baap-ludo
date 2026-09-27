@@ -316,8 +316,53 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
             </div>
             
             <p style="color: #666; font-size: 11px; margin-bottom: 15px;">⚠️ कृपया ध्यान दें: गलत UPI ID डालने पर पैसे ट्रांसफर नहीं होंगे।</p>
+>
+    <!-- यह बटन बिना किसी बाहरी फंक्शन के सीधे आपके Supabase डेटाबेस में विड्रॉल रिक्वेस्ट भेज देगा -->
+<button type="button" style="width: 100%; background: #dc3545; color: #fff; border: 0; border-radius: 8px; padding: 13px 24px; font-weight: 800; font-size: 16px; cursor: pointer;" 
+        onclick="
+        (async () => {
+            var amountVal = document.getElementById('userWithdrawAmountInput') ? document.getElementById('userWithdrawAmountInput').value : 0;
+            var upiVal = document.getElementById('userWithdrawUpiInput') ? document.getElementById('userWithdrawUpiInput').value.trim() : '';
+            
+            if (parseFloat(amountVal) < 200) { 
+                alert('❌ कम से कम ₹200 का विड्रॉल करना आवश्यक है। कृपया ₹200 या उससे अधिक अमाउंट डालें।'); 
+                return; 
+            }
+            if (!upiVal || !upiVal.includes('@')) { 
+                alert('❌ कृपया वैध UPI ID दर्ज करें (जैसे: example@ybl)।'); 
+                return; 
+            }
+            
+            try {
+                var client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
+                if (!client) { alert('❌ डेटाबेस कनेक्शन एरर! Supabase कनेक्ट नहीं है।'); return; }
+                
+                var { data: authRes } = await client.auth.getUser();
+                var user = authRes ? authRes.user : null;
+                if (!user) { alert('❌ कृपया पहले अपनी आईडी लॉगिन करें!'); return; }
+                
+                alert('🔄 विड्रॉल रिक्वेस्ट सबमिट हो रही है, कृपया प्रतीक्षा करें...');
+                
+                var { error: insertErr } = await client.from('withdraw_requests').insert([
+                    { user_id: user.id, user_email: user.email, amount: parseFloat(amountVal), upi_id: upiVal, status: 'Pending' }
+                ]);
+                
+                if (insertErr) {
+                    alert('⚠️ विड्रॉल फेल हुआ: ' + insertErr.message);
+                } else {
+                    alert('🎉 आपकी विड्रॉल रिक्वेस्ट सफलतापूर्वक लाइव दर्ज हो गई है! एडमिन 5-10 मिनट में वेरिफिकेशन करके पैसे ट्रांसफर कर देंगे।');
+                    if(document.getElementById('userWithdrawUpiInput')) document.getElementById('userWithdrawUpiInput').value = '';
+                    if(document.getElementById('userWithdrawFormSection')) document.getElementById('userWithdrawFormSection').style.display = 'none';
+                    window.location.reload();
+                }
+            } catch (err) {
+                alert('सिस्टम एरर: ' + err.message);
+            }
+        })();
+        ">
+        Submit Withdraw Request
+</button>
 
-            <button type="button" style="width: 100%; background: #dc3545; color: #fff; border: 0; border-radius: 8px; padding: 13px 24px; font-weight: 800; font-size: 16px; cursor: pointer;" onclick="window.submitWithdrawalToSupabase()">Submit Withdraw Request</button>
         </div>
     </div>
 </section>
