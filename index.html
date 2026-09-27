@@ -1162,11 +1162,12 @@ window.submitLudoWinWithScreenshot = async function() {
 // ========================================================
 
 // 1. एडमिन मैन्युअल वॉलेट कंट्रोल (LIVE ADD / DEDUCT MONEY)
+// 1. एडमिन मैन्युअल वॉलेट कंट्रोल (LIVE ADD / DEDUCT MONEY)
 window.adjustUserWallet = async function(type) {
     const identifier = document.getElementById('targetUserIdentifier').value.trim();
     const amountVal = document.getElementById('manualWalletAmount').value;
     if (!identifier || !amountVal || parseFloat(amountVal) <= 0) { alert("❌ कृपया सही यूजर ID/Email और अमाउंट भरें।"); return; }
-    const client = getSupabaseClient(); if (!client) return;
+    const client = getSupabaseClient(); if (!client) { alert("❌ Supabase कनेक्ट नहीं है।"); return; }
     if (!confirm(`क्या आप वाकई इस यूजर के वॉलेट में पैसे ${type === 'add' ? 'जोड़ना' : 'घटाना'} चाहते हैं?`)) return;
     try {
         let targetId = identifier; let finalTable = 'profiles'; let currentBalance = 0; let found = false;
@@ -1183,8 +1184,93 @@ window.adjustUserWallet = async function(type) {
         await client.from(finalTable).update({ balance: nextBalance }).eq('id', targetId);
         alert(`✅ [${finalTable}] में बैलेंस सफलतापूर्वक लाइव अपडेट हुआ! नया बैलेंस: ₹${nextBalance}`);
         document.getElementById('manualWalletAmount').value = '';
-    } catch(e) { alert("याद रखें: " + e.message); }
+        window.location.reload();
+    } catch(e) { alert("एरर: " + e.message); }
 };
+
+// 2. एडमिन डिपॉजिट रिक्वेस्ट लोड और प्रोसेस करना
+window.fetchAdminDeposits = async function() {
+    const container = document.getElementById('adminDepositList'); if (!container) return;
+    const client = getSupabaseClient(); if (!client) return;
+    try {
+        const { data: deposits } = await client.from('deposit_requests').select('*').eq('status', 'Pending').order('created_at', { ascending: false });
+        if (!deposits || deposits.length === 0) { container.innerHTML = "<p style='text-align:center;color:#666;'>कोई डिपॉजिट पेंडिंग नहीं है...</p>"; return; }
+        let html = '<table style="width:100%;border-collapse:collapse;margin-top:5px;font-size:12px;"><tr style="background:#f4f4f4;text-align:left;"><th style="padding:6px;">खिलाड़ी</th><th style="padding:6px;">अमाउंट</th><th style="padding:6px;">UTR</th><th style="padding:6px;">एक्शन</th></tr>';
+        deposits.forEach(d => {
+            html += `<tr style="border-bottom:1px solid #eee;"><td style="padding:6px;max-width:100px;word-break:break-all;">${d.user_email||'N/A'}</td><td style="padding:6px;font-weight:bold;color:green;">₹${d.amount}</td><td style="padding:6px;font-family:monospace;">${d.utr_number}</td><td style="padding:6px;display:flex;gap:4px;"><button onclick="window.processAdminDeposit(${d.id},'${d.user_id}',${d.amount},'Approved')" style="background:#28a745;color:white;border:0;padding:4px 8px;border-radius:4px;cursor:pointer;font-weight:bold;">✓</button> <button onclick="window.processAdminDeposit(${d.id},'${d.user_id}',${d.amount},'Rejected')" style="background:#dc3545;color:white;border:0;padding:4px 8px;border-radius:4px;cursor:pointer;font-weight:bold;">✗</button></td></tr>`;
+        });
+        container.innerHTML = html + '</table>';
+    } catch(e) { container.innerHTML = "<p>डेटा लोड एरर</p>"; }
+};
+
+window.processAdminDeposit = async function(reqId, userId, amount, status) {
+    if (!confirm(`क्या आप इस डिपॉजिट को ${status} करना चाहते हैं?`)) return;
+    const client = getSupabaseClient(); if (!client) return;
+    try {
+        if (status === 'Approved') {
+            const { data: p } = await client.from('profiles').select('balance').eq('id', userId).single();
+            await client.from('profiles').update({ balance: parseFloat(p.balance || 0) + parseFloat(amount) }).eq('id', userId);
+        }
+        await client.from('deposit_requests').update({ status: status }).eq('id', reqId);
+        alert(`डिपॉजिट रिक्वेस्ट ${status}!`); window.fetchAdminDeposits(); window.location.reload();
+    } catch(e) { alert(e.message); }
+};
+
+// 3. एडमिन विड्रॉल रिक्वेस्ट लोड और प्रोसेस करना
+window.fetchAdminWithdrawals = async function() {
+    const container = document.getElementById('adminWithdrawList'); if (!container) return;
+    const client = getSupabaseClient(); if (!client) return;
+    try {
+        const { data: withdraws } = await client.from('withdraw_requests').select('*').eq('status', 'Pending').order('created_at', { ascending: false });
+        if (!withdraws || withdraws.length === 0) { container.innerHTML = "<p style='text-align:center;color:#666;'>कोई विड्रॉल रिक्वेस्ट पेंडिंग नहीं है...</p>"; return; }
+        let html = '<table style="width:100%;border-collapse:collapse;margin-top:5px;font-size:12px;"><tr style="background:#f4f4f4;text-align:left;"><th style="padding:6px;">खिलाड़ी</th><th style="padding:6px;">अमाउंट</th><th style="padding:6px;">UPI ID</th><th style="padding:6px;">एक्शन</th></tr>';
+        withdraws.forEach(w => {
+            html += `<tr style="border-bottom:1px solid #eee;"><td style="padding:6px;max-width:100px;word-break:break-all;">${w.user_email||'N/A'}</td><td style="padding:6px;font-weight:bold;color:red;">₹${w.amount}</td><td style="padding:6px;font-family:monospace;">${w.upi_id}</td><td style="padding:6px;display:flex;gap:4px;"><button onclick="window.processAdminWithdraw(${w.id},'${w.user_id}',${w.amount},'Approved')" style="background:#28a745;color:white;border:0;padding:4px 8px;border-radius:4px;cursor:pointer;font-weight:bold;">✓</button> <button onclick="window.processAdminWithdraw(${w.id},'${w.user_id}',${w.amount},'Rejected')" style="background:#dc3545;color:white;border:0;padding:4px 8px;border-radius:4px;cursor:pointer;font-weight:bold;">✗</button></td></tr>`;
+        });
+        container.innerHTML = html + '</table>';
+    } catch(e) { container.innerHTML = "<p>डेटा लोड एरर</p>"; }
+};
+
+window.processAdminWithdraw = async function(reqId, userId, amount, status) {
+    if (!confirm(`क्या आप इस विड्रॉल को ${status} करना चाहते हैं?`)) return;
+    const client = getSupabaseClient(); if (!client) return;
+    try {
+        if (status === 'Rejected') {
+            const { data: p } = await client.from('profiles').select('balance').eq('id', userId).single();
+            await client.from('profiles').update({ balance: parseFloat(p.balance || 0) + parseFloat(amount) }).eq('id', userId);
+        }
+        await client.from('withdraw_requests').update({ status: status }).eq('id', reqId);
+        alert(`विड्रॉल रिक्वेस्ट ${status}!`); window.fetchAdminWithdrawals(); window.location.reload();
+    } catch(e) { alert(e.message); }
+};
+
+// 4. एडमिन लाइव मैच मैनेजमेंट (विजेता तय करना)
+window.fetchAdminLiveMatches = async function() {
+    const container = document.getElementById('adminLiveMatchesList'); if (!container) return;
+    const client = getSupabaseClient(); if (!client) return;
+    try {
+        const { data: matches } = await client.from('battles').select('*').eq('status', 'Running').order('created_at', { ascending: false });
+        if (!matches || matches.length === 0) { container.innerHTML = "<p style='text-align:center;color:#666;'>अभी कोई मैच लाइव नहीं चल रहा है...</p>"; return; }
+        let html = '<table style="width:100%;border-collapse:collapse;margin-top:5px;font-size:12px;"><tr style="background:#f4f4f4;text-align:left;"><th style="padding:6px;">मैच राशि</th><th style="padding:6px;">खिलाड़ी</th><th style="padding:6px;">कोड</th><th style="padding:6px;">विजेता तय करें</th></tr>';
+        matches.forEach(m => {
+            html += `<tr style="border-bottom:1px solid #eee;"><td style="padding:6px;font-weight:bold;">₹${m.entry_fee}</td><td style="padding:6px;font-size:11px;">Cr:${m.creator_email?.split('@')}<br>Jo:${m.joiner_email?.split('@')}</td><td style="padding:6px;font-family:monospace;">${m.room_code||'No'}</td><td style="padding:6px;display:flex;flex-direction:column;gap:4px;"><button onclick="window.resolveMatch(${m.id},'${m.creator_id}',${m.winning_prize},'Completed')" style="background:#28a745;color:white;border:0;padding:4px;border-radius:3px;font-size:10px;cursor:pointer;font-weight:bold;">Cr जिताएं</button> <button onclick="window.resolveMatch(${m.id},'${m.joiner_id}',${m.winning_prize},'Completed')" style="background:#a74fff;color:white;border:0;padding:4px;border-radius:3px;font-size:10px;cursor:pointer;font-weight:bold;">Jo जिताएं</button> <button onclick="window.resolveMatch(${m.id},null,${m.entry_fee},'Cancelled')" style="background:#718096;color:white;border:0;padding:4px;border-radius:3px;font-size:10px;cursor:pointer;font-weight:bold;">रद्द करें</button></td></tr>`;
+        });
+        container.innerHTML = html + '</table>';
+    } catch(e) {}
+};
+
+window.resolveMatch = async function(matchId, winnerId, prizeAmount, finalStatus) {
+    if (!confirm("क्या आप वाकई इस मैच का परिणाम दर्ज करना चाहते हैं?")) return;
+    const client = getSupabaseClient(); if (!client) return;
+    try {
+        if (finalStatus === 'Completed' && winnerId) {
+            const { data: p } = await client.from('profiles').select('balance').eq('id', winnerId).single();
+            await client.from('profiles').update({ balance: parseFloat(p.balance || 0) + parseFloat(prizeAmount) }).eq('id', winnerId);
+        } else if (finalStatus === 'Cancelled') {
+            const { data: m } = await client.from('battles').select('creator_id, joiner_id, entry_fee').eq('id', matchId).single();
+            if (m.creator_id) {
+                const { data: p1 } = await client.from('profiles').select('balance').eq('id', m.creator_id).single();
+
 
 // 2. एडमिन डिपॉजिट रिक्वेस्ट लोड और प्रोसेस करना
 window.fetchAdminDeposits = async function() {
