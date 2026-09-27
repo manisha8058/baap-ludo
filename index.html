@@ -469,21 +469,25 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
   
 <script>
 // ========================================================
-// 🎁 गिफ्ट बॉक्स से मेन वॉलेट में ट्रांसफर करने का लॉजिक (Min ₹100)
+// 🎁 गिफ्ट बॉक्स से मेन वॉलेट में ट्रांसफर करने का लॉजिक (Min ₹100) - FIXED
 // ========================================================
 window.transferReferToMainWallet = async function() {
     try {
         var client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
-        if (!client) { alert("❌ डेटाबेस कनेक्शन एरर!"); return; }
+        if (!client) { alert("❌ डेटाबेस कनेक्शन एरर! Supabase कनेक्ट नहीं है।"); return; }
         
         var { data: authRes } = await client.auth.getUser();
         var user = authRes ? authRes.user : null;
-        if (!user) { alert("❌ कृपया पहले लॉगिन करें!"); return; }
+        if (!user) { alert("❌ कृपया पहले अपना मोबाइल नंबर और पासवर्ड डालकर लॉगिन करें!"); return; }
         
-        // खिलाड़ी का दोनों लाइव बैलेंस निकालना
-        var { data: profile } = await client.from('profiles').select('balance, refer_balance').eq('id', user.id).single();
-        var currentReferBal = parseFloat(profile.refer_balance || 0);
-        var currentMainBal = parseFloat(profile.balance || 0);
+        // खिलाड़ी का दोनों लाइव बैलेंस निकालना (maybeSingle का उपयोग ताकि null एरर न आए)
+        var { data: profile, error: pErr } = await client.from('profiles').select('balance, refer_balance').eq('id', user.id).maybeSingle();
+        
+        if (pErr) { alert("❌ प्रोफाइल डेटा लोड करने में एरर आया: " + pErr.message); return; }
+        
+        // यदि प्रोफाइल रो (Row) नहीं मिली तो डिफ़ॉल्ट रूप से 0 सेट करें
+        var currentReferBal = profile ? parseFloat(profile.refer_balance || 0) : 0;
+        var currentMainBal = profile ? parseFloat(profile.balance || 0) : 0;
         
         // मिनिमम ₹100 ट्रांसफर करने का मन्नत लूडो नियम
         if (currentReferBal < 100) {
@@ -493,7 +497,7 @@ window.transferReferToMainWallet = async function() {
         
         if (!confirm("🎁 आपके गिफ्ट वॉलेट में ₹" + currentReferBal.toFixed(2) + " हैं। क्या आप इसे अपने मुख्य वॉलेट में ट्रांसफर करना चाहते हैं?")) return;
         
-        // गिफ्ट बैलेंस जीरो करना...
+        // गिफ्ट बैलेंस जीरो करना और मेन वॉलेट में जोड़ना
         var { error } = await client.from('profiles').update({ 
             refer_balance: 0, 
             balance: currentMainBal + currentReferBal 
@@ -505,7 +509,7 @@ window.transferReferToMainWallet = async function() {
     } catch (e) { alert("ट्रांसफर फेल: " + e.message); }
 };
 
-// ⚡ रीयल-टाइम गिफ्ट बैलेंस सिंक्रोनाइज़र (हर 3 सेकंड में अपडेट करेगा)
+// ⚡ रीयल-टाइम गिफ्ट बैलेंस सिंक्रोनाइज़र (हर 3 सेकंड में अपडेट करेगा - एरर प्रूफ)
 setInterval(async function() {
     try {
         var client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
@@ -513,15 +517,16 @@ setInterval(async function() {
         var { data: authRes } = await client.auth.getUser();
         if (!authRes || !authRes.user) return;
         
-        var { data: profile } = await client.from('profiles').select('refer_balance').eq('id', authRes.user.id).single();
+        var { data: profile } = await client.from('profiles').select('refer_balance').eq('id', authRes.user.id).maybeSingle();
         if (!profile) return;
         
-        // गिफ्ट बॉक्स का बैलेंस स्क्रीन पर रिफ्रेश करें
+        // गिफ्ट बॉक्स (रेफर वॉलेट) का बैलेंस ऊपर स्क्रीन पर रिफ्रेश करें
         var referTotalSpan = document.getElementById('mainReferBalanceText');
         if (referTotalSpan) referTotalSpan.innerText = parseFloat(profile.refer_balance || 0).toFixed(2);
     } catch (err) {}
 }, 3000);
 </script>
+
   
 <section id="refer" class="page"><div class="content">
 <div class="refer-hero referral-hero-new"><small>REFER &amp; EARN</small><h1>Invite Friends<br><span>Get Rewarded!</span></h1><p>Share your room/invite link with friends and play together in practice mode.</p></div>
