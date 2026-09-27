@@ -279,12 +279,12 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
 </div></section>
 <section id="wallet" class="page">
     <div class="content">
-        <div class="balance">
-            <h2>My Play Balance</h2>
-            <p>Manage your practice credits</p>
-            <small>PRACTICE CREDITS</small>
-            <h1>₹<span id="balance">00</span></h1>
-        </div>
+        <!-- असली पैसे दिखाने वाला टोटल वॉलेट बैलेंस बॉक्स -->
+<div class="balance" style="background: linear-gradient(135deg, #4c0870, #a74fff); color: white; border-radius: 15px; padding: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px;">
+    <h2 style="margin: 0; font-size: 16px; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">💰 Total Wallet Balance</h2>
+    <p style="margin: 4px 0 0 0; font-size: 12px; opacity: 0.7;">Your live deposit & winning balance</p>
+    <h1 style="margin: 15px 0 0 0; font-size: 32px; font-weight: 800;">₹<span id="mainTotalBalanceText">0.00</span></h1>
+</div>
 
         <!-- ＋ Wallet बटन: दबाते ही सीधे आपके QR कोड वाले पेज पर ले जाएगा -->
         <div class="cash-card">
@@ -1214,6 +1214,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+    // वॉलेट बैलेंस को ऊपर और नीचे दोनों जगह लाइव सिंक करने का लॉजिक
+setInterval(() => {
+    const walletValueDiv = document.querySelector('.cash-card .value');
+    const mainTotalSpan = document.getElementById('mainTotalBalanceText');
+    if (walletValueDiv && mainTotalSpan) {
+        const currentAmt = walletValueDiv.innerText.replace('₹', '').trim();
+        mainTotalSpan.innerText = currentAmt || '0.00';
+    }
+}, 1000);
+    
 </script>
 </body>
 </html>
