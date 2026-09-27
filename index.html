@@ -7,14 +7,14 @@
 <script src="https://jsdelivr.net"></script>
 <script>
 // ========================================================
-// 🔑 अपनी असली Supabase की चाबियां यहाँ कोट्स "" के बीच में डालें
+// 🔑 आपकी असली और लाइव Supabase क्रेडेंशियल्स (चाबियाँ सबसे ऊपर फिक्स)
 // ========================================================
-const SUPABASE_ANON_KEY = "sb_publishable_LsDSRgGwM-Dx7uSLaaJ48w_K6hvok2c";
-    
-const SUPABASE_ANON_KEY = "sb_publishable_LsDSRgGwM-Dx7uSLaaJ48w_K6hvok2c";
+const SUPABASE_URL = "https://supabase.co"; 
 
-// डेटाबेस इनिशियलाइजेशन
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// ⚠️ यहाँ कोट्स "" के बीच में वह नई जेनरेट की हुई Secret Key पेस्ट कर दें जो आपने अभी कॉपी की है:
+const SUPABASE_SECRET_KEY = "sb_secret_tq33BONLcd-Uq3sxwXS6cA_IGLCh7-Y";
+
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_SECRET_KEY);
 const getSupabaseClient = () => { return supabase; };
 </script>
 <style>
@@ -72,7 +72,7 @@ const getSupabaseClient = () => { return supabase; };
                 <p style="font-size:13px; margin-top:20px; color:#aaa;">नया अकाउंट बनाना है? <a href="javascript:void(0)" onclick="document.getElementById('authLoginBox').style.display='none'; document.getElementById('authRegisterBox').style.display='block';" style="color:#20d85c; font-weight:bold; text-decoration:none;">यहाँ साइनअप करें</a></p>
             </div>
 
-            <!-- साइनअप बॉक्स (3 चीजें फिक्स्ड) -->
+            <!-- साइनअप बॉक्स -->
             <div id="authRegisterBox" class="mannat-box" style="display:none; border-color: #20d85c;">
                 <h1>BAAP LUDO</h1>
                 <p style="color:#20d85c; font-size:12px; font-weight:bold; margin-bottom:20px;">📝 नया खाता बनाएं (Signup)</p>
@@ -109,7 +109,3 @@ const getSupabaseClient = () => { return supabase; };
                     <button type="button" class="btn blue" style="flex:1;" onclick="window.showPage('redeem')">Withdraw</button>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- 6. डिपॉजिट स्क्रीन -->
