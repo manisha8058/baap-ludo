@@ -95,10 +95,10 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
 </head>
 <body>
 <div class="app">
-<header class="header"><button class="menu-btn" onclick="openDrawer()">☰</button><div class="logo">BAAP<br>LUDO</div><div class="spacer"></div><button class="pill" onclick="showPage('addcash')" aria-label="Open Add Cash">🪙 <span id="coinTop">00</span></button><button class="pill" onclick="showPage('redeem')" aria-label="Open Redeem">🎁 <span id="bonusTop">00</span></button></header>
-
+<div class="pill" onclick="window.transferReferToMainWallet()" style="cursor: pointer; background: linear-gradient(#ff85a2, #f65ca5); border: 1px solid #ffb0d8; box-shadow: 0 0 15px #f65ca5aa;" title="क्लिक करके मेन वॉलेट में ट्रांसफर करें">🎁 ₹<span id="mainReferBalanceText">0.00</span></div>
 
 <div class="quick-grid">
+
   <button class="quick-btn" onclick="showPage('wallet')"><span class="ico">💰</span>Wallet</button>
   <button class="quick-btn" onclick="showPage('history')"><span class="ico">🧾</span>History</button>
   <button class="quick-btn" onclick="showPage('notifications')"><span class="ico">🔔</span>Alerts</button>
@@ -453,7 +453,62 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
     </div>
 </section>
   
+<script>
+// ========================================================
+// 🎁 गिफ्ट बॉक्स से मेन वॉलेट में ट्रांसफर करने का लॉजिक (Min ₹100)
+// ========================================================
+window.transferReferToMainWallet = async function() {
+    try {
+        var client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
+        if (!client) { alert("❌ डेटाबेस कनेक्शन एरर!"); return; }
+        
+        var { data: authRes } = await client.auth.getUser();
+        var user = authRes ? authRes.user : null;
+        if (!user) { alert("❌ कृपया पहले लॉगिन करें!"); return; }
+        
+        // खिलाड़ी का दोनों लाइव बैलेंस निकालना
+        var { data: profile } = await client.from('profiles').select('balance, refer_balance').eq('id', user.id).single();
+        var currentReferBal = parseFloat(profile.refer_balance || 0);
+        var currentMainBal = parseFloat(profile.balance || 0);
+        
+        // मिनिमम ₹100 ट्रांसफर करने का मन्नत लूडो नियम
+        if (currentReferBal < 100) {
+            alert("❌ आपके गिफ्ट वॉलेट में कम से कम ₹100 होना अनिवार्य है!\n\nवर्तमान रेफर अर्निंग: ₹" + currentReferBal.toFixed(2));
+            return;
+        }
+        
+        if (!confirm("🎁 आपके गिफ्ट वॉलेट में ₹" + currentReferBal.toFixed(2) + " हैं। क्या आप इसे अपने मुख्य वॉलेट में ट्रांसफर करना चाहते हैं?")) return;
+        
+        // गिफ्ट बैलेंस जीरो करना...
+        var { error } = await client.from('profiles').update({ 
+            refer_balance: 0, 
+            balance: currentMainBal + currentReferBal 
+        }).eq('id', user.id);
+        
+        if (error) throw error;
+        alert("🎉 ₹" + currentReferBal.toFixed(2) + " सफलतापूर्वक आपके मुख्य वॉलेट में ट्रांसफर कर दिए गए हैं! अब आप इसका विड्रॉल ले सकते हैं।");
+        window.location.reload();
+    } catch (e) { alert("ट्रांसफर फेल: " + e.message); }
+};
 
+// ⚡ रीयल-टाइम गिफ्ट बैलेंस सिंक्रोनाइज़र (हर 3 सेकंड में अपडेट करेगा)
+setInterval(async function() {
+    try {
+        var client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
+        if (!client) return;
+        var { data: authRes } = await client.auth.getUser();
+        if (!authRes || !authRes.user) return;
+        
+        var { data: profile } = await client.from('profiles').select('refer_balance').eq('id', authRes.user.id).single();
+        if (!profile) return;
+        
+        // गिफ्ट बॉक्स का बैलेंस स्क्रीन पर रिफ्रेश करें
+        var referTotalSpan = document.getElementById('mainReferBalanceText');
+        if (referTotalSpan) referTotalSpan.innerText = parseFloat(profile.refer_balance || 0).toFixed(2);
+    } catch (err) {}
+}, 3000);
+</script>
+  
 <section id="refer" class="page"><div class="content">
 <div class="refer-hero referral-hero-new"><small>REFER &amp; EARN</small><h1>Invite Friends<br><span>Get Rewarded!</span></h1><p>Share your room/invite link with friends and play together in practice mode.</p></div>
 <div class="ref-card">
