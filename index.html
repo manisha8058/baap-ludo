@@ -1422,7 +1422,55 @@ setInterval(() => {
         mainTotalSpan.innerText = currentAmt || '0.00';
     }
 }, 1000);
-    
+  // ========================================================
+// ⚡ मन्नत लूडो स्टाइल रीयल-टाइम बैलेंस सिंक्रोनाइज़र ⚡
+// ========================================================
+window.syncUserLiveBalanceEverySecond = async function() {
+    try {
+        const client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
+        if (!client) return;
+
+        // लॉगिन खिलाड़ी की जानकारी निकालें
+        const { data: { user } } = await client.auth.getUser();
+        if (!user) return;
+
+        // डेटाबेस से खिलाड़ी का लाइव बैलेंस लाएं
+        const { data: profile, error } = await client.from('profiles').select('balance').eq('id', user.id).single();
+        if (error || !profile) return;
+
+        const liveBalance = parseFloat(profile.balance || 0).toFixed(2);
+
+        // 1. नीचे वॉलेट कार्ड वाले बैलेंस टेक्स्ट को लाइव अपडेट करें (🎮 Wallet)
+        const walletValueDiv = document.querySelector('.cash-card .value');
+        if (walletValueDiv) {
+            walletValueDiv.innerText = '₹' + liveBalance;
+        }
+
+        // 2. ऊपर बने मुख्य 'Total Wallet Balance' के टेक्स्ट को लाइव अपडेट करें
+        const mainTotalSpan = document.getElementById('mainTotalBalanceText');
+        if (mainTotalSpan) {
+            mainTotalSpan.innerText = liveBalance;
+        }
+
+        // 3. अगर आपकी साइट में पुराने बैलेंस स्पैन (id="balance") मौजूद हैं, तो उन्हें भी अपडेट करें
+        const oldBalanceSpan = document.getElementById('balance');
+        if (oldBalanceSpan) {
+            oldBalanceSpan.innerText = liveBalance;
+        }
+
+    } catch (err) {
+        console.log("बैलेंस सिंक एरर: " + err.message);
+    }
+};
+
+// पेज लोड होते ही और हर 3 सेकंड में खिलाड़ी का बैलेंस बैकग्राउंड में अपने आप अपडेट होगा
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.syncUserLiveBalanceEverySecond) {
+        window.syncUserLiveBalanceEverySecond();
+        setInterval(window.syncUserLiveBalanceEverySecond, 3000); 
+    }
+});
+              
 </script>
 </body>
 </html>
