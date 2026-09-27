@@ -6,29 +6,28 @@
 <title>BAAP LUDO</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#000;font-family:Arial,Helvetica,sans-serif;color:#293242}
-:root{--purple:#21002f;--purple2:#4c0870;--pink:#f65ca5;--blue:#26a9ff;--light:#f7f8fc;--card:#dce9ff;--ink:#1b0828}
-.app{width:100%;max-width:665px;min-height:100vh;margin:auto;background:#120018;position:relative;padding-bottom:78px;overflow:hidden}
+:root{--purple:#1b0828;--purple2:#4c0870;--pink:#f65ca5;--blue:#26a9ff;--light:#f7f8fc;--card:#100018}
+.app{width:100%;max-width:665px;min-height:100vh;margin:auto;background:#fff;position:relative;padding-bottom:78px;overflow:hidden}
 .header{height:96px;background:linear-gradient(100deg,#09000e,#300046,#120016);border-bottom:4px solid #ff9ed0;display:flex;align-items:center;gap:12px;padding:12px 15px;position:sticky;top:0;z-index:20;justify-content:space-between;width:100%}
 .menu-btn{font-size:30px;color:#fff;background:none;border:0;cursor:pointer;padding:0;margin:0}
 .logo{width:65px;height:65px;border-radius:50%;display:grid;place-items:center;color:#ffd66c;font-weight:900;font-size:11px;text-align:center;border:2px solid #b78b2f;background:radial-gradient(circle,#503b12,#0c0710 68%);box-shadow:0 0 12px #f8d66b55;line-height:1.2}
 .spacer{flex:1}
 .pill{display:flex;align-items:center;gap:5px;background:linear-gradient(#61d8ff,#168df0);border:1px solid #6fe6ff;box-shadow:0 0 10px #2bbcffaa;color:#fff;border-radius:20px;padding:8px 12px;font-size:14px;font-weight:bold;white-space:nowrap;cursor:pointer}
-.content{padding:12px 20px}.section-title{font-size:18px;font-weight:800;margin:15px 0 14px;text-align:center;background:linear-gradient(90deg,#ff7284,#a74fff,#399aff);color:white;border-radius:7px;padding:12px;box-shadow:0 3px 5px rgba(0,0,0,0.2)}
-.page{display:none}.page.active{display:block}.live-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.promo{height:160px;border-radius:15px;background:#090909;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-size:24px;font-weight:900;color:#ffd94a;border:2px solid #ff7284;padding:10px;box-shadow:0 4px 15px rgba(0,0,0,0.3);cursor:pointer;user-select:none}
-.promo.ludo{background:radial-gradient(circle at 50% 40%,#263e89,#03030a 65%);text-shadow:3px 3px #e9007d}.promo.support{background:radial-gradient(circle at 50% 40%,#0f4c1d,#030a05 65%);color:#42e83b;text-shadow:2px 2px #000}
-.amount{display:flex;gap:10px;margin:12px 0 18px}.amount input{min-width:0;flex:1;padding:15px;border:1px solid #aaa;border-radius:7px;font-size:16px}.btn{border:0;border-radius:28px;padding:13px 24px;font-weight:800;font-size:15px;cursor:pointer;transition:0.2s}
-.blue{background:linear-gradient(#69d9ff,#2198f4);color:#fff;box-shadow:0 4px 12px rgba(33,152,244,0.4)}.green{background:linear-gradient(#2ee56b,#20d85c);color:#fff;box-shadow:0 4px 12px rgba(32,216,92,0.4)}.purple{background:linear-gradient(#a74fff,#4c0870);color:white;box-shadow:0 4px 12px rgba(76,8,112,0.4)}
-.drawer{position:fixed;left:0;top:0;width:min(408px,88%);height:100vh;background:linear-gradient(#2b0340,#08000e);z-index:50;color:white;transform:translateX(-105%);transition:.25s;padding:16px 11px;overflow:auto}.drawer.open{transform:translateX(0)}.drawer-top{height:105px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:4px solid #b65a9f}.drawer-logo{font-size:30px;font-weight:900;color:#fff;text-shadow:2px 2px #ff1f63}.drawer-item{display:flex;align-items:center;justify-content:space-between;background:#3b134d;border-bottom:5px solid #ff7284;border-radius:12px;padding:16px 18px;margin:12px 0;font-size:16px;font-weight:bold;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,0.15)}.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:40}.overlay.show{display:block}
-.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(665px,100%);height:78px;background:linear-gradient(90deg,#08000c,#26003d,#08000c);display:flex;justify-content:space-around;align-items:center;z-index:30;border-top:2px solid #ff7284}.bottom button{border:0;background:none;color:#a0aec0;font-size:11px;font-weight:bold;padding:7px 13px;border-radius:30px;display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:0.2s}.bottom button span{display:block;font-size:24px;margin-bottom:2px}.bottom button.active{background:rgba(255,114,132,0.15);color:#ff7284;border:1px solid rgba(255,114,132,0.3)}
-.cash-card{background:linear-gradient(135deg,#1f0c33,#3b125c);color:white;border-radius:25px;padding:25px;margin-top:18px;border:1px solid rgba(255,114,132,0.2);box-shadow:0 8px 25px rgba(0,0,0,0.3)}.cash-card h2{margin:0;color:#cbd5e1;font-size:16px}.cash-card .value{font-size:38px;font-weight:bold;margin:12px 0 22px;color:#ffd66c}
-@keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
-.admin-badge { background: #ffc107; color: #000; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-left: 8px; }
+.content{padding:12px 20px}.notice{background:linear-gradient(90deg,#260019,#17000e);color:white;border:1px solid #ffb0d8;border-radius:8px;padding:12px;font-size:14px;line-height:1.45;margin-bottom:18px}.section-title{font-size:20px;font-weight:800;margin:15px 0 14px;text-align:center;background:linear-gradient(90deg,#ff7284,#a74fff,#399aff);color:white;border-radius:7px;padding:14px;box-shadow:0 3px 5px #aaa}
+.page{display:none}.page.active{display:block}.live-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.live-label{color:#ff7d9a;font-size:12px;margin:0 0 15px 6px}.promo{height:190px;border-radius:7px;background:#090909;display:flex;align-items:center;justify-content:center;text-align:center;font-size:30px;font-weight:900;color:#ffd94a;border:1px solid #222;padding:10px}.promo.ludo{background:radial-gradient(circle at 50% 40%,#263e89,#03030a 65%);text-shadow:3px 3px #e9007d}.promo.support{background:#000;color:#42e83b;font-size:26px;text-shadow:2px 2px #ff2d5f;cursor:pointer;user-select:none}
+.amount{display:flex;gap:10px;margin:12px 0 18px}.amount input{min-width:0;flex:1;padding:15px;border:1px solid #aaa;border-radius:7px;font-size:16px}.btn{border:0;border-radius:28px;padding:13px 24px;font-weight:800;font-size:16px;cursor:pointer}
+.blue{background:linear-gradient(#69d9ff,#2198f4);color:#fff;box-shadow:0 4px 12px #888}.green{background:#20d85c;color:#fff}.purple{background:#5143e6;color:white}
+.drawer{position:fixed;left:0;top:0;width:min(408px,88%);height:100vh;background:linear-gradient(#2b0340,#08000e);z-index:50;color:white;transform:translateX(-105%);transition:.25s;padding:16px 11px;overflow:auto}.drawer.open{transform:translateX(0)}.drawer-top{height:105px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:4px solid #b65a9f}.drawer-logo{font-size:30px;font-weight:900;color:#fff;text-shadow:2px 2px #ff1f63}.drawer-item{display:flex;align-items:center;justify-content:space-between;background:#6a5a79;border-bottom:7px solid #9b2d86;border-radius:9px;padding:16px 18px;margin:10px 0;font-size:19px;font-weight:bold}.drawer-item button{background:none;border:0;font-size:24px}.overlay{display:none;position:fixed;inset:0;background:#0008;z-index:40}.overlay.show{display:block}
+.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(665px,100%);height:78px;background:linear-gradient(90deg,#08000c,#26003d,#08000c);display:flex;justify-content:space-around;align-items:center;z-index:30;border-top:1px solid #9d5fb7}.bottom button{border:0;background:none;color:#fff;font-size:12px;font-weight:bold;padding:7px 13px;border-radius:30px}.bottom button span{display:block;font-size:28px;margin-bottom:3px}.bottom button.active{background:#fff;color:#222}
+.cash-card{background:#edf4ff;border-radius:25px;padding:25px;margin-top:18px}.cash-card h2{margin:0;color:#64748a}.cash-card .value{font-size:34px;font-weight:bold;margin:10px 0 22px}.cash-card .btn{width:100%}
+@media(max-width:390px){.content{padding:10px 12px}.header{padding:10px 12px;gap:8px}.pill{font-size:13px;padding:10px}.live-grid{gap:8px}.promo{height:145px;font-size:22px}.bottom button{padding:5px 8px}.bottom button span{font-size:24px}}
+@keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.03); opacity: 0.9; } 100% { transform: scale(1); opacity: 1; } }
 </style>
 </head>
 <body>
 
 <div class="app">
-    <!-- 1. मुख्य प्रीमियम हेडर पिल्स -->
+    <!-- 1. मुख्य प्रीमियम हेडर -->
     <header class="header">
         <button class="menu-btn" onclick="window.openDrawer()">☰</button>
         <div class="logo">BAAP<br>LUDO</div>
@@ -37,41 +36,42 @@
         <button class="pill" onclick="window.transferReferToMainWallet()" aria-label="Transfer Refer Wallet" style="background:linear-gradient(#ff85a2,#f65ca5); border:1px solid #ffb0d8; box-shadow:0 0 10px #f65ca5aa;">🎁 ₹<span id="mainReferBalanceText">0.00</span></button>
     </header>
 
-    <!-- 2. मन्नत लूडो स्टाइल स्पेशल लाइव एडमिन नोटिस बोर्ड -->
-    <div id="mannatDynamicNoticeContainer" class="mannat-notice-board" style="background: linear-gradient(135deg, #1a0628, #3b0b54); border: 2px solid #ff7284; border-radius: 12px; padding: 12px 15px; margin: 15px auto; max-width: 630px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-family: sans-serif;">
+    <!-- 2. मन्नत लूडो स्टाइल स्पेशल एडमिन नोटिस बोर्ड -->
+    <div id="dynamicNoticeBoard" class="mannat-notice-board" style="background: linear-gradient(135deg, #1a0628, #3b0b54); border: 2px solid #ff7284; border-radius: 12px; padding: 12px 15px; margin: 15px auto; max-width: 630px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-family: sans-serif; display:none;">
         <div style="display: flex; align-items: flex-start; gap: 10px;">
-            <span style="font-size: 20px; animation: pulse 1s infinite;">⚠️</span>
-            <p id="liveNoticeTextDisplay" style="margin: 0; color: #ffffff; font-size: 13px; font-weight: bold; line-height: 1.6; text-align: left; letter-spacing: 0.3px;">
-                लोड हो रहा है...
-            </p>
+            <span style="font-size: 20px;">⚠️</span>
+            <p id="noticeBoardText" style="margin: 0; color: #ffffff; font-size: 13px; font-weight: bold; line-height: 1.6; text-align: left; letter-spacing: 0.3px;"></p>
         </div>
     </div>
 
-    <!-- 3. मोबाइल लॉगिन/साइनअप स्क्रीन (Secure Auth Box) -->
-    <div id="loginScreen" class="page active" style="font-family: sans-serif; max-width: 450px; margin: auto; padding: 20px;">
-        <div id="authLoginBox" style="background: #fff; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid #eee;">
-            <h3 style="margin-top: 0; color: #4c0870; font-size: 18px; margin-bottom: 20px; text-align:center; font-weight:bold;">👤 खिलाड़ी लॉगिन (Login)</h3>
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 6px; color: #4a5568;">अपना मोबाइल नंबर दर्ज करें:</label>
-                <input type="tel" id="loginMobileInput" placeholder="Enter 10 Digit Mobile No." maxlength="10" style="width:100%; padding:13px; border:1px solid #cbd5e1; border-radius:10px; font-size:16px; font-weight:bold; text-align:center; letter-spacing:1px;">
+    <!-- 3. मन्नत लूडो स्टाइल 100% सेम टू सेम मोबाइल लॉगिन/साइनअप स्क्रीन -->
+    <div id="loginScreen" class="page active" style="font-family: sans-serif; position: fixed; inset: 0; background: linear-gradient(145deg, #0e0114, #27033a); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
+        
+        <!-- लॉगिन फ़ॉर्म (Login Box) -->
+        <div id="authLoginBox" style="width: 100%; max-width: 400px; background: rgba(16, 0, 24, 0.95); border: 2px solid #ff7284; padding: 30px 25px; border-radius: 24px; box-shadow: 0 15px 45px rgba(0,0,0,0.6); text-align: center;">
+            <div style="font-size: 36px; font-weight: 900; color: #fff; text-shadow: 0 0 15px #f65ca5, 2px 2px #000; margin-bottom: 5px; font-style: italic;">Mannat <span style="color:#ffd66c;">LUDO</span></div>
+            <p style="color: #a0aec0; font-size: 12px; margin-top: 0; margin-bottom: 25px;">सुरक्षित मोबाइल नंबर लॉगिन</p>
+            
+            <div style="margin-bottom: 16px; text-align: left;">
+                <input type="tel" id="loginMobileInput" placeholder="Mobile (+91)" maxlength="10" style="width: 100%; padding: 14px; background: transparent; border: 0; border-bottom: 2px solid #ccd1dc; color: #fff; font-size: 16px; font-weight: bold; outline: none; text-align: center; letter-spacing: 1px;">
             </div>
-            <div style="margin-bottom: 25px;">
-                <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 6px; color: #4a5568;">अपना पासवर्ड:</label>
-                <input type="password" id="loginPasswordInput" placeholder="Enter Password" style="width:100%; padding:13px; border:1px solid #cbd5e1; border-radius:10px; font-size:16px; text-align:center;">
+            <div style="margin-bottom: 25px; text-align: left;">
+                <input type="password" id="loginPasswordInput" placeholder="Enter Password" style="width: 100%; padding: 14px; background: transparent; border: 0; border-bottom: 2px solid #ccd1dc; color: #fff; font-size: 16px; outline: none; text-align: center;">
             </div>
-            <button type="button" style="width:100%; background:linear-gradient(90deg,#4c0870,#a74fff); color:white; border:0; padding:14px; border-radius:10px; font-weight:bold; cursor:pointer; font-size:16px; box-shadow:0 4px 12px rgba(76,8,112,0.3);" onclick="window.handleMobileLogin()">प्रवेश करें (Login)</button>
-            <p style="text-align: center; font-size:14px; margin-top:20px; color:#4a5568;">नया अकाउंट बनाना है? <a href="javascript:void(0)" onclick="document.getElementById('authLoginBox').style.display='none'; document.getElementById('authRegisterBox').style.display='block';" style="color:#a74fff; font-weight:bold; text-decoration:none;">यहाँ साइनअप करें</a></p>
+            <button type="button" style="width: 100%; background: linear-gradient(90deg, #2bbcff, #168df0); color: white; border: 0; padding: 14px; border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 16px; box-shadow: 0 4px 15px rgba(22,141,240,0.4);" onclick="window.handleMobileLogin()">Login & Access</button>
+            <p style="text-align: center; font-size: 13px; margin-top: 20px; color: #a0aec0;">नया खिलाड़ी? <a href="javascript:void(0)" onclick="document.getElementById('authLoginBox').style.display='none'; document.getElementById('authRegisterBox').style.display='block';" style="color: #f65ca5; font-weight: bold; text-decoration: none;">यहाँ साइनअप करें</a></p>
         </div>
 
-        <div id="authRegisterBox" style="background: #fff; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid #eee; display: none;">
-            <h3 style="margin-top: 0; color: #28a745; font-size: 18px; margin-bottom: 20px; text-align:center; font-weight:bold;">📝 नया खाता बनाएं (Signup)</h3>
-            <div style="margin-bottom: 15px;">
-                <input type="tel" id="regMobileInput" placeholder="Enter 10 Digit Mobile No." maxlength="10" style="width:100%; padding:13px; border:1px solid #cbd5e1; border-radius:10px; font-weight:bold; font-size:16px; text-align:center;">
+        <!-- साइनअप फ़ॉर्म (Register Box) -->
+        <div id="authRegisterBox" style="width: 100%; max-width: 400px; background: rgba(16, 0, 24, 0.95); border: 2px solid #28a745; padding: 30px 25px; border-radius: 24px; box-shadow: 0 15px 45px rgba(0,0,0,0.6); text-align: center; display: none;">
+            <div style="font-size: 36px; font-weight: 900; color: #fff; text-shadow: 0 0 15px #28a745, 2px 2px #000; margin-bottom: 5px; font-style: italic;">Mannat <span style="color:#ffd66c;">LUDO</span></div>
+            <p style="color: #a0aec0; font-size: 12px; margin-top: 0; margin-bottom: 25px;">📝 नया खाता बनाएं (Signup)</p>
+            
+            <div style="margin-bottom: 16px;">
+                <input type="tel" id="regMobileInput" placeholder="Mobile (+91)" maxlength="10" style="width: 100%; padding: 14px; background: transparent; border: 0; border-bottom: 2px solid #ccd1dc; color: #fff; font-size: 16px; font-weight: bold; outline: none; text-align: center; letter-spacing: 1px;">
             </div>
-            <div style="margin-bottom: 15px;">
-                <input type="password" id="regPasswordInput" placeholder="Create Strong Password" style="width:100%; padding:13px; border:1px solid #cbd5e1; border-radius:10px; font-size:16px; text-align:center;">
+            <div style="margin-bottom: 16px;">
+                <input type="password" id="regPasswordInput" placeholder="Create Password" style="width: 100%; padding: 14px; background: transparent; border: 0; border-bottom: 2px solid #ccd1dc; color: #fff; font-size: 16px; outline: none; text-align: center;">
             </div>
             <div style="margin-bottom: 25px;">
-                <input type="text" id="regReferCodeInput" placeholder="रेफरल कोड (Optional)" maxlength="10" style="width:100%; padding:13px; border:1px solid #a74fff; border-radius:10px; font-weight:bold; text-transform:uppercase; text-align:center;">
-            </div>
-            
+                
