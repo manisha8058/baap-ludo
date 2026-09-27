@@ -227,7 +227,17 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
     <input id="addCashAmount" type="number" min="100" max="20000" value="100" style="width:100%;box-sizing:border-box;padding:12px;font-size:18px;border-radius:8px;border:1px solid #ccc;">
 
     <!-- यह बटन बिना किसी एरर के सीधा openQrPaymentScreen वाले कोड को चलाएगा -->
-<button type="button" style="width:100%; background:linear-gradient(#69d9ff,#2198f4); color:#fff; border:0; border-radius:28px; padding:13px 24px; font-weight:800; font-size:16px; cursor:pointer; margin-top:15px;" onclick="try { window.openQrPaymentScreen(); } catch(err) { alert('कोडिंग एरर: ' + err.message); }">Next →</button>
+<!-- यह बटन बिना किसी बाहरी फंक्शन पर निर्भर रहे सीधे आपका QR कोड बॉक्स खोल देगा -->
+<button type="button" style="width:100%; background:linear-gradient(#69d9ff,#2198f4); color:#fff; border:0; border-radius:28px; padding:13px 24px; font-weight:800; font-size:16px; cursor:pointer; margin-top:15px;" 
+        onclick="
+        var amt = document.getElementById('addCashAmount') ? document.getElementById('addCashAmount').value : 100;
+        if(parseFloat(amt) < 100) { alert('कम से कम ₹100 डिपॉजिट करना आवश्यक है।'); return; }
+        if(document.getElementById('displayAmountText')) document.getElementById('displayAmountText').innerText = amt;
+        if(document.getElementById('dynamicUpiLink')) document.getElementById('dynamicUpiLink').href = 'upi://pay?pa=8058128380-2.wallet@phonepe&pn=BAAP_LUDO&am=' + amt + '&cu=INR&tn=WalletDeposit';
+        if(document.getElementById('qrPaymentSection')) document.getElementById('qrPaymentSection').style.display = 'block';
+        ">
+        Next →
+</button>
   
 
 
