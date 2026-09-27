@@ -143,10 +143,10 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
 
 </main>
 <!-- ======================================================== -->
-<!-- 100% सेम टू सेम मन्नत लूडो स्टाइल 3-इन-1 हिस्ट्री स्क्रीन -->
+<!-- 100% फिक्स्ड मन्नत लूडो स्टाइल 3-इन-1 हिस्ट्री स्क्रीन -->
 <!-- ======================================================== -->
 <section id="history" class="page">
-    <div class="content" style="font-family: sans-serif; max-width: 665px; margin: auto; padding: 15px;">
+    <div class="content" style="font-family: sans-serif; max-width: 665px; margin: auto; padding: 15px; background: #fff; min-height: 80vh;">
         <h2 style="text-align: center; margin-bottom: 15px; color: #1b0828; font-weight: bold; font-size: 24px;">History</h2>
         
         <!-- मन्नत लूडो स्टाइल थ्री-टैब बटन्स -->
@@ -193,21 +193,21 @@ window.switchMannatHistoryTab = function(tabName) {
 
     if (tabName === 'game') {
         btnGame.style.background = '#4c0870'; btnGame.style.color = 'white'; listGame.style.display = 'block';
-        window.loadMannatGameHistory();
+        if(window.loadMannatGameHistory) window.loadMannatGameHistory();
     } else if (tabName === 'txn') {
         btnTxn.style.background = '#4c0870'; btnTxn.style.color = 'white'; listTxn.style.display = 'block';
-        window.loadMannatTxnHistory();
+        if(window.loadMannatTxnHistory) window.loadMannatTxnHistory();
     } else if (tabName === 'ref') {
         btnRef.style.background = '#4c0870'; btnRef.style.color = 'white'; listRef.style.display = 'block';
-        window.loadMannatRefHistory();
+        if(window.loadMannatRefHistory) window.loadMannatRefHistory();
     }
 };
 
 window.loadMannatGameHistory = async function() {
     const box = document.getElementById('mannatHistoryGameList'); if(!box) return;
-    const client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null); if(!client) return;
+    var client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null); if(!client) return;
     try {
-        const { data: { user } } = await client.auth.getUser(); if(!user) return;
+        const { data: authRes } = await client.auth.getUser(); var user = authRes ? authRes.user : null; if(!user) return;
         const { data: matches } = await client.from('battles').select('*').or(`creator_id.eq.${user.id},joiner_id.eq.${user.id}`).in('status',['Completed','Cancelled']).order('created_at',{ascending:false});
         if(!matches || matches.length === 0){ box.innerHTML = "<p style='text-align:center;color:#999;font-size:13px;padding:20px;'>अभी कोई मैच रिकॉर्ड नहीं है।</p>"; return; }
         
@@ -241,9 +241,9 @@ window.loadMannatGameHistory = async function() {
 
 window.loadMannatTxnHistory = async function() {
     const box = document.getElementById('mannatHistoryTxnList'); if(!box) return;
-    const client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null); if(!client) return;
+    var client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null); if(!client) return;
     try {
-        const { data: { user } } = await client.auth.getUser(); if(!user) return;
+        const { data: authRes } = await client.auth.getUser(); var user = authRes ? authRes.user : null; if(!user) return;
         const { data: deps } = await client.from('deposit_requests').select('created_at, amount, status, utr_number').eq('user_id',user.id);
         const { data: withs } = await client.from('withdraw_requests').select('created_at, amount, status, upi_id').eq('user_id',user.id);
         
@@ -279,14 +279,10 @@ window.loadMannatTxnHistory = async function() {
 
 window.loadMannatRefHistory = async function() {
     const box = document.getElementById('mannatHistoryRefList'); if(!box) return;
-    const client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null); if(!client) return;
+    var client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null); if(!client) return;
     try {
-        const { data: { user } } = await client.auth.getUser(); if(!user) return;
+        const { data: authRes } = await client.auth.getUser(); var user = authRes ? authRes.user : null; if(!user) return;
         const { data: refs } = await client.from('refer_history').select('*').eq('user_id',user.id).order('created_at',{ascending:false});
-        if(!refs || refs.length === 0){ box.innerHTML = "<p style='text-align:center;color:#999;font-size:13px;padding:20px;'>अभी कोई रेफ़रल कमाई इतिहास नहीं है।</p>"; return; }
-        
-        let html = '';
-        refs.forEach(r => {
 
 <section id="admin" class="page">
     <div class="content" style="font-family: sans-serif; color: #333; padding: 10px;">
