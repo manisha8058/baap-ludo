@@ -95,7 +95,21 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
 </head>
 <body>
 <div class="app">
-<div class="pill" onclick="window.transferReferToMainWallet()" style="cursor: pointer; background: linear-gradient(#ff85a2, #f65ca5); border: 1px solid #ffb0d8; box-shadow: 0 0 15px #f65ca5aa;" title="क्लिक करके मेन वॉलेट में ट्रांसफर करें">🎁 ₹<span id="mainReferBalanceText">0.00</span></div>
+<header class="header" style="height:96px; background:linear-gradient(100deg,#09000e,#300046,#120016); border-bottom:4px solid #ff9ed0; display:flex; align-items:center; gap:12px; padding:12px 15px; position:sticky; top:0; z-index:20; justify-content: space-between; width: 100%;">
+    <button class="menu-btn" onclick="openDrawer()" style="font-size:30px; color:#fff; background:none; border:0; cursor:pointer; padding:0; margin:0;">☰</button>
+    <div class="logo" style="width:65px; height:65px; border-radius:50%; display:grid; place-items:center; color:#ffd66c; font-weight:900; font-size:11px; text-align:center; border:2px solid #b78b2f; background:radial-gradient(circle,#503b12,#0c0710 68%); box-shadow:0 0 12px #f8d66b55; line-height:1.2;">BAAP<br>LUDO</div>
+    <div class="spacer" style="flex:1;"></div>
+    
+    <!-- 🪙 सिक्कों वाला बटन (Main Wallet) -->
+    <button class="pill" onclick="showPage('addcash')" aria-label="Open Add Cash" style="display:flex; align-items:center; gap:5px; background:linear-gradient(#61d8ff,#168df0); border:1px solid #6fe6ff; box-shadow:0 0 10px #2bbcffaa; color:#fff; border-radius:20px; padding:8px 12px; font-size:14px; font-weight:bold; white-space:nowrap; cursor:pointer;">
+        🪙 <span id="coinTop">00</span>
+    </button>
+    
+    <!-- 🎁 मन्नत लूडो स्टाइल गिफ्ट वॉलेट (Refer અर्निंग बॉक्स) -->
+    <button class="pill" onclick="window.transferReferToMainWallet()" aria-label="Transfer Refer Wallet" style="display:flex; align-items:center; gap:5px; background:linear-gradient(#ff85a2,#f65ca5); border:1px solid #ffb0d8; box-shadow:0 0 10px #f65ca5aa; color:#fff; border-radius:20px; padding:8px 12px; font-size:14px; font-weight:bold; white-space:nowrap; cursor:pointer;">
+        🎁 ₹<span id="mainReferBalanceText">0.00</span>
+    </button>
+</header>
 
 <div class="quick-grid">
 
