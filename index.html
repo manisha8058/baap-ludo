@@ -587,6 +587,17 @@ setInterval(async function() {
     
     <button type="button" style="width: 100%; background: #000; color: #fff; border: 0; border-radius: 8px; padding: 13px; font-weight: bold; font-size: 15px; cursor: pointer; letter-spacing: 0.5px;" onclick="window.submitReferRedeemToMain()">
         Redeem
+       <!-- मन्नत लूडो स्टाइल रेफर/बोनस कमीशन हिस्ट्री लिस्ट -->
+    <div class="refer-history-card" style="margin-top: 25px; background: #fff; border-radius: 15px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eee; font-family: sans-serif;">
+        <h3 style="margin-top: 0; color: #4c0870; font-size: 15px; display: flex; align-items: center; gap: 6px;">📋 Referral Earning History</h3>
+        <p style="color: #666; font-size: 11px; margin-top: 0; margin-bottom: 12px;">प्रत्येक मैच से कमाए गए 2% लाइफटाइम कमीशन की लाइव सूची।</p>
+        
+        <!-- लोड होने वाला डायनेमिक टेबल कंटेनर -->
+        <div id="userReferHistoryContainer" style="max-height: 250px; overflow-y: auto;">
+            <p style="text-align: center; color: #888; font-size: 12px; padding: 10px;">इतिहास लोड हो रहा है, कृपया प्रतीक्षा करें...</p>
+        </div>
+    </div>
+      
     </button>
 </div>
 
