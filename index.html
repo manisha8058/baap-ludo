@@ -7,20 +7,13 @@
 <script src="https://jsdelivr.net"></script>
 <script>
 // ========================================================
-// 🔑 आपकी असली और लाइव Supabase क्रेडेंशियल्स (100% फिक्स्ड)
+// 🔑 आपकी असली और लाइव Supabase क्रेडेंशियल्स (सुरक्षित पब्लिश की)
 // ========================================================
 const SUPABASE_URL = "https://supabase.co"; 
+const SUPABASE_ANON_KEY = "sb_publishable_LsDSRgGwM-Dx7uSLaaJ48w_K6hvok2c";
 
-// ⚠️ यहाँ कोट्स "" के बीच में अपनी वही नई जेनरेट की हुई Secret Key पेस्ट कर दें जो आपने अभी Supabase से कॉपी की थी:
-const SUPABASE_SECRET_KEY = "sb_secret_F4DmKAlfJzK20jwAP_rbag_UgLqldSi";
-
-// सुपर एडमिन कनेक्शन इनिशियलाइजेशन (ताकि खिलाड़ी का डेटा बिना रुके तुरंत रजिस्टर हो जाए)
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_SECRET_KEY, {
-    auth: {
-        autoRefreshToken: false,
-        persistSession: false
-    }
-});
+// क्लाइंट इनिशियलाइजेशन (अब गिटहब इसे कभी ब्लॉक नहीं कर पाएगा)
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const getSupabaseClient = () => { return supabase; };
 </script>
 <style>
@@ -49,7 +42,7 @@ const getSupabaseClient = () => { return supabase; };
     <!-- 1. मुख्य प्रीमियम हेडर -->
     <header id="mainHeaderBar" class="header" style="display:none;">
         <button class="menu-btn" onclick="window.openDrawer()">☰</button>
-        <div class="logo">BAAP<br>LUDO</div>
+        <div class="logo">BAAP LUDO</div>
         <div class="spacer"></div>
         <button class="pill" onclick="window.showPage('wallet')">🪙 <span id="coinTop">0.00</span></button>
         <button class="pill" onclick="window.transferReferToMainWallet()" style="background:linear-gradient(#ff85a2,#f65ca5); border:1px solid #ffb0d8; box-shadow:0 0 10px #f65ca5aa;">🎁 ₹<span id="mainReferBalanceText">0.00</span></button>
@@ -112,4 +105,11 @@ const getSupabaseClient = () => { return supabase; };
                 <div class="value">₹0.00</div>
                 <div style="display:flex; gap:10px;">
                     <button type="button" class="btn green" style="flex:1;" onclick="window.showPage('addcash')">Deposit</button>
-                    
+                    <button type="button" class="btn blue" style="flex:1;" onclick="window.showPage('redeem')">Withdraw</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="addcash" class="page">
+        
