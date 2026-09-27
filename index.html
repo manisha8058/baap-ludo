@@ -134,12 +134,12 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
 <div class="history-row"><span>Play Match<br><small>Yesterday • 6:20 PM</small></span><b>+₹95</b></div>
 <p style="color:#777;font-size:12px"> records only. Play records only. No real-money deposit, wagering, or withdrawal is connected.</p></div></section>
 >
- <section id="admin" class="page">
+<section id="admin" class="page">
     <div class="content" style="font-family: sans-serif; color: #333; padding: 10px;">
         <h2 style="color: #4c0870; margin-bottom: 5px;">🛠️ Admin Control Center</h2>
         <p style="color:#66758b; font-size: 12px; margin-top: 0;">मन्नत लूडो की तरह सभी लाइव कंट्रोल्स और परमिशन्स यहाँ उपलब्ध हैं।</p>
         
-        <!-- 1. यूजर वॉलेट मैन्युअल कंट्रोल (पैसे बढ़ाएं / घटाएं) -->
+        <!-- 1. यूजर वॉलेट मैन्युअल CONTROL (पैसे बढ़ाएं / घटाएं) -->
         <div class="admin-card" style="margin-top: 15px; border: 2px solid #e67e22; border-radius: 12px; padding: 15px; background: #fff;">
             <h3 style="color: #e67e22; margin-bottom: 10px; margin-top: 0; font-size: 15px;">👤 Manual Wallet Control (पैसे बढ़ाएं / घटाएं)</h3>
             <div style="margin-bottom: 8px;">
@@ -149,7 +149,8 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
                 <input type="number" id="manualWalletAmount" placeholder="अमाउंट (₹)" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px;">
             </div>
             <div style="display: flex; gap: 10px;">
-                <!-- पैसे बढ़ाने का इनलाइन बटन -->
+                
+                <!-- पैसे बढ़ाने का फिक्स्ड बटन -->
                 <button type="button" style="flex: 1; background: #28a745; color: white; border: 0; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px;"
                         onclick="
                         (async () => {
@@ -160,21 +161,51 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
                             try {
                                 var client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
                                 if (!client) { alert('❌ Supabase कनेक्ट नहीं है।'); return; }
-                                alert('🔄 लाइव डेटाबेस सिंक हो रहा है...');
-                                var { data: p } = await client.from('profiles').select('id,balance').or('email.eq.' + idf + ',user_email.eq.' + idf).maybeSingle();
-                                var tId = p ? p.id : idf;
-                                var { data: cur } = await client.from('profiles').select('balance').eq('id', tId).single();
-                                var next = parseFloat(cur ? cur.balance : 0) + parseFloat(amt);
-                                await client.from('profiles').update({ balance: next }).eq('id', tId);
-                                alert('✅ बैलेंस सफलतापूर्वक लाइव अपडेट हुआ! नया बैलेंस: ₹' + next);
+                                
+                                var targetId = idf;
+                                var currentBalance = 0;
+                                var tableName = 'profiles';
+                                
+                                if(idf.includes('@')) {
+                                    // कोटेशन मार्क्स फिक्स ताकि क्वेरी क्रैश न हो
+                                    var { data: p1 } = await client.from('profiles').select('id, balance').or('email.eq.\u0022' + idf + '\u0022,user_email.eq.\u0022' + idf + '\u0022').maybeSingle();
+                                    if (p1) {
+                                        targetId = p1.id;
+                                        currentBalance = parseFloat(p1.balance || 0);
+                                    } else {
+                                        var { data: u1 } = await client.from('users').select('id, balance').or('email.eq.\u0022' + idf + '\u0022,user_email.eq.\u0022' + idf + '\u0022').maybeSingle();
+                                        if (u1) {
+                                            targetId = u1.id;
+                                            currentBalance = parseFloat(u1.balance || 0);
+                                            tableName = 'users';
+                                        } else {
+                                            alert('❌ खिलाड़ी का ईमेल डेटाबेस में नहीं मिला। कृपया सही ईमेल या UUID डालकर प्रयास करें!');
+                                            return;
+                                        }
+                                    }
+                                } else {
+                                    var { data: cur } = await client.from('profiles').select('balance').eq('id', idf).maybeSingle();
+                                    if(cur) {
+                                        currentBalance = parseFloat(cur.balance || 0);
+                                    } else {
+                                        var { data: curU } = await client.from('users').select('balance').eq('id', idf).maybeSingle();
+                                        if(curU) { currentBalance = parseFloat(curU.balance || 0); tableName = 'users'; }
+                                    }
+                                }
+                                
+                                var next = currentBalance + parseFloat(amt);
+                                var { error: upErr } = await client.from(tableName).update({ balance: next }).eq('id', targetId);
+                                if(upErr) throw upErr;
+                                
+                                alert('✅ [' + tableName + '] में बैलेंस सफलतापूर्वक लाइव अपडेट हुआ! नया बैलेंस: ₹' + next);
                                 window.location.reload();
-                            } catch(e) { alert('एरर: ' + e.message); }
+                            } catch(e) { alert('डेटाबेस एरर: ' + e.message); }
                         })();
                         ">
                     ➕ पैसे बढ़ाएं (Add)
                 </button>
                 
-                <!-- पैसे घटाने का इनलाइन बटन -->
+                <!-- पैसे घटाने का फिक्स्ड बटन -->
                 <button type="button" style="flex: 1; background: #dc3545; color: white; border: 0; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px;"
                         onclick="
                         (async () => {
@@ -185,15 +216,44 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
                             try {
                                 var client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
                                 if (!client) { alert('❌ Supabase कनेक्ट नहीं है।'); return; }
-                                alert('🔄 लाइव डेटाबेस सिंक हो रहा है...');
-                                var { data: p } = await client.from('profiles').select('id,balance').or('email.eq.' + idf + ',user_email.eq.' + idf).maybeSingle();
-                                var tId = p ? p.id : idf;
-                                var { data: cur } = await client.from('profiles').select('balance').eq('id', tId).single();
-                                var next = Math.max(0, parseFloat(cur ? cur.balance : 0) - parseFloat(amt));
-                                await client.from('profiles').update({ balance: next }).eq('id', tId);
-                                alert('✅ बैलेंस सफलतापूर्वक लाइव अपडेट हुआ! नया बैलेंस: ₹' + next);
+                                
+                                var targetId = idf;
+                                var currentBalance = 0;
+                                var tableName = 'profiles';
+                                
+                                if(idf.includes('@')) {
+                                    var { data: p1 } = await client.from('profiles').select('id, balance').or('email.eq.\u0022' + idf + '\u0022,user_email.eq.\u0022' + idf + '\u0022').maybeSingle();
+                                    if (p1) {
+                                        targetId = p1.id;
+                                        currentBalance = parseFloat(p1.balance || 0);
+                                    } else {
+                                        var { data: u1 } = await client.from('users').select('id, balance').or('email.eq.\u0022' + idf + '\u0022,user_email.eq.\u0022' + idf + '\u0022').maybeSingle();
+                                        if (u1) {
+                                            targetId = u1.id;
+                                            currentBalance = parseFloat(u1.balance || 0);
+                                            tableName = 'users';
+                                        } else {
+                                            alert('❌ खिलाड़ी का ईमेल डेटाबेस में नहीं मिला।');
+                                            return;
+                                        }
+                                    }
+                                } else {
+                                    var { data: cur } = await client.from('profiles').select('balance').eq('id', idf).maybeSingle();
+                                    if(cur) {
+                                        currentBalance = parseFloat(cur.balance || 0);
+                                    } else {
+                                        var { data: curU } = await client.from('users').select('balance').eq('id', idf).maybeSingle();
+                                        if(curU) { currentBalance = parseFloat(curU.balance || 0); tableName = 'users'; }
+                                    }
+                                }
+                                
+                                var next = Math.max(0, currentBalance - parseFloat(amt));
+                                var { error: upErr } = await client.from(tableName).update({ balance: next }).eq('id', targetId);
+                                if(upErr) throw upErr;
+                                
+                                alert('✅ [' + tableName + '] में बैलेंस सफलतापूर्वक लाइव अपडेट हुआ! नया बैलेंस: ₹' + next);
                                 window.location.reload();
-                            } catch(e) { alert('एरर: ' + e.message); }
+                            } catch(e) { alert('डेटाबेस एरर: ' + e.message); }
                         })();
                         ">
                     ➖ पैसे घटाएं (Deduct)
@@ -205,12 +265,8 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
         <div class="admin-card" style="margin-top: 20px; border: 2px solid #2198f4; border-radius: 12px; padding: 15px; background: #fff;">
             <h3 style="color: #2198f4; margin-bottom: 10px; margin-top: 0; font-size: 15px; display: flex; justify-content: space-between; align-items: center;">
                 <span>💰 Pending Deposits (UTR Verification)</span>
-                <button type="button" onclick="if(window.fetchAdminDeposits) window.fetchAdminDeposits(); else alert('डेटा लोड हो रहा है, कृपया प्रतीक्षा करें...')" style="background: #2198f4; color: white; border: 0; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: bold;">🔄 Refresh</button>
-            </h3>
-            <div id="adminDepositList" style="max-height: 200px; overflow-y: auto; font-size: 13px;">
-                <p style="color: #666; text-align: center; padding: 5px;">लोड हो रहा है...</p>
-            </div>
-        </div>
+                <button type="button" onclick="if(window.fetchAdminDeposits) window.fetchAdminDeposits();" style="background: #2198f4; color: white; border: 0; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: bold;">🔄 Refresh</button>
+
 
         <!-- 3. पेंडिंग विड्रॉल लिस्ट -->
         <div class="admin-card" style="margin-top: 20px; border: 2px solid #dc3545; border-radius: 12px; padding: 15px; background: #fff;">
