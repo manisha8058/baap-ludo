@@ -466,50 +466,84 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); window
         </div>
     </div>
 </section>
-  
-<script>
+  <script>
 // ========================================================
-// 🎁 गिफ्ट बॉक्स से मेन वॉलेट में ट्रांसफर करने का लॉजिक (Min ₹100) - FIXED
+// 🎁 मन्नत लूडो स्टाइल 'Redeem Refer Screen' दिखाने और छिपाने का लॉजिक
 // ========================================================
-window.transferReferToMainWallet = async function() {
+window.transferReferToMainWallet = function() {
+    var redeemSection = document.getElementById('mannatReferRedeemSection');
+    if (redeemSection) {
+        // यदि खुला है तो बंद करें, बंद है तो खोलें और स्क्रीन को साफ रखें
+        if (redeemSection.style.display === 'block') {
+            redeemSection.style.display = 'none';
+        } else {
+            redeemSection.style.display = 'block';
+            // स्क्रीन को स्क्रॉल करके सीधे रिडीम बॉक्स पर ले जाएं
+            redeemSection.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+};
+
+// ========================================================
+// 💸 असली रिडीम बटन दबाने पर पैसे ट्रांसफर करने का लाइव लॉजिक (Min 100)
+// ========================================================
+window.submitReferRedeemToMain = async function() {
+    var amountInput = document.getElementById('referRedeemAmountInput');
+    var amtVal = amountInput ? amountInput.value.trim() : '';
+    
+    if (!amtVal || isNaN(amtVal) || parseFloat(amtVal) < 100) { 
+        alert("❌ कम से कम ₹100 रिडीम करना आवश्यक है। कृपया 100 या अधिक अमाउंट डालें।"); 
+        return; 
+    }
+    
+    var client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
+    if (!client) { alert("❌ डेटाबेस कनेक्शन एरर! Supabase कनेक्ट नहीं है।"); return; }
+    
     try {
-        var client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
-        if (!client) { alert("❌ डेटाबेस कनेक्शन एरर! Supabase कनेक्ट नहीं है।"); return; }
-        
         var { data: authRes } = await client.auth.getUser();
         var user = authRes ? authRes.user : null;
         if (!user) { alert("❌ कृपया पहले अपना मोबाइल नंबर और पासवर्ड डालकर लॉगिन करें!"); return; }
         
-        // खिलाड़ी का दोनों लाइव बैलेंस निकालना (maybeSingle का उपयोग ताकि null एरर न आए)
-        var { data: profile, error: pErr } = await client.from('profiles').select('balance, refer_balance').eq('id', user.id).maybeSingle();
+        alert("🔄 रेफरल बैलेंस सिंक और ट्रांसफर हो रहा है, कृपया प्रतीक्षा करें...");
         
-        if (pErr) { alert("❌ प्रोफाइल डेटा लोड करने में एरर आया: " + pErr.message); return; }
+        var { data: profile, error: pErr } = await client.from('profiles').select('*').eq('id', user.id).maybeSingle();
+        if (pErr || !profile) { alert("❌ प्रोफाइल डेटाबेस लोड एरर।"); return; }
         
-        // यदि प्रोफाइल रो (Row) नहीं मिली तो डिफ़ॉल्ट रूप से 0 सेट करें
-        var currentReferBal = profile ? parseFloat(profile.refer_balance || 0) : 0;
-        var currentMainBal = profile ? parseFloat(profile.balance || 0) : 0;
+        var currentReferBal = parseFloat(profile.refer_balance || 0);
         
-        // मिनिमम ₹100 ट्रांसफर करने का मन्नत लूडो नियम
-        if (currentReferBal < 100) {
-            alert("❌ आपके गिफ्ट वॉलेट में कम से कम ₹100 होना अनिवार्य है!\n\nवर्तमान रेफर अर्निंग: ₹" + currentReferBal.toFixed(2));
+        // आपके डेटाबेस में पैसे स्टोर करने वाले सही कॉलम का नाम ढूंढना
+        var mainWalletColumn = 'balance';
+        var currentMainBal = 0;
+        if ('balance' in profile) { currentMainBal = parseFloat(profile.balance || 0); mainWalletColumn = 'balance'; }
+        else if ('coins' in profile) { currentMainBal = parseFloat(profile.coins || 0); mainWalletColumn = 'coins'; }
+        else if ('amount' in profile) { currentMainBal = parseFloat(profile.amount || 0); mainWalletColumn = 'amount'; }
+        else if ('money' in profile) { currentMainBal = parseFloat(profile.money || 0); mainWalletColumn = 'money'; }
+        else if ('cash' in profile) { currentMainBal = parseFloat(profile.cash || 0); mainWalletColumn = 'cash'; }
+        
+        // चेक करें कि खिलाड़ी के पास गिफ्ट बॉक्स में उतने पैसे हैं या नहीं जितना वो निकाल रहा है
+        if (currentReferBal < parseFloat(amtVal)) {
+            alert("❌ आपके पास पर्याप्त रेफर बैलेंस नहीं है!\n\nवर्तमान रेफर बैलेंस: ₹" + currentReferBal.toFixed(2));
             return;
         }
         
-        if (!confirm("🎁 आपके गिफ्ट वॉलेट में ₹" + currentReferBal.toFixed(2) + " हैं। क्या आप इसे अपने मुख्य वॉलेट में ट्रांसफर करना चाहते हैं?")) return;
+        if (!confirm("🎁 क्या आप वाकई अपने रेफर बैलेंस से ₹" + amtVal + " को मेन वॉलेट में ट्रांसफर करना चाहते हैं?")) return;
         
-        // गिफ्ट बैलेंस जीरो करना और मेन वॉलेट में जोड़ना
-        var { error } = await client.from('profiles').update({ 
-            refer_balance: 0, 
-            balance: currentMainBal + currentReferBal 
-        }).eq('id', user.id);
+        // रेफर बैलेंस में से घटाना और मेन वॉलेट कॉलम में जोड़ना
+        var updateData = { refer_balance: currentReferBal - parseFloat(amtVal) };
+        updateData[mainWalletColumn] = currentMainBal + parseFloat(amtVal);
         
-        if (error) throw error;
-        alert("🎉 ₹" + currentReferBal.toFixed(2) + " सफलतापूर्वक आपके मुख्य वॉलेट में ट्रांसफर कर दिए गए हैं! अब आप इसका विड्रॉल ले सकते हैं।");
+        var { error: upErr } = await client.from('profiles').update(updateData).eq('id', user.id);
+        if (upErr) throw upErr;
+        
+        alert("🎉 ₹" + amtVal + " सफलतापूर्वक आपके मुख्य वॉलेट में जोड़ दिए गए हैं! अब आप इसका विड्रॉल ले सकते हैं।");
+        if(amountInput) amountInput.value = '';
+        if(document.getElementById('mannatReferRedeemSection')) document.getElementById('mannatReferRedeemSection').style.display = 'none';
         window.location.reload();
-    } catch (e) { alert("ट्रांसफर फेल: " + e.message); }
+        
+    } catch (e) { alert("रिडीम फेल हुआ: " + e.message); }
 };
 
-// ⚡ रीयल-टाइम गिफ्ट बैलेंस सिंक्रोनाइज़र (हर 3 सेकंड में अपडेट करेगा - एरर प्रूफ)
+// ⚡ रीयल-टाइम गिफ्ट बैलेंस सिंक्रोनाइज़र (हर 3 सेकंड में अपडेट करेगा)
 setInterval(async function() {
     try {
         var client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
@@ -520,14 +554,48 @@ setInterval(async function() {
         var { data: profile } = await client.from('profiles').select('refer_balance').eq('id', authRes.user.id).maybeSingle();
         if (!profile) return;
         
-        // गिफ्ट बॉक्स (रेफर वॉलेट) का बैलेंस ऊपर स्क्रीन पर रिफ्रेश करें
         var referTotalSpan = document.getElementById('mainReferBalanceText');
         if (referTotalSpan) referTotalSpan.innerText = parseFloat(profile.refer_balance || 0).toFixed(2);
     } catch (err) {}
 }, 3000);
 </script>
 
-  
+<!-- ======================================================== -->
+<!-- 100% सेम टू सेम मन्नत लूडो स्टाइल 'Redeem Your Refer Balance' स्क्रीन -->
+<!-- ======================================================== -->
+<div id="mannatReferRedeemSection" style="display: none; background: #9be2f3; border-radius: 20px; padding: 15px; margin: 15px 0; font-family: sans-serif; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 2px solid #ff7284;">
+    
+    <div style="text-align: center; margin-bottom: 15px;">
+        <h3 style="color: #1b0828; margin: 0; font-size: 18px; font-weight: bold;">Redeem Your Refer Balance</h3>
+        <!-- मन्नत लूडो जैसी सुंदर दो दोस्तों वाली कार्टून इमेज का डिज़ाइन इफ़ेक्ट -->
+        <div style="font-size: 55px; margin: 10px 0;">🤝💰🫵</div>
+    </div>
+    
+    <!-- तीन नियमों वाला व्हाइट बॉर्डर बॉक्स -->
+    <div style="background: #fff; border: 1px dashed #6fe6ff; border-radius: 12px; padding: 12px; font-size: 12px; color: #333; line-height: 1.5; margin-bottom: 15px;">
+        <div style="display: flex; gap: 8px; margin-bottom: 8px; align-items: center;">
+            <span>💼</span> <span>TDS (0%) Will Be Deducted After Annual Referral Earning Of ₹ 15,000.</span>
+        </div>
+        <div style="display: flex; gap: 8px; margin-bottom: 8px; align-items: center;">
+            <span>📦</span> <span>Money Will Be Added To Main Wallet Coin.</span>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <span>💼</span> <span>Minimum Withdrawal Amount 🪙 100</span>
+        </div>
+    </div>
+    
+    <!-- एंटर अमाउंट इनपुट बॉक्स -->
+    <div style="margin-bottom: 12px;">
+        <span style="font-size: 11px; color: #d32f2f; font-weight: bold; display: block; margin-bottom: 4px;">Enter Amount (Min: 100, Max: 10000)</span>
+        <input type="number" id="referRedeemAmountInput" placeholder="Enter Amount" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; font-weight: bold; box-sizing: border-box;">
+    </div>
+    
+    <!-- ब्लैक कलर का प्रीमियम मन्नत लूडो रिडीम बटन -->
+    <button type="button" style="width: 100%; background: #000; color: #fff; border: 0; border-radius: 8px; padding: 13px; font-weight: bold; font-size: 15px; cursor: pointer; letter-spacing: 0.5px;" onclick="window.submitReferRedeemToMain()">
+        Redeem
+    </button>
+</div>
+
 <section id="refer" class="page"><div class="content">
 <div class="refer-hero referral-hero-new"><small>REFER &amp; EARN</small><h1>Invite Friends<br><span>Get Rewarded!</span></h1><p>Share your room/invite link with friends and play together in practice mode.</p></div>
 <div class="ref-card">
