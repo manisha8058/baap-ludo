@@ -1194,8 +1194,9 @@ function isAdminUser(){return window.currentUserIsAdmin===true;}function setAdmi
   function renderV6(){
     const balance=Number(v6Wallet?.balance||0), winnings=Number(v6Wallet?.winning_balance||0), bonus=Number(v6Wallet?.bonus_balance||0);
     ['balance'].forEach(id=>{if($(id)) $(id).textContent=balance.toFixed(2)});
-    if($('coinTop')) $('coinTop').textContent=balance.toFixed(2);
-    if($('bonusTop')) $('bonusTop').textContent=bonus.toFixed(2);
+    const coinTopElement = document.getElementById('coinTop');
+if (coinTopElement) coinTopElement.textContent = balance.toFixed(2);
+
     const cash=document.querySelectorAll('#wallet .cash-card .value'); if(cash[0]) cash[0].textContent=money(balance); if(cash[1]) cash[1].textContent=money(winnings);
     const savedName=v6User?.user_metadata?.display_name || v6User?.email?.split('@')[0] || 'Player'; const ph=document.querySelector('#profile .profile-head h2'); if(ph) ph.textContent=savedName+' ✎';
     const details=document.querySelectorAll('#profile .detail b'); if(details[0]) details[0].textContent=savedName; if(details[1]) details[1].textContent=v6User?.email||'';
