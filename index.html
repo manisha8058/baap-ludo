@@ -1627,27 +1627,63 @@ window.submitLudoWinWithScreenshot = async function() {
 window.adjustUserWallet = async function(type) {
     const identifier = document.getElementById('targetUserIdentifier').value.trim();
     const amountVal = document.getElementById('manualWalletAmount').value;
-    if (!identifier || !amountVal || parseFloat(amountVal) <= 0) { alert("❌ कृपया सही यूजर ID/Email और अमाउंट भरें।"); return; }
-    const client = getSupabaseClient(); if (!client) { alert("❌ Supabase कनेक्ट नहीं है।"); return; }
-    if (!confirm(`क्या आप वाकई इस यूजर के वॉलेट में पैसे ${type === 'add' ? 'जोड़ना' : 'घटाना'} चाहते हैं?`)) return;
+    if (!identifier || !amountVal || parseFloat(amountVal) <= 0) { 
+        alert("❌ कृपया सही ईमेल ID और आवश्यक राशि दर्ज करें!"); 
+        return; 
+    }
+    const client = getSupabaseClient();
+    if (!client) { alert("❌ सुपाबेस कनेक्शन त्रुटि!"); return; }
     try {
-        let targetId = identifier; let finalTable = 'profiles'; let currentBalance = 0; let found = false;
-        const possibleTables = ['profiles', 'users'];
-        for (let table of possibleTables) {
-            let query = client.from(table).select('id, balance');
-            if (identifier.includes('@')) query = query.or(`email.eq."${identifier}",user_email.eq."${identifier}"`);
-            else query = query.eq('id', identifier);
-            const { data: resData } = await query.maybeSingle();
-            if (resData) { targetId = resData.id; currentBalance = parseFloat(resData.balance || 0); finalTable = table; found = true; break; }
+        alert("🔄 सुपाबेस मुख्य इंजन में खिलाड़ी की खोज की जा रही है...");
+        
+        let targetUid = null;
+        let targetEmailClean = identifier.toLowerCase().trim();
+
+        const { data: pData, error: pErr } = await client.from('profiles').select('*');
+        if(!pErr && pData) {
+            let foundProf = pData.find(function(r) {
+                return String(r.email).toLowerCase().trim() === targetEmailClean ||
+                       String(r.user_email).toLowerCase().trim() === targetEmailClean ||
+                       String(r.id).trim() === targetEmailClean;
+            });
+            if(foundProf) targetUid = foundProf.id;
         }
-        if (!found) { alert("❌ यह खिलाड़ी प्रोफाइल डेटाबेस में नहीं मिली!"); return; }
-        let nextBalance = type === 'add' ? (currentBalance + parseFloat(amountVal)) : Math.max(0, currentBalance - parseFloat(amountVal));
-        await client.from(finalTable).update({ balance: nextBalance }).eq('id', targetId);
-        alert(`✅ [${finalTable}] में बैलेंस सफलतापूर्वक लाइव अपडेट हुआ! नया बैलेंस: ₹${nextBalance}`);
-        document.getElementById('manualWalletAmount').value = '';
+
+        if (!targetUid && identifier.length > 20) {
+            targetUid = identifier;
+        }
+
+        if (!targetUid) {
+            alert("❌ खिलाड़ी की ईमेल आईडी सुपाबेस सर्वर में नहीं मिली! कृपया सही पंजीकृत ईमेल डालकर प्रयास करें।");
+            return;
+        }
+
+        const { data: currentProf, error: getErr } = await client.from('profiles').select('balance').eq('id', targetUid).maybeSingle();
+        
+        let currentBalance = 0;
+        if (currentProf && currentProf.balance) {
+            currentBalance = parseFloat(currentProf.balance);
+        }
+
+        const nextBalance = type === 'add' ? (currentBalance + parseFloat(amountVal)) : Math.max(0, currentBalance - parseFloat(amountVal));
+
+        const { error: updateErr } = await client.from('profiles').upsert({ 
+            id: targetUid, 
+            user_email: targetEmailClean,
+            email: targetEmailClean,
+            balance: nextBalance 
+        }, { onConflict: 'id' });
+
+        if (updateErr) throw updateErr;
+
+        alert("🎉 सफलतापूर्वक बैलेंस अपडेट हुआ! नया लाइव बैलेंस: ₹" + nextBalance.toFixed(2));
+        document.getElementById('manualWalletAmount').value = "";
         window.location.reload();
-    } catch(e) { alert("एरर: " + e.message); }
+    } catch(e) {
+        alert("❌ एरर: " + e.message);
+    }
 };
+
 
 // 2. एडमिन डिपॉजिट रिक्वेस्ट लोड और प्रोसेस करना
 window.fetchAdminDeposits = async function() {
