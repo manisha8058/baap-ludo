@@ -959,10 +959,42 @@ setInterval(async function() {
 <div class="drawer-item" onclick="logout()">🚪 Logout <button>›</button></div>
 </aside>
 <script>
-const battles=[['Play Room','100','180'],['Classic Play','200','360'],['Quick Match','50','90']];
-const running=[['Player 1','Player 2','100','180'],['Player 3','Player 4','200','360']];
-function openBattles(){document.getElementById('openBattles').innerHTML=battles.map(x=>`<div class="battle"><div class="battle-info"><span class="tag">LIVE</span><strong>${x[0]}</strong><div class="labels"><div>PLAY POINTS<b>₹${x[1]}</b></div><div>WINNING PRIZE<b class="prize">₹${x[2]}</b></div></div></div><button class="btn blue" onclick="play('${x[1]}')">Play</button></div>`).join('')}
-function runningHtml(x){return `<div class="running"><div class="playing">Playing For: <span class="names">${x[0]} &nbsp; <i>&</i> &nbsp; ${x[1]}</span></div><div class="running-row"><div class="money"><small>PLAY POINTS</small><b>₹ ${x[2]}</b></div><div class="controller">🎮</div><div class="money"><small>WINNING PRIZE</small><b>₹ ${x[3]}</b></div></div></div>`}
+const battles = [];
+const running = [];
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        const client = getSupabaseClient();
+        if (client) {
+            // सीधे सुपाबेस की 'battles' टेबल से लाइव मैच लोड करें
+            const { data: openMatches } = await client.from('battles').select('*').eq('status', 'Open');
+            const openListContainer = document.getElementById('openBattles') || document.getElementById('liveOpenBattlesList');
+            
+            if (openListContainer) {
+                if (!openMatches || openMatches.length === 0) {
+                    openListContainer.innerHTML = `<div style="text-align:center; padding:20px; color:#aaa; font-size:14px; background:#100018; border-radius:10px;">🎮 अभी कोई लाइव मैच उपलब्ध नहीं है। नया मैच सेट करें!</div>`;
+                } else {
+                    let htmlContent = '';
+                    openMatches.forEach(match => {
+                        const entry = parseFloat(match.entry_fee || 0);
+                        const prize = entry * 1.95; // 1.95 गुना लाइव प्राइज़ गणित फिक्स
+                        htmlContent += `
+                            <div class="battle" style="background:#160729; border:2px solid #ff7284; border-radius:15px; padding:15px; margin:10px 0; display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%;">
+                                <div style="flex:1; text-align:left;">
+                                    <span style="background:#ff7284; color:#fff; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:bold;">LIVE PLAY</span>
+                                    <div style="margin-top:8px; font-size:15px; font-weight:bold; color:#fff;">🪙 Entry: ₹${entry}</div>
+                                    <div style="color:#20d85c; font-size:14px; font-weight:bold; margin-top:4px;">🎁 Win Prize: ₹${prize.toFixed(2)}</div>
+                                </div>
+                                <button type="button" class="btn blue" style="min-width:90px; border-radius:8px; padding:10px; color:#fff; font-weight:bold;" onclick="window.joinLudoBattle('${match.id}')">Play 🎮</button>
+                            </div>
+                        `;
+                    });
+                    openListContainer.innerHTML = htmlContent;
+                }
+            }
+        }
+    } catch(e) { console.log(e.message); }
+});
+
 function go(id,btn){
   if(id==='admin' && !window.currentUserIsAdmin){ alert('Admin access required'); return; }
   if(id==='profile'){
