@@ -1177,7 +1177,29 @@ function toggleFaq(btn){
 
 async function adminCall(fn,args){const {data,error}=await supabaseClient.rpc(fn,args||{});if(error){alert(error.message);throw error;}return data;}
 function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
-async function adminCreateBattle(){const title=document.getElementById('adminBattleTitle').value.trim()||'Ludo Battle';const entry=Number(document.getElementById('adminEntry').value),prize=Number(document.getElementById('adminPrize').value),status=document.getElementById('adminStatus').value;if(entry<=0||prize<=0){alert('Entry fee और prize भरें');return;}await adminCall('admin_create_battle',{p_title:title,p_entry_fee:entry,p_prize:prize,p_status:status});await loadAdminData();}
+async function adminCreateBattle(){
+    const entry = Number(document.getElementById('adminEntry').value);
+    
+    // 🛑 1. मिनिमम ₹50 का सुरक्षा नियम
+    if (entry < 50) {
+        alert('❌ मन्नत लूडो नियम: आप कम से कम ₹50 या उससे ऊपर की ही बैटल टेबल सेट कर सकते हैं!');
+        return;
+    }
+    
+    // 💰 2. 1.95 गुना गणित फिक्स (₹100 एंट्री फीस = ₹195 विनिंग प्राइज़) [u0SfB1]
+    const prize = entry * 1.95; 
+    const title = document.getElementById('adminBattleTitle').value.trim() || 'Ludo Battle';
+    const status = document.getElementById('adminStatus').value;
+    
+    try {
+        await adminCall('admin_create_battle',{p_title:title,p_entry_fee:entry,p_prize:prize,p_status:status});
+        alert('🎉 एडमिन पैनल से नया मैच सफलतापूर्वक लाइव सेट हो गया है!');
+        await loadAdminData();
+    } catch(e) {
+        alert('❌ एरर: ' + e.message);
+    }
+}
+
 async function adminAdjustWallet(id){const amount=Number(prompt('Wallet adjustment (+ credit / - debit):','0'));if(!Number.isFinite(amount)||amount===0)return;const reason=prompt('Reason:','Admin adjustment')||'Admin adjustment';await adminCall('admin_adjust_wallet',{p_user_id:id,p_amount:amount,p_reason:reason});await loadAdminData();}
 async function adminResetPassword(id,name){
   const password=prompt('New password for '+name+' (minimum 8 characters):','');
