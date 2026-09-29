@@ -1180,17 +1180,49 @@ function isAdminUser(){return window.currentUserIsAdmin===true;}function setAdmi
   const $=id=>document.getElementById(id);
   const money=n=>'₹'+Number(n||0).toFixed(2);
   async function refreshV6(){
-    const {data:{session}}=await supabaseClient.auth.getSession();
-    v6User=session?.user||null; window.v6User=v6User;
-    if(!v6User){ $('loginScreen').style.display='flex'; return; }
-    $('loginScreen').style.display='none';
-    const pr=await supabaseClient.from('profiles').select('*').eq('id',v6User.id).maybeSingle();
-    v6Profile=pr.data||null;
-    const w=await supabaseClient.from('wallets').select('*').eq('user_id',v6User.id).maybeSingle();
-    v6Wallet=w.data||null;
-    renderV6();
-    setAdminVisibility(v6User.email, v6Profile?.role==='admin');
-  }
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        var vUser = session ? session.user : null; window.vUser = vUser;
+        if (!vUser) { if(document.getElementById('loginScreen')) document.getElementById('loginScreen').style.display = 'flex'; return; }
+        if(document.getElementById('loginScreen')) document.getElementById('loginScreen').style.display = 'none';
+        
+        const { data: prData } = await supabaseClient.from('profiles').select('*').eq('id', vUser.id).maybeSingle();
+        vProfile = prData; window.vProfile = prData;
+        
+        // 🛠️ एडमिन विजिबिलिटी इंजन (इसे वापस चालू किया गया ताकि एडमिन पैनल वापस आ जाए)
+        if(vUser && vUser.email === "meenaankita4482@gmail.com") {
+            if(document.getElementById('drawerAdminBtn')) document.getElementById('drawerAdminBtn').style.display = 'block';
+            var admBtn = document.querySelector('.quick-grid .quick-btn[onclick*="Admin"]');
+            if(admBtn) admBtn.style.display = 'block';
+            var admBox = document.getElementById('admin');
+            if(admBox) setAdminVisibility(vUser.email, true);
+        } else if(vProfile && vProfile.role === 'admin') {
+            setAdminVisibility(vUser.email, true);
+        } else {
+            setAdminVisibility(vUser.email, false);
+        }
+        
+        renderV6();
+    } catch(e) { alert("🔄 रीफ्रेश एरर: " + e.message); }
+}
+
+function renderV6() {
+    // 1. सीधे प्रोफाइल्स टेबल के लाइव बैलेंस को निकालें
+    const balance = vProfile ? parseFloat(vProfile.balance || 0) : 0;
+    const winnings = vProfile ? parseFloat(vProfile.winnings_balance || 0) : 0;
+    const bonus = vProfile ? parseFloat(vProfile.bonus_balance || 0) : 0;
+
+    // 2. बड़े डिब्बों का बैलेंस सेट करें
+    document.querySelectorAll('#balance, [id*="balance"]').forEach(el => {
+        el.textContent = balance.toFixed(2);
+    });
+
+    // 3. ऊपर नीले वाले छोटे डिब्बे (Header Pill) को 100% पक्का सिंक करें
+    const coinTopElement = document.getElementById('coinTop');
+    if (coinTopElement) {
+        coinTopElement.textContent = balance.toFixed(2);
+    }
+}
+
 function renderV6() {
     // 1. सीधे प्रोफाइल्स टेबल के लाइव बैलेंस को निकालें
     const balance = vProfile ? parseFloat(vProfile.balance || 0) : 0;
