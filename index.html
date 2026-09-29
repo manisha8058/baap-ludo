@@ -1200,30 +1200,7 @@ function isAdminUser(){return window.currentUserIsAdmin===true;}function setAdmi
         } else {
             setAdminVisibility(vUser.email, false);
         }
-        
-        renderV6();
-    } catch(e) { alert("🔄 रीफ्रेश एरर: " + e.message); }
-}
-
-function renderV6() {
-    // 1. सीधे प्रोफाइल्स टेबल के लाइव बैलेंस को निकालें
-    const balance = vProfile ? parseFloat(vProfile.balance || 0) : 0;
-    const winnings = vProfile ? parseFloat(vProfile.winnings_balance || 0) : 0;
-    const bonus = vProfile ? parseFloat(vProfile.bonus_balance || 0) : 0;
-
-    // 2. बड़े डिब्बों का बैलेंस सेट करें
-    document.querySelectorAll('#balance, [id*="balance"]').forEach(el => {
-        el.textContent = balance.toFixed(2);
-    });
-
-    // 3. ऊपर नीले वाले छोटे डिब्बे (Header Pill) को 100% पक्का सिंक करें
-    const coinTopElement = document.getElementById('coinTop');
-    if (coinTopElement) {
-        coinTopElement.textContent = balance.toFixed(2);
-    }
-}
-
-function renderV6() {
+        function renderV6() {
     // 1. सीधे प्रोफाइल्स टेबल के लाइव बैलेंस को निकालें
     const balance = vProfile ? parseFloat(vProfile.balance || 0) : 0;
     const winnings = vProfile ? parseFloat(vProfile.winnings_balance || 0) : 0;
