@@ -1026,7 +1026,51 @@ function play(amount){
   document.getElementById('playRoomMessage').textContent='';
 }
 function showClassicBattles(){const box=document.getElementById('classicContent');if(box){box.style.display='block';box.scrollIntoView({behavior:'smooth',block:'start'});}}
-function setAmount(){alert('Amount filter : '+(document.getElementById('amount').value||'all'))}
+async function setAmount(amt) {
+    // बॉक्स में खिलाड़ी द्वारा लिखी गई राशि निकालें
+    const amountInput = document.getElementById('amount');
+    const amountVal = amountInput ? parseFloat(amountInput.value.trim()) : parseFloat(amt);
+    
+    // 🛑 1. मिनिमम ₹50 का सुरक्षा नियम (खिलाड़ी ₹50 से कम का मैच नहीं बना पाएगा)
+    if (!amountVal || isNaN(amountVal) || amountVal < 50) { 
+        alert("❌ मन्नत लूडो नियम: आप कम से कम ₹50 या उससे ऊपर की ही बैटल टेबल सेट कर सकते हैं!"); 
+        return; 
+    }
+    
+    try {
+        alert("🔄 आपकी बैटल टेबल डेटाबेस में सेट की जा रही है...");
+        const client = getSupabaseClient();
+        if (!client) { alert("❌ सुपाबेस कनेक्शन त्रुटि!"); return; }
+
+        // 2. खिलाड़ी का लाइव बैलेंस चेक करें
+        const { data: authRes } = await client.from('profiles').select('balance').eq('id', window.vUser.id).single();
+        if (!authRes || parseFloat(authRes.balance || 0) < amountVal) { 
+            alert("❌ आपके वॉलेट में पर्याप्त बैलेंस नहीं है! कृपया पहले डिपॉजिट करें।"); 
+            return; 
+        }
+        
+        // 3. 1.95 गुना गणित फिक्स (₹100 एंट्री फीस = ₹195 विनिंग प्राइज़)
+        const calculatePrize = amountVal * 1.95;
+        
+        // 4. सुपाबेस की 'battles' टेबल में नया मैच लाइव दर्ज करें
+        const { error: insertErr } = await client.from('battles').insert([{ 
+            creator_id: window.vUser.id, 
+            creator_email: window.vUser.email, 
+            entry_fee: amountVal, 
+            winning_prize: calculatePrize, 
+            status: 'Open' 
+        }]);
+        
+        if (insertErr) throw insertErr;
+        
+        alert("⚔️ आपकी बैटल सफलतापूर्वक लाइव हो गई है!"); 
+        if (amountInput) amountInput.value = ''; 
+        window.location.reload();
+    } catch(e) { 
+        alert("❌ मैच क्रिएशन फेल: " + e.message); 
+    }
+}
+
 function getReferralLink(){
   const base=(window.location.origin && window.location.origin!=='null') ? window.location.origin + window.location.pathname : 'https://baapludo.com/';
   return base + '?ref=804858';
