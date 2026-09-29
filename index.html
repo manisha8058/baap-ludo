@@ -1058,20 +1058,11 @@ async function login() {
         email, password: pass,
         options: { data: { referral_code: (document.getElementById('referralCode')?.value.trim() || null) } }
       });
-      if (result.error) { alert('Registration failed: ' + result.error.message); return; }
-      if (!result.data?.session) {
-        alert('Account create ho gaya. Agar email confirmation ON hai, pehle email verify karein, phir Login karein.');
-        setLoginMode();
-        return;
-      }
-    } else {
-      result = await supabaseClient.auth.signInWithPassword({email, password:pass});
-      if (result.error) {
-        const msg=String(result.error.message||'').toLowerCase();
-        if (msg.includes('invalid login credentials')) {
-          alert('Login details galat hain ya account/password match nahi ho raha. New user hain to Create account karein, ya Forgot password use karein.');
-        } else { alert('Login failed: ' + result.error.message); }
-        return;
+              if (result.error) {
+            alert("❌ लॉगिन फेल: आपकी ईमेल आईडी या पासवर्ड गलत है! कृपया सही विवरण दर्ज करें।");
+            return;
+        }
+
       }
     }
 
