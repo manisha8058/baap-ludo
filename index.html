@@ -961,6 +961,106 @@ setInterval(async function() {
 <script>
 const battles = [];
 const running = [];
+  // 🎮 1. दूसरे खिलाड़ी द्वारा मैच जॉइन करने का लाइव फंक्शन फिक्स
+window.joinLudoBattle = async function(matchId) {
+    if (!window.vUser) { alert("❌ कृपया पहले अपना अकाउंट लॉगिन करें!"); return; }
+    if (!confirm("क्या आप इस बैटल मैच को जॉइन करना चाहते हैं?")) return;
+    
+    try {
+        const client = getSupabaseClient();
+        // मैच की डिटेल्स और जॉइनर का बैलेंस चेक करें
+        const { data: match } = await client.from('battles').select('*').eq('id', matchId).single();
+        const { data: p } = await client.from('profiles').select('balance').eq('id', window.vUser.id).single();
+        
+        if (parseFloat(p.balance || 0) < parseFloat(match.entry_fee)) {
+            alert("❌ आपके वॉलेट में पर्याप्त बैलेंस नहीं है! कृपया पहले डिपॉजिट करें।");
+            return;
+        }
+        if (match.creator_id === window.vUser.id) {
+            alert("❌ आप खुद का ही बनाया हुआ मैच जॉइन नहीं कर सकते!");
+            return;
+        }
+
+        // जॉइनर के पैसे काटें और मैच को Running स्टेटस में अपडेट करें
+        await client.from('profiles').update({ balance: parseFloat(p.balance || 0) - parseFloat(match.entry_fee) }).eq('id', window.vUser.id);
+        await client.from('battles').update({ 
+            status: 'Running', 
+            joiner_id: window.vUser.id, 
+            joiner_email: window.vUser.email 
+        }).eq('id', matchId);
+
+        alert("🎉 मैच सफलतापूर्वक जॉइन हो गया! अब रूम कोड डालें या प्राप्त करें।");
+        window.location.reload();
+    } catch(e) { alert("❌ जॉइनिंग एरर: " + e.message); }
+};
+
+// 🔑 2. लूडो किंग रूम कोड देने और लेने का लाइव रीयल-टाइम रेंडरर
+window.syncRoomCodeSystem = async function() {
+    try {
+        const client = getSupabaseClient();
+        if (!client || !window.vUser) return;
+
+        // डेटाबेस से चेक करें कि यूज़र किसी रनिंग मैच में है या नहीं
+        const { data: runningMatches } = await client.from('battles')
+            .select('*')
+            .eq('status', 'Running');
+
+        const runningBox = document.getElementById('liveRunningBattlesList');
+        if (!runningBox) return;
+
+        // यूज़र से संबंधित मैच खोजें (चाहे उसने बनाया हो या जॉइन किया हो)
+        let myMatch = runningMatches ? runningMatches.find(m => m.creator_id === window.vUser.id || m.joiner_id === window.vUser.id) : null;
+
+        if (!myMatch) {
+            runningBox.innerHTML = `<div style="text-align:center; padding:12px; color:#aaa; font-size:13px;">🎮 वर्तमान में आपका कोई मैच लाइव रनिंग नहीं है।</div>`;
+            return;
+        }
+
+        const isCreator = myMatch.creator_id === window.vUser.id;
+        const currentCode = myMatch.room_code || '';
+
+        let codeHtml = '';
+
+        if (isCreator) {
+            // 👑 रूम कोड देने वाला (Challenger/Creator) का बॉक्स
+            codeHtml = `
+                <div style="background:#1a0628; border:2px dashed #399aff; border-radius:12px; padding:15px; margin-top:10px; text-align:center;">
+                    <h4 style="margin:0 0 10px; color:#399aff;">🔑 लूडो किंग रूम कोड सबमिट करें</h4>
+                    <input type="text" id="dbRoomCodeInput" placeholder="8 अंकों का कोड दर्ज करें" value="${currentCode}" maxlength="8" style="width:100%; padding:10px; text-align:center; color:#000; font-weight:bold; border-radius:6px; border:0; margin-bottom:10px;">
+                    <button type="button" class="btn blue" style="width:100%;" onclick="window.submitLudoRoomCode('${myMatch.id}')">कोड सबमिट करें (Set Code)</button>
+                </div>
+            `;
+        } else {
+            // 👤 ROOM CODE लेने वाला (Joiner) का बॉक्स
+            codeHtml = `
+                <div style="background:#1a0628; border:2px dashed #20d85c; border-radius:12px; padding:15px; margin-top:10px; text-align:center;">
+                    <h4 style="margin:0 0 10px; color:#20d85c;">📥 चैलेंजर से रूम कोड प्राप्त करें</h4>
+                    <div style="background:#fff; color:#000; padding:12px; font-size:20px; font-weight:bold; border-radius:6px; letter-spacing:2px; margin-bottom:10px;">
+                        ${currentCode ? currentCode : '<span style="color:#888; font-size:14px; font-weight:normal; letter-spacing:0;">⏳ चैलेंजर कोड डाल रहा है, इंतजार करें...</span>'}
+                    </div>
+                    ${currentCode ? `<button type="button" class="btn green" style="width:100%;" onclick="navigator.clipboard.writeText('\${currentCode}'); alert('📋 रूम कोड कॉपी हो गया! लूडो किंग ऐप में पेस्ट करें।');">कोड कॉपी करें (Copy Code)</button>` : ''}
+                </div>
+            `;
+        }
+        runningBox.innerHTML = codeHtml;
+    } catch(e) { console.log(e.message); }
+};
+
+// ✍️ 3. रूम कोड सुपाबेस में सेव करने का फंक्शन
+window.submitLudoRoomCode = async function(matchId) {
+    const codeVal = document.getElementById('dbRoomCodeInput').value.trim();
+    if (codeVal.length < 6 || isNaN(codeVal)) { alert("❌ कृपया वैध लूडो किंग रूम कोड दर्ज करें!"); return; }
+    try {
+        const client = getSupabaseClient();
+        await client.from('battles').update({ room_code: codeVal }).eq('id', matchId);
+        alert("🎉 रूम कोड सफलतापूर्वक लाइव अपडेट हो गया है! विरोधी खिलाड़ी इसे अब देख सकता है।");
+        window.location.reload();
+    } catch(e) { alert(e.message); }
+};
+
+// बैकग्राउंड में हर 3 सेकंड में रूम कोड का स्टेटस ऑटो-सिंक करें
+setInterval(() => { if(typeof window.syncRoomCodeSystem === 'function') window.syncRoomCodeSystem(); }, 3000);
+
 document.addEventListener('DOMContentLoaded', async function() {
     try {
         const client = getSupabaseClient();
