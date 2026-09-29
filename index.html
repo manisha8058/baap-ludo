@@ -1191,17 +1191,24 @@ function isAdminUser(){return window.currentUserIsAdmin===true;}function setAdmi
     renderV6();
     setAdminVisibility(v6User.email, v6Profile?.role==='admin');
   }
-  function renderV6(){
-    const balance=Number(v6Wallet?.balance||0), winnings=Number(v6Wallet?.winning_balance||0), bonus=Number(v6Wallet?.bonus_balance||0);
-    ['balance'].forEach(id=>{if($(id)) $(id).textContent=balance.toFixed(2)});
-    const coinTopElement = document.getElementById('coinTop');
-if (coinTopElement) coinTopElement.textContent = balance.toFixed(2);
+function renderV6() {
+    // 1. सीधे प्रोफाइल्स टेबल के लाइव बैलेंस को निकालें
+    const balance = vProfile ? parseFloat(vProfile.balance || 0) : 0;
+    const winnings = vProfile ? parseFloat(vProfile.winnings_balance || 0) : 0;
+    const bonus = vProfile ? parseFloat(vProfile.bonus_balance || 0) : 0;
 
-    const cash=document.querySelectorAll('#wallet .cash-card .value'); if(cash[0]) cash[0].textContent=money(balance); if(cash[1]) cash[1].textContent=money(winnings);
-    const savedName=v6User?.user_metadata?.display_name || v6User?.email?.split('@')[0] || 'Player'; const ph=document.querySelector('#profile .profile-head h2'); if(ph) ph.textContent=savedName+' ✎';
-    const details=document.querySelectorAll('#profile .detail b'); if(details[0]) details[0].textContent=savedName; if(details[1]) details[1].textContent=v6User?.email||'';
-    const k=document.querySelector('#profile .kyc'); if(k){const ok=v6Profile?.kyc_status==='verified'; k.textContent='📱 KYC Status: '+(ok?'Verified ✓':'Not Verified ❌'); k.style.color=ok?'#168b50':'#e53935';}
-  }
+    // 2. बड़े डिब्बों का बैलेंस सेट करें (जो पहले से काम कर रहा है)
+    document.querySelectorAll('#balance, [id*="balance"]').forEach(el => {
+        el.textContent = balance.toFixed(2);
+    });
+
+    // 3. ऊपर नीले वाले छोटे डिब्बे (Header Pill) को 100% पक्का सिंक करें
+    const coinTopElement = document.getElementById('coinTop');
+    if (coinTopElement) {
+        coinTopElement.textContent = balance.toFixed(2);
+    }
+}
+
   window.v6LoadHistory=async function(){
     const box=document.querySelector('#history .content'); if(!box||!v6User)return;
     const {data,error}=await supabaseClient.from('wallet_transactions').select('id,type,amount,status,created_at,description').eq('user_id',v6User.id).order('created_at',{ascending:false}).limit(50);
