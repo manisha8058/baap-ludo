@@ -998,53 +998,56 @@ window.joinLudoBattle = async function(matchId) {
 window.syncRoomCodeSystem = async function() {
     try {
         const client = getSupabaseClient();
-        if (!client || !window.vUser) return;
+        if (!client) return;
 
-        // डेटाबेस से चेक करें कि यूज़र किसी रनिंग मैच में है या नहीं
-        const { data: runningMatches } = await client.from('battles')
-            .select('*')
-            .eq('status', 'Running');
+        // सीधे सुपाबेस के लाइव सेशन से वर्तमान यूज़र की असली आईडी निकालें
+        const { data: { session } } = await client.auth.getSession();
+        const currentUser = session ? session.user : window.vUser;
+        if (!currentUser) return;
 
+        // डेटाबेस से सभी रनिंग मैच चेक करें
+        const { data: runningMatches } = await client.from('battles').select('*').eq('status', 'Running');
         const runningBox = document.getElementById('liveRunningBattlesList');
         if (!runningBox) return;
 
-        // यूज़र से संबंधित मैच खोजें (चाहे उसने बनाया हो या जॉइन किया हो)
-        let myMatch = runningMatches ? runningMatches.find(m => m.creator_id === window.vUser.id || m.joiner_id === window.vUser.id) : null;
+        // वर्तमान लॉगिन खिलाड़ी से संबंधित मैच खोजें
+        let myMatch = runningMatches ? runningMatches.find(m => m.creator_id === currentUser.id || m.joiner_id === currentUser.id) : null;
 
         if (!myMatch) {
-            runningBox.innerHTML = `<div style="text-align:center; padding:12px; color:#aaa; font-size:13px;">🎮 वर्तमान में आपका कोई मैच लाइव रनिंग नहीं है।</div>`;
+            runningBox.innerHTML = `<div style="text-align:center; padding:15px; color:#aaa; font-size:13px; background:#100018; border-radius:10px; margin-top:10px;">🎮 वर्तमान में आपका कोई मैच लाइव रनिंग नहीं है।</div>`;
             return;
         }
 
-        const isCreator = myMatch.creator_id === window.vUser.id;
+        const isCreator = myMatch.creator_id === currentUser.id;
         const currentCode = myMatch.room_code || '';
 
         let codeHtml = '';
 
         if (isCreator) {
-            // 👑 रूम कोड देने वाला (Challenger/Creator) का बॉक्स
+            // 👑 रूम कोड देने वाला (Challenger/Creator) का इनपुट बॉक्स
             codeHtml = `
-                <div style="background:#1a0628; border:2px dashed #399aff; border-radius:12px; padding:15px; margin-top:10px; text-align:center;">
-                    <h4 style="margin:0 0 10px; color:#399aff;">🔑 लूडो किंग रूम कोड सबमिट करें</h4>
-                    <input type="text" id="dbRoomCodeInput" placeholder="8 अंकों का कोड दर्ज करें" value="${currentCode}" maxlength="8" style="width:100%; padding:10px; text-align:center; color:#000; font-weight:bold; border-radius:6px; border:0; margin-bottom:10px;">
-                    <button type="button" class="btn blue" style="width:100%;" onclick="window.submitLudoRoomCode('${myMatch.id}')">कोड सबमिट करें (Set Code)</button>
+                <div style="background:#160729; border:2px dashed #399aff; border-radius:12px; padding:15px; margin-top:10px; text-align:center; width:100%;">
+                    <h4 style="margin:0 0 10px; color:#399aff; font-size:15px;">🔑 लूडो किंग रूम कोड सबमिट करें</h4>
+                    <input type="text" id="dbRoomCodeInput" placeholder="8 अंकों का कोड दर्ज करें" value="${currentCode}" maxlength="8" style="width:100%; padding:12px; text-align:center; color:#000; font-weight:bold; border-radius:8px; border:0; margin-bottom:10px; font-size:16px;">
+                    <button type="button" class="btn blue" style="width:100%; font-weight:bold;" onclick="window.submitLudoRoomCode('${myMatch.id}')">कोड सबमिट करें (Set Code)</button>
                 </div>
             `;
         } else {
-            // 👤 ROOM CODE लेने वाला (Joiner) का बॉक्स
+            // 👤 रूम कोड लेने वाला (Joiner) का बॉक्स
             codeHtml = `
-                <div style="background:#1a0628; border:2px dashed #20d85c; border-radius:12px; padding:15px; margin-top:10px; text-align:center;">
-                    <h4 style="margin:0 0 10px; color:#20d85c;">📥 चैलेंजर से रूम कोड प्राप्त करें</h4>
-                    <div style="background:#fff; color:#000; padding:12px; font-size:20px; font-weight:bold; border-radius:6px; letter-spacing:2px; margin-bottom:10px;">
-                        ${currentCode ? currentCode : '<span style="color:#888; font-size:14px; font-weight:normal; letter-spacing:0;">⏳ चैलेंजर कोड डाल रहा है, इंतजार करें...</span>'}
+                <div style="background:#160729; border:2px dashed #20d85c; border-radius:12px; padding:15px; margin-top:10px; text-align:center; width:100%;">
+                    <h4 style="margin:0 0 10px; color:#20d85c; font-size:15px;">📥 चैलेंजर से रूम कोड प्राप्त करें</h4>
+                    <div style="background:#fff; color:#000; padding:12px; font-size:22px; font-weight:bold; border-radius:8px; letter-spacing:2px; margin-bottom:10px; box-shadow:inset 0 0 5px #ccc;">
+                        ${currentCode ? currentCode : '<span style="color:#e74c3c; font-size:13px; font-weight:normal; letter-spacing:0;">⏳ चैलेंजर कोड डाल रहा है, थोड़ा इंतजार करें...</span>'}
                     </div>
-                    ${currentCode ? `<button type="button" class="btn green" style="width:100%;" onclick="navigator.clipboard.writeText('\${currentCode}'); alert('📋 रूम कोड कॉपी हो गया! लूडो किंग ऐप में पेस्ट करें।');">कोड कॉपी करें (Copy Code)</button>` : ''}
+                    ${currentCode ? `<button type="button" class="btn green" style="width:100%; font-weight:bold;" onclick="navigator.clipboard.writeText('\${currentCode}'); alert('📋 रूम कोड कॉपी हो गया! लूडो किंग ऐप में पेस्ट करें।');">कोड कॉपी करें (Copy Code)</button>` : ''}
                 </div>
             `;
         }
         runningBox.innerHTML = codeHtml;
     } catch(e) { console.log(e.message); }
 };
+
 
 // ✍️ 3. रूम कोड सुपाबेस में सेव करने का फंक्शन
 window.submitLudoRoomCode = async function(matchId) {
