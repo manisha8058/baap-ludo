@@ -1087,8 +1087,9 @@ async function login() {
     }
 
     document.getElementById('loginScreen').style.display='none';
-    const adminProfile=await supabaseClient.from('profiles').select('role').eq('id',user.id).maybeSingle();
-    setAdminVisibility(user.email||email,adminProfile.data?.role==='admin');
+    setAdminVisibility(vUser.email, true);
+if(typeof secAdminVisibility === 'function') secAdminVisibility(vUser.email, true);
+
     if(typeof refreshV6==='function') await refreshV6();
     alert(registerMode?'Account created successfully':'Login successful');
   } catch(e) { console.error(e); alert('Connection/Auth error: ' + (e?.message || e)); }
