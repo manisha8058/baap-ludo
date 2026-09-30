@@ -1044,7 +1044,17 @@ window.syncRoomCodeSystem = async function() {
                 </div>
             `;
         }
-        runningBox.innerHTML = codeHtml;
+                runningBox.innerHTML = codeHtml;
+
+        // 🚀 खिलाड़ियों को सीधे प्रीमियम 'View Game' इंटरफ़ेस स्क्रीन पर रीडायरेक्ट करें
+        const viewGameBox = document.getElementById('viewGameScreen') || document.getElementById('viewGame') || document.getElementById('gameView');
+        if (viewGameBox) {
+            viewGameBox.style.display = 'block';
+            // होम स्क्रीन के बाकी ओपन मैचों को बैकग्राउंड में छिपाएं
+            const homeBox = document.getElementById('homeContent') || document.getElementById('mainContent') || document.getElementById('home');
+            if (homeBox) homeBox.style.display = 'none';
+        }
+      
     } catch(e) { console.log(e.message); }
 };
 
