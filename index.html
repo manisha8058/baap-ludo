@@ -1135,7 +1135,13 @@ window.submitLudoRoomCode = async function(matchId) {
 setInterval(() => { if(typeof window.syncRoomCodeSystem === 'function') window.syncRoomCodeSystem(); }, 3000);
 
 document.addEventListener('DOMContentLoaded', async function() {
-    try {
+    // 🔄 यह इंजन हर 3 सेकंड में बिना पेज रीफ्रेश किए ओपन और रनिंग दोनों मैचों को लाइव स्क्रीन पर दिखाएगा
+    setInterval(async function() {
+        if (typeof window.syncRoomCodeSystem === 'function') {
+            await window.syncRoomCodeSystem();
+        }
+    }, 3000);
+
         const client = getSupabaseClient();
         if (client) {
             // सीधे सुपाबेस की 'battles' टेबल से लाइव मैच लोड करें
