@@ -1020,19 +1020,25 @@ window.createNewLudoBattle = async function() {
         alert("❌ मैच क्रिएशन फेल: " + (e.message || e));
     }
 };
-
 window.joinLudoBattle = async function(matchId) {
     if (!window.vUser) { alert("❌ कृपया पहले अपना अकाउंट लॉगिन करें!"); return; }
     if (!confirm("क्या आप इस बैटल मैच को जॉइन करना चाहते हैं?")) return;
     
     try {
         const client = getSupabaseClient();
-        // मैच की डिटेल्स और जॉइनर का बैलेंस चेक करें
-        const { data: match } = await client.from('battles').select('*').eq('id', matchId).single();
-        const { data: p } = await client.from('profiles').select('balance').eq('id', window.vUser.id).single();
-        if (!match || parseFloat(match.entry_fee || 0) < 50) { alert("❌ यह मैच ₹50 minimum entry rule को पूरा नहीं करता।"); return; }
+        if (!client) { alert("❌ डेटाबेस कनेक्शन त्रुटि!"); return; }
+
+        // 1. मैच की डिटेल्स और जॉइन करने वाले खिलाड़ी का लाइव बैलेंस निकालें
+        const { data: match, error: mErr } = await client.from('battles').select('*').eq('id', matchId).single();
+        if (mErr || !match) { alert("❌ यह मैच अब उपलब्ध नहीं है!"); return; }
         
-        if (parseFloat(p.balance || 0) < parseFloat(match.entry_fee)) {
+        const { data: pJoiner, error: pErr } = await client.from('profiles').select('balance').eq('id', window.vUser.id).single();
+        if (pErr || !pJoiner) { alert("❌ खिलाड़ी प्रोफाइल लोड नहीं हो सकी!"); return; }
+
+        const entryFee = parseFloat(match.entry_fee || 0);
+
+        // 2. सुरक्षा जांच
+        if (parseFloat(pJoiner.balance || 0) < entryFee) {
             alert("❌ आपके वॉलेट में पर्याप्त बैलेंस नहीं है! कृपया पहले डिपॉजिट करें।");
             return;
         }
@@ -1041,19 +1047,26 @@ window.joinLudoBattle = async function(matchId) {
             return;
         }
 
-        // जॉइनर के पैसे काटें और मैच को Running स्टेटस में अपडेट करें
-        await client.from('profiles').update({ balance: parseFloat(p.balance || 0) - parseFloat(match.entry_fee) }).eq('id', window.vUser.id);
-        await client.from('battles').update({ 
+        // 💰 3. जादुई फिक्स: जॉइन करने वाले दूसरे खिलाड़ी के वॉलेट से भी तुरंत पैसा काटें
+        const newJoinerBalance = parseFloat(pJoiner.balance || 0) - entryFee;
+        const { error: walletErr } = await client.from('profiles').update({ balance: newJoinerBalance }).eq('id', window.vUser.id);
+        if (walletErr) throw walletErr;
+
+        // 📝 4. सुपाबेस में मैच को 'Running' करें और जॉइनर की पूरी जानकारी सही-差े दर्ज करें
+        const { error: battleErr } = await client.from('battles').update({ 
             status: 'Running', 
             joiner_id: window.vUser.id, 
             joiner_email: window.vUser.email 
         }).eq('id', matchId);
+        
+        if (battleErr) throw battleErr;
 
-        alert("🎉 मैच सफलतापूर्वक जॉइन हो गया! अब रूम कोड डालें या प्राप्त करें।");
+        alert("🎉 मैच सफलतापूर्वक जॉइन हो गया! दोनों आईडी से पैसा कट चुका है। अब रूम कोड डालें या प्राप्त करें।");
         window.location.reload();
-    } catch(e) { alert("❌ जॉइनिंग एरर: " + e.message); }
+    } catch(e) { 
+        alert("❌ जॉइनिंग एरर: " + e.message); 
+    }
 };
-
 // 🔑 2. लूडो किंग रूम कोड देने और लेने का लाइव रीयल-टाइम रेंडरर
 window.syncRoomCodeSystem = async function() {
     try {
