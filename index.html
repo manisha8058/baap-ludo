@@ -959,10 +959,30 @@ setInterval(async function() {
 <div class="drawer-item" onclick="logout()">🚪 Logout <button>›</button></div>
 </aside>
 <script>
-  var registerMode = false; window.registerMode = registerMode;
+var registerMode = false; 
+window.registerMode = registerMode;
+
 const battles = [];
 const running = [];
-  // 🎮 1. दूसरे खिलाड़ी द्वारा मैच जॉइन करने का लाइव फंक्शन फिक्स
+
+// 🤝 'Create account' और 'Login' बटन स्विच करने का लाइव फंक्शन फिक्स
+window.toggleRegisterMode = function() {
+    window.registerMode = !window.registerMode;
+    const titleEl = document.querySelector('.card h2') || document.querySelector('h2');
+    const btnEl = document.querySelector('.btn.blue') || document.querySelector('button[onclick*="Login"]');
+    const switchLink = document.querySelector('a[onclick*="toggleRegisterMode"]') || document.querySelector('.card a');
+    
+    if (window.registerMode) {
+        if(titleEl) titleEl.innerText = "BAAP LUDO SIGNUP";
+        if(btnEl) btnEl.innerText = "Register & Play";
+        if(switchLink) switchLink.innerText = "Already a user? Login";
+    } else {
+        if(titleEl) titleEl.innerText = "BAAP LUDO";
+        if(btnEl) btnEl.innerText = "Login";
+        if(switchLink) switchLink.innerText = "New user? Create account";
+    }
+};
+
 window.joinLudoBattle = async function(matchId) {
     if (!window.vUser) { alert("❌ कृपया पहले अपना अकाउंट लॉगिन करें!"); return; }
     if (!confirm("क्या आप इस बैटल मैच को जॉइन करना चाहते हैं?")) return;
