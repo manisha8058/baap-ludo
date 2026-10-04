@@ -1135,7 +1135,7 @@ window.submitLudoRoomCode = async function(matchId) {
         window.location.reload();
     } catch(e) { alert(e.message); }
 };
-    // 🔄 रीयल-टाइम ऑटो-सिंक लूप (पुराना ब्रैकेट एरर और 'runningHtml' क्रैश हमेशा के लिए साफ़)
+    // 🔄 रीयल-टाइम ऑटो-सिंक लूप (ब्रैकेट एरर हमेशा के लिए साफ़)
     setInterval(async function() {
         try {
             if (typeof window.syncRoomCodeSystem === 'function') {
@@ -1174,7 +1174,6 @@ window.submitLudoRoomCode = async function(matchId) {
             }
         }
     } catch(e) { console.log(e.message); }
-});
 function go(id,btn){
   if(id==='admin' && !window.currentUserIsAdmin){ alert('Admin access required'); return; }
   if(id==='profile'){
