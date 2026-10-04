@@ -1046,12 +1046,11 @@ window.joinLudoBattle = async function(matchId) {
             alert("❌ आप खुद का ही बनाया हुआ मैच जॉइन नहीं कर सकते!");
             return;
         }
-
-        // 💰 3. जादुई फिक्स: जॉइन करने वाले दूसरे खिलाड़ी के वॉलेट से भी तुरंत पैसा काटें
+        // 💰 5. जादुई फिक्स: जॉइन करने वाले दूसरे खिलाड़ी के वॉलेट से भी तुरंत पैसा काटें
         const newJoinerBalance = parseFloat(pJoiner.balance || 0) - entryFee;
         const { error: walletErr } = await client.from('profiles').update({ balance: newJoinerBalance }).eq('id', window.vUser.id);
         if (walletErr) throw walletErr;
-
+      
         // 📝 4. सुपाबेस में मैच को 'Running' करें और जॉइनर की पूरी जानकारी सही-差े दर्ज करें
         const { error: battleErr } = await client.from('battles').update({ 
             status: 'Running', 
