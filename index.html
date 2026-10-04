@@ -1135,9 +1135,7 @@ window.submitLudoRoomCode = async function(matchId) {
         window.location.reload();
     } catch(e) { alert(e.message); }
 };
-
-// बैकग्राउंड में हर 3 सेकंड में रूम कोड का स्टेटस ऑटो-सिंक करें
-    // 🔄 रीयल-टाइम ऑटो-सिंक लूप (पुराना 'runningHtml' एरर हमेशा के लिए साफ़)
+    // 🔄 रीयल-टाइम ऑटो-सिंक लूप (पुराना ब्रैकेट एरर और 'runningHtml' क्रैश हमेशा के लिए साफ़)
     setInterval(async function() {
         try {
             if (typeof window.syncRoomCodeSystem === 'function') {
@@ -1146,19 +1144,18 @@ window.submitLudoRoomCode = async function(matchId) {
         } catch(e) { console.log(e.message); }
     }, 3000);
 
+    // ⚔️ डेटाबेस से लाइव ओपन मैच लोड करने वाला बैकएंड इंजन फिक्स
+    try {
         const client = getSupabaseClient();
         if (client) {
-            // सीधे सुपाबेस की 'battles' टेबल से लाइव मैच लोड करें
             const { data: openMatches } = await client.from('battles').select('*').eq('status', 'Open');
-            const validOpenMatches = (openMatches || []).filter(match => parseFloat(match.entry_fee || 0) >= 50);
             const openListContainer = document.getElementById('openBattles') || document.getElementById('liveOpenBattlesList');
-            
             if (openListContainer) {
-                if (!validOpenMatches || validOpenMatches.length === 0) {
+                if (!openMatches || openMatches.length === 0) {
                     openListContainer.innerHTML = `<div style="text-align:center; padding:20px; color:#aaa; font-size:14px; background:#100018; border-radius:10px;">🎮 अभी कोई लाइव मैच उपलब्ध नहीं है। नया मैच सेट करें!</div>`;
                 } else {
                     let htmlContent = '';
-                    validOpenMatches.forEach(match => {
+                    openMatches.forEach(match => {
                         const entry = parseFloat(match.entry_fee || 0);
                         const prize = entry * 1.95; // 1.95 गुना लाइव प्राइज़ गणित फिक्स
                         htmlContent += `
@@ -1176,8 +1173,8 @@ window.submitLudoRoomCode = async function(matchId) {
                 }
             }
         }
+    } catch(e) { console.log(e.message); }
 });
-
 function go(id,btn){
   if(id==='admin' && !window.currentUserIsAdmin){ alert('Admin access required'); return; }
   if(id==='profile'){
