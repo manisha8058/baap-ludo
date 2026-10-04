@@ -1137,13 +1137,15 @@ window.submitLudoRoomCode = async function(matchId) {
 };
 
 // बैकग्राउंड में हर 3 सेकंड में रूम कोड का स्टेटस ऑटो-सिंक करें
-setInterval(() => { if(typeof window.syncRoomCodeSystem === 'function') window.syncRoomCodeSystem(); }, 3000);
-document.addEventListener('DOMContentLoaded', async function() {
+    // 🔄 रीयल-टाइम ऑटो-सिंक लूप (पुराना 'runningHtml' एरर हमेशा के लिए साफ़)
     setInterval(async function() {
-        if (typeof window.syncRoomCodeSystem === 'function') {
-            await window.syncRoomCodeSystem();
-        }
+        try {
+            if (typeof window.syncRoomCodeSystem === 'function') {
+                await window.syncRoomCodeSystem();
+            }
+        } catch(e) { console.log(e.message); }
     }, 3000);
+
         const client = getSupabaseClient();
         if (client) {
             // सीधे सुपाबेस की 'battles' टेबल से लाइव मैच लोड करें
