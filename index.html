@@ -1024,79 +1024,80 @@ window.joinLudoBattle = async function(matchId) {
     if (!window.vUser) { alert("❌ कृपया पहले अपना अकाउंट लॉगिन करें!"); return; }
     if (!confirm("क्या आप इस बैटल मैच को जॉइन करना चाहते हैं?")) return;
     
-    try {
-        const client = getSupabaseClient();
-        if (!client) { alert("❌ डेटाबेस कनेक्शन त्रुटि!"); return; }
+    const client = getSupabaseClient();
+    if (!client) { alert("❌ डेटाबेस कनेक्शन त्रुटि!"); return; }
 
-        // 1. मैच की डिटेल्स और जॉइन करने वाले खिलाड़ी का लाइव बैलेंस निकालें
+    try {
         const { data: match, error: mErr } = await client.from('battles').select('*').eq('id', matchId).single();
         if (mErr || !match) { alert("❌ यह मैच अब उपलब्ध नहीं है!"); return; }
         
-        const { data: pJoiner, error: pErr } = await client.from('profiles').select('balance').eq('id', window.vUser.id).single();
-        if (pErr || !pJoiner) { alert("❌ खिलाड़ी प्रोफाइल लोड नहीं हो सकी!"); return; }
-
-        const entryFee = parseFloat(match.entry_fee || 0);
-
-        // 2. सुरक्षा जांच
-        if (parseFloat(pJoiner.balance || 0) < entryFee) {
-            alert("❌ आपके वॉलेट में पर्याप्त बैलेंस नहीं है! कृपया पहले डिपॉजिट करें।");
-            return;
-        }
-        if (match.creator_id === window.vUser.id) {
+        if (match.creator_id === window.vUser.id || match.creator_email === window.vUser.email) {
             alert("❌ आप खुद का ही बनाया हुआ मैच जॉइन नहीं कर सकते!");
             return;
         }
-        // 💰 5. जादुई फिक्स: जॉइन करने वाले दूसरे खिलाड़ी के वॉलेट से भी तुरंत पैसा काटें
-        const newJoinerBalance = parseFloat(pJoiner.balance || 0) - entryFee;
-        const { error: walletErr } = await client.from('profiles').update({ balance: newJoinerBalance }).eq('id', window.vUser.id);
-        if (walletErr) throw walletErr;
-      
-        // 📝 4. सुपाबेस में मैच को 'Running' करें और जॉइनर की पूरी जानकारी सही-差े दर्ज करें
+
+        const { data: pJoiner, error: pErr } = await client.from('profiles').select('*').eq('id', window.vUser.id).single();
+        if (pErr || !pJoiner) { alert("❌ खिलाड़ी प्रोफाइल लोड नहीं हो सकी!"); return; }
+
+        const entryFee = parseFloat(match.entry_fee || 0);
+        const currentJoinerBalance = parseFloat(pJoiner.balance || 0);
+
+        if (currentJoinerBalance < entryFee) {
+            alert("❌ आपके वॉलेट में पर्याप्त बैलेंस नहीं है! कृपया पहले डिपॉजिट करें।");
+            return;
+        }
+
+        // 💰 1. जादुई फिक्स: सीधे नंबर कैलकुलेट करके दूसरे खिलाड़ी का पक्का पैसा काटें
+        const updatedBalance = currentJoinerBalance - entryFee;
+        const { error: walletErr } = await client.from('profiles').update({ balance: updatedBalance }).eq('id', window.vUser.id);
+        if (walletErr) { alert("❌ बैलेंस कटने में त्रुटि: " + walletErr.message); return; }
+
+        // 📝 2. मैच को 'Running' स्टेटस में डालें और जॉइनर की जानकारी लॉक करें
         const { error: battleErr } = await client.from('battles').update({ 
             status: 'Running', 
             joiner_id: window.vUser.id, 
             joiner_email: window.vUser.email 
         }).eq('id', matchId);
         
-        if (battleErr) throw battleErr;
+        if (battleErr) { alert("❌ बैटल अपडेट एरर: " + battleErr.message); return; }
 
-        alert("🎉 मैच सफलतापूर्वक जॉइन हो गया! दोनों आईडी से पैसा कट चुका है। अब रूम कोड डालें या प्राप्त करें।");
+        alert("🎉 बधाई हो भाई! दोनों आईडी से पैसा 100% कट चुका है।");
         window.location.reload();
     } catch(e) { 
-        alert("❌ जॉइनिंग एरर: " + e.message); 
+        alert("❌ जॉइनिंग क्रैश एरर: " + e.message); 
     }
 };
-// 🔑 2. लूडो किंग रूम कोड देने और लेने का लाइव रीयल-टाइम रेंडरर
+
+// 🔑 3. लूडो किंग रूम कोड देने और लेने का लाइव रीयल-टाइम रेंडरर (रनिंग टेबल फिक्स)
 window.syncRoomCodeSystem = async function() {
     try {
         const client = getSupabaseClient();
         if (!client) return;
 
-        // सीधे सुपाबेस के लाइव सेशन से वर्तमान यूज़र की असली आईडी निकालें
         const { data: { session } } = await client.auth.getSession();
         const currentUser = session ? session.user : window.vUser;
         if (!currentUser) return;
 
-        // डेटाबेस से सभी रनिंग मैच चेक करें
-        const { data: runningMatches } = await client.from('battles').select('*').eq('status', 'Running');
-        const runningBox = document.getElementById('liveRunningBattlesList');
+        const { data: runningMatches, error: fetchErr } = await client.from('battles').select('*').eq('status', 'Running');
+        if (fetchErr) throw fetchErr;
+
+        const runningBox = document.getElementById('liveRunningBattlesList') || document.getElementById('runningBattles') || document.getElementById('running');
         if (!runningBox) return;
 
-        // वर्तमान लॉगिन खिलाड़ी से संबंधित मैच खोजें
-        let myMatch = runningMatches ? runningMatches.find(m => m.creator_id === currentUser.id || m.joiner_id === currentUser.id) : null;
+        let myMatch = runningMatches ? runningMatches.find(m => m.creator_id === currentUser.id || m.joiner_id === currentUser.id || m.creator_email === currentUser.email || m.joiner_email === currentUser.email) : null;
 
         if (!myMatch) {
-            runningBox.innerHTML = `<div style="text-align:center; padding:15px; color:#aaa; font-size:13px; background:#100018; border-radius:10px; margin-top:10px;">🎮 वर्तमान में आपका कोई मैच लाइव रनिंग नहीं है।</div>`;
+            runningBox.innerHTML = `<div style="text-align:center; padding:15px; color:#aaa; font-size:13px; background:#160729; border:2px solid #26003d; border-radius:10px; margin-top:10px; width:100%;">🎮 वर्तमान में आपका कोई मैच लाइव रनिंग नहीं है। नया मैच खेलें!</div>`;
             return;
         }
 
-        const isCreator = myMatch.creator_id === currentUser.id;
+        const isCreator = myMatch.creator_id === currentUser.id || myMatch.creator_email === currentUser.email;
         const currentCode = myMatch.room_code || '';
 
         let codeHtml = '';
 
         if (isCreator) {
-            // 👑 रूम कोड देने वाला (Challenger/Creator) का इनपुट बॉक्स
+            // 👑 रूम कोड देने वाला (Challenger/Creator) का लाइव बॉक्स
             codeHtml = `
                 <div style="background:#160729; border:2px dashed #399aff; border-radius:12px; padding:15px; margin-top:10px; text-align:center; width:100%;">
                     <h4 style="margin:0 0 10px; color:#399aff; font-size:15px;">🔑 लूडो किंग रूम कोड सबमिट करें</h4>
@@ -1105,10 +1106,10 @@ window.syncRoomCodeSystem = async function() {
                 </div>
             `;
         } else {
-            // 👤 रूम कोड लेने वाला (Joiner) का बॉक्स
+            // 👤 रूम कोड लेने वाला (Joiner) का लाइव बॉक्स
             codeHtml = `
                 <div style="background:#160729; border:2px dashed #20d85c; border-radius:12px; padding:15px; margin-top:10px; text-align:center; width:100%;">
-                    <h4 style="margin:0 0 10px; color:#20d85c; font-size:15px;">📥 चैलेंजर से रूम कोड प्राप्त करें</h4>
+                    <h4 style="margin:0 0 10px; color:#20d85c; font-size:15px;">📥 चैलेंजर से ROOM CODE प्राप्त करें</h4>
                     <div style="background:#fff; color:#000; padding:12px; font-size:22px; font-weight:bold; border-radius:8px; letter-spacing:2px; margin-bottom:10px; box-shadow:inset 0 0 5px #ccc;">
                         ${currentCode ? currentCode : '<span style="color:#e74c3c; font-size:13px; font-weight:normal; letter-spacing:0;">⏳ चैलेंजर कोड डाल रहा है, थोड़ा इंतजार करें...</span>'}
                     </div>
@@ -1116,8 +1117,16 @@ window.syncRoomCodeSystem = async function() {
                 </div>
             `;
         }
-                runningBox.innerHTML = codeHtml;
-
+        runningBox.innerHTML = codeHtml;
+        
+        const viewGameBox = document.getElementById('viewGameScreen') || document.getElementById('viewGame');
+        if (viewGameBox) {
+            viewGameBox.style.display = 'block';
+            if(document.getElementById('homeContent')) document.getElementById('homeContent').style.display = 'none';
+        }
+    } catch(e) { console.log("रेंडर एरर: " + e.message); }
+};
+  
         // 🚀 खिलाड़ियों को सीधे प्रीमियम 'View Game' इंटरफ़ेस स्क्रीन पर रीडायरेक्ट करें
         const viewGameBox = document.getElementById('viewGameScreen') || document.getElementById('viewGame') || document.getElementById('gameView');
         if (viewGameBox) {
