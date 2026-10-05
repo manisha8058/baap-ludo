@@ -993,7 +993,7 @@ window.createNewLudoBattle = async function() {
         if (input) input.focus();
         return;
     }
-        try {
+            try {
         const client = getSupabaseClient();
         if (!client) { alert("❌ सुपाबेस कनेक्शन त्रुटि!"); return; }
 
@@ -1029,6 +1029,8 @@ window.createNewLudoBattle = async function() {
     } catch(e) { 
         alert("❌ मैच क्रिएशन फेल: " + (e.message || e)); 
     }
+};
+
 
 window.joinLudoBattle = async function(matchId) {
     if (!confirm("क्या आप इस बैटल मैच को जॉइन करना चाहते हैं?")) return;
