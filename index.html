@@ -993,34 +993,43 @@ window.createNewLudoBattle = async function() {
         if (input) input.focus();
         return;
     }
-    try {
+        try {
         const client = getSupabaseClient();
-        if (!client) { alert("❌ Supabase connection नहीं मिला।"); return; }
-        const { data: profile, error: profileErr } = await client.from("profiles").select("balance").eq("id", window.vUser.id).single();
-        if (profileErr) throw profileErr;
-        if (parseFloat(profile?.balance || 0) < amount) {
-            alert("❌ आपके वॉलेट में पर्याप्त बैलेंस नहीं है!");
-            return;
+        if (!client) { alert("❌ सुपाबेस कनेक्शन त्रुटि!"); return; }
+
+        // 1. खिलाड़ी का लाइव बैलेंस चेक करें
+        const { data: authRes } = await client.from('profiles').select('balance').eq('id', window.vUser.id).single();
+        if (!authRes || parseFloat(authRes.balance || 0) < amount) { 
+            alert("❌ आपके वॉलेट में पर्याप्त बैलेंस नहीं है! कृपया पहले डिपॉजिट करें।"); 
+            return; 
         }
-        const prize = Number((amount * 1.95).toFixed(2));
-        const { error } = await client.from("battles").insert([{
-            creator_id: window.vUser.id,
-            creator_email: window.vUser.email || "",
-            entry_fee: amount,
-            winning_prize: prize,
-            status: "Open"
+
+        // 💰 जादुई फिक्स: मैच सेट करने वाले खिलाड़ी के वॉलेट से तुरंत पैसा काटें
+        const newCreatorBalance = parseFloat(authRes.balance || 0) - amount;
+        const { error: walletErr } = await client.from('profiles').update({ balance: newCreatorBalance }).eq('id', window.vUser.id);
+        if (walletErr) throw walletErr;
+
+        // 2. 1.95 गुना गणित फिक्स (₹100 एंट्री फीस = ₹195 विनिंग प्राइज़)
+        const prize = (amount * 1.95).toFixed(2);
+        
+        // 3. सुपाबेस की 'battles' टेबल में नया मैच लाइव दर्ज करें
+        const { error: insertErr } = await client.from('battles').insert([{ 
+            creator_id: window.vUser.id, 
+            creator_email: window.vUser.email, 
+            entry_fee: amount, 
+            winning_prize: prize, 
+            status: 'Open' 
         }]);
-        if (error) throw error;
-        alert("⚔️ Battle सफलतापूर्वक live हो गई! Minimum ₹50 लागू है।");
-        if (input) input.value = "";
-        const list = document.getElementById("liveOpenBattlesList");
-        if (list) list.innerHTML = `<div style="text-align:center;padding:15px;color:#20d85c;font-weight:bold;">✅ ₹${amount} की battle live हो गई।</div>`;
-        if (typeof window.syncRoomCodeSystem === "function") window.syncRoomCodeSystem();
-        setTimeout(() => window.location.reload(), 500);
-    } catch (e) {
-        alert("❌ मैच क्रिएशन फेल: " + (e.message || e));
+        
+        if (insertErr) throw insertErr;
+        
+        alert("⚔️ आपकी बैटल सफलतापूर्वक बिना किसी एरर के लाइव हो गई है और आपका बैलेंस कट चुका है!"); 
+        if (input) input.value = ''; 
+        window.location.reload();
+    } catch(e) { 
+        alert("❌ मैच क्रिएशन फेल: " + (e.message || e)); 
     }
-};
+
 window.joinLudoBattle = async function(matchId) {
     if (!confirm("क्या आप इस बैटल मैच को जॉइन करना चाहते हैं?")) return;
     
