@@ -999,14 +999,14 @@ window.createNewLudoBattle = async function() {
         const client = getSupabaseClient();
         if (!client) { alert("❌ सुपाबेस कनेक्शन त्रुटि!"); return; }
 
-        // 1. खिलाड़ी का लाइव बैलेंस चेक करें
+        // 1. मैच बनाने वाले खिलाड़ी का लाइव बैलेंस चेक करें
         const { data: authRes } = await client.from('profiles').select('balance').eq('id', window.vUser.id).single();
         if (!authRes || parseFloat(authRes.balance || 0) < amount) { 
             alert("❌ आपके वॉलेट में पर्याप्त बैलेंस नहीं है! कृपया पहले डिपॉजिट करें।"); 
             return; 
         }
 
-        // 💰 जादुई फिक्स: मैच सेट करने वाले खिलाड़ी के वॉलेट से तुरंत पैसा काटें
+        // 💰 जादुई फिक्स: मैच सेट (बनाने) करने वाले खिलाड़ी के वॉलेट से तुरंत पैसा काटें
         const newCreatorBalance = parseFloat(authRes.balance || 0) - amount;
         const { error: walletErr } = await client.from('profiles').update({ balance: newCreatorBalance }).eq('id', window.vUser.id);
         if (walletErr) throw walletErr;
