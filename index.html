@@ -1088,12 +1088,13 @@ window.syncRoomCodeSystem = async function() {
         const { data: { session } } = await client.auth.getSession();
         const currentUser = session ? session.user : window.vUser;
         if (!currentUser) return;
-
-        const { data: runningMatches, error: fetchErr } = await client.from('battles').select('*').eq('status', 'Running');
+        const { data: allMatches, error: fetchErr } = await client.from('battles').select('*');
         if (fetchErr) throw fetchErr;
 
-        const runningBox = document.getElementById('liveRunningBattlesList') || document.getElementById('runningBattles') || document.getElementById('running');
+        const runningMatches = allMatches ? allMatches.filter(m => m.status === 'Running' || m.status === 'running') : [];
+        const runningBox = document.getElementById('liveRunningBattlesList') || document.getElementById('runningBattles') || document.getElementById('runningMatches');
         if (!runningBox) return;
+
         let myMatch = runningMatches ? runningMatches.find(m => 
             String(m.creator_id) === String(currentUser.id) || 
             String(m.joiner_id) === String(currentUser.id) || 
@@ -1106,7 +1107,7 @@ window.syncRoomCodeSystem = async function() {
             return;
         }
 
-        const isCreator = myMatch.creator_id === currentUser.id || myMatch.creator_email === currentUser.email;
+        const isCreator = String(myMatch.creator_id) === String(currentUser.id) || myMatch.creator_email === currentUser.email;
         const currentCode = myMatch.room_code || '';
 
         let codeHtml = '';
