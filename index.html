@@ -1022,7 +1022,6 @@ window.createNewLudoBattle = async function() {
     }
 };
 window.joinLudoBattle = async function(matchId) {
-    if (!window.vUser) { alert("❌ कृपया पहले अपना अकाउंट लॉगिन करें!"); return; }
     if (!confirm("क्या आप इस बैटल मैच को जॉइन करना चाहते हैं?")) return;
     
     const client = getSupabaseClient();
@@ -1031,18 +1030,27 @@ window.joinLudoBattle = async function(matchId) {
     try {
         alert("🔄 दोनों आईडी से बैलेंस वेरिफाई और कट किया जा रहा है...");
         
+        // सुपाबेस के लाइव सेशन से वर्तमान लॉगिन खिलाड़ी की असली आईडी निकालें
+        const { data: { session } } = await client.auth.getSession();
+        const currentUser = session ? session.user : window.vUser;
+        
+        if (!currentUser) { 
+            alert("❌ कृपया पहले अपना अकाउंट लॉग-आउट करके दोबारा लॉगिन करें!"); 
+            return; 
+        }
+
         // 1. मैच की डिटेल्स निकालें
         const { data: match, error: mErr } = await client.from('battles').select('*').eq('id', matchId).single();
         if (mErr || !match) { alert("❌ यह मैच अब उपलब्ध नहीं है!"); return; }
         
         // खुद का मैच जॉइन करने से रोकें
-        if (String(match.creator_id) === String(window.vUser.id) || match.creator_email === window.vUser.email) {
+        if (String(match.creator_id) === String(currentUser.id) || match.creator_email === currentUser.email) {
             alert("❌ आप खुद का ही बनाया हुआ मैच जॉइन नहीं कर सकते!");
             return;
         }
 
         // 2. जॉइन करने वाले (दूसरे खिलाड़ी) का लाइव बैलेंस निकालें
-        const { data: pJoiner, error: pErr } = await client.from('profiles').select('*').eq('id', window.vUser.id).single();
+        const { data: pJoiner, error: pErr } = await client.from('profiles').select('*').eq('id', currentUser.id).single();
         if (pErr || !pJoiner) { alert("❌ खिलाड़ी प्रोफाइल लोड नहीं हो सकी!"); return; }
 
         const entryFee = parseFloat(match.entry_fee || 0);
@@ -1053,15 +1061,15 @@ window.joinLudoBattle = async function(matchId) {
             return;
         }
 
-        // 💰 3. जादुई डायरेक्ट फिक्स: सीधे नंबर "33" वाली आईडी से पक्का पैसा काटें
+        // 💰 3. जादुई डायरेक्ट फिक्स: सीधे करंट सेशन आईडी का उपयोग करके दूसरे खिलाड़ी का पक्का पैसा काटें
         const updatedBalance = currentJoinerBalance - entryFee;
-        const { error: walletErr } = await client.from('profiles').update({ balance: updatedBalance }).eq('id', window.vUser.id);
+        const { error: walletErr } = await client.from('profiles').update({ balance: updatedBalance }).eq('id', currentUser.id);
         if (walletErr) { alert("❌ बैलेंस कटने में त्रुटि: " + walletErr.message); return; }
 
         // 📝 4. मैच को 'Running' स्टेटस में डालें और जॉइनर की जानकारी बिना किसी UUID एरर के लॉक करें
         const { error: battleErr } = await client.from('battles').update({ 
             status: 'Running', 
-            joiner_email: window.vUser.email 
+            joiner_email: currentUser.email 
         }).eq('id', matchId);
         
         if (battleErr) { alert("❌ बैटल अपडेट एरर: " + battleErr.message); return; }
@@ -1072,7 +1080,7 @@ window.joinLudoBattle = async function(matchId) {
         alert("❌ जॉइनिंग क्रैश एरर: " + e.message); 
     }
 };
-
+  
 // 🔑 3. लूडो किंग रूम कोड देने और लेने का लाइव रीयल-टाइम रेंडरर (रनिंग टेबल फिक्स)
 window.syncRoomCodeSystem = async function() {
     try {
