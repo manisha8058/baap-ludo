@@ -999,39 +999,25 @@ window.createNewLudoBattle = async function() {
         const client = getSupabaseClient();
         if (!client) { alert("❌ सुपाबेस कनेक्शन त्रुटि!"); return; }
 
-        // 1. मैच बनाने वाले खिलाड़ी का लाइव बैलेंस चेक करें
-        const { data: authRes } = await client.from('profiles').select('balance').eq('id', window.vUser.id).single();
-        if (!authRes || parseFloat(authRes.balance || 0) < amount) { 
-            alert("❌ आपके वॉलेट में पर्याप्त बैलेंस नहीं है! कृपया पहले डिपॉजिट करें।"); 
-            return; 
-        }
+        alert("🔄 आपका बैलेंस वेरिफाई और कट किया जा रहा है...");
 
-        // 💰 जादुई फिक्स: मैच सेट (बनाने) करने वाले खिलाड़ी के वॉलेट से तुरंत पैसा काटें
-        const newCreatorBalance = parseFloat(authRes.balance || 0) - amount;
-        const { error: walletErr } = await client.from('profiles').update({ balance: newCreatorBalance }).eq('id', window.vUser.id);
-        if (walletErr) throw walletErr;
+        // सुपाबेस के सिक्योर डेटाबेस फंक्शन (RPC) को कॉल करें
+        const { error } = await client.rpc('create_battle_and_deduct_balance', {
+            p_creator_id: window.vUser.id,
+            p_creator_email: window.vUser.email,
+            p_amount: amount
+        });
 
-        // 2. 1.95 गुना गणित फिक्स (₹100 एंट्री फीस = ₹195 विनिंग प्राइज़)
-        const prize = (amount * 1.95).toFixed(2);
+        if (error) throw error;
         
-        // 3. सुपाबेस की 'battles' टेबल में नया मैच लाइव दर्ज करें
-        const { error: insertErr } = await client.from('battles').insert([{ 
-            creator_id: window.vUser.id, 
-            creator_email: window.vUser.email, 
-            entry_fee: amount, 
-            winning_prize: prize, 
-            status: 'Open' 
-        }]);
-        
-        if (insertErr) throw insertErr;
-        
-        alert("⚔️ आपकी बैटल सफलतापूर्वक बिना किसी एरर के लाइव हो गई है और आपका बैलेंस कट चुका है!"); 
+        alert("⚔️ आपकी बैटल सफलतापूर्वक लाइव हो गई है और आपका बैलेंस कट चुका है!"); 
         if (input) input.value = ''; 
         window.location.reload();
     } catch(e) { 
         alert("❌ मैच क्रिएशन फेल: " + (e.message || e)); 
     }
 };
+
 
 window.joinLudoBattle = async function(matchId) {
     if (!confirm("क्या आप इस बैटल मैच को जॉइन करना चाहते हैं?")) return;
