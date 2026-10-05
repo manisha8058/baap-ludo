@@ -986,14 +986,16 @@ window.toggleRegisterMode = function() {
 
 window.createNewLudoBattle = async function() {
     if (!window.vUser) { alert("❌ कृपया पहले अपना अकाउंट लॉगिन करें!"); return; }
-    const input = document.getElementById("newBattleAmountInput");
+    const input = document.getElementById('newBattleAmountInput');
     const amount = input ? parseFloat(input.value.trim()) : NaN;
-    if (!Number.isFinite(amount) || amount < 50) {
-        alert("❌ Minimum entry ₹50 है। ₹50 या उससे ज्यादा amount डालें।");
+    
+    if (isNaN(amount) || amount < 50) {
+        alert("❌ Minimum entry ₹50 है! ₹50 या उससे ज्यादा अमाउंट डालें।");
         if (input) input.focus();
         return;
     }
-            try {
+
+    try {
         const client = getSupabaseClient();
         if (!client) { alert("❌ सुपाबेस कनेक्शन त्रुटि!"); return; }
 
@@ -1030,7 +1032,6 @@ window.createNewLudoBattle = async function() {
         alert("❌ मैच क्रिएशन फेल: " + (e.message || e)); 
     }
 };
-
 
 window.joinLudoBattle = async function(matchId) {
     if (!confirm("क्या आप इस बैटल मैच को जॉइन करना चाहते हैं?")) return;
