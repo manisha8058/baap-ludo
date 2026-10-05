@@ -1094,8 +1094,12 @@ window.syncRoomCodeSystem = async function() {
 
         const runningBox = document.getElementById('liveRunningBattlesList') || document.getElementById('runningBattles') || document.getElementById('running');
         if (!runningBox) return;
-
-        let myMatch = runningMatches ? runningMatches.find(m => m.creator_id === currentUser.id || m.joiner_id === currentUser.id || m.creator_email === currentUser.email || m.joiner_email === currentUser.email) : null;
+        let myMatch = runningMatches ? runningMatches.find(m => 
+            String(m.creator_id) === String(currentUser.id) || 
+            String(m.joiner_id) === String(currentUser.id) || 
+            m.creator_email === currentUser.email || 
+            m.joiner_email === currentUser.email
+        ) : null;
 
         if (!myMatch) {
             runningBox.innerHTML = `<div style="text-align:center; padding:15px; color:#aaa; font-size:13px; background:#160729; border:2px solid #26003d; border-radius:10px; margin-top:10px; width:100%;">🎮 वर्तमान में आपका कोई मैच लाइव रनिंग नहीं है। नया मैच खेलें!</div>`;
