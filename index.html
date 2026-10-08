@@ -1215,7 +1215,64 @@ window.adminDeleteAnyBattle = async function(matchId) {
         alert("❌ डिलीट परमिशन एरर: " + e.message);
     }
 };
-  
+  // 👑 ⚔️ एडमिन पैनल में सभी लाइव मैचों की लिस्ट और लाल रंग का Delete बटन लोड करने का लाइव इंजन
+window.fetchAdminLiveMatches = async function() {
+    const client = getSupabaseClient();
+    if (!client) return;
+
+    try {
+        // डेटाबेस से सभी लाइव (Open/Running) मैच निकालें
+        const { data: matches, error } = await client.from('battles').select('*').order('created_at', { ascending: false });
+        if (error) throw error;
+
+        const container = document.getElementById('adminLiveMatchesList');
+        if (!container) return;
+
+        if (!matches || matches.length === 0) {
+            container.innerHTML = `<p style="color:#666; text-align:center; padding:15px;">❌ वर्तमान में कोई मैच लाइव नहीं चल रहा है...</p>`;
+            return;
+        }
+
+        let html = '<div style="display:flex; flex-direction:column; gap:10px;">';
+        matches.forEach(match => {
+            // केवल Open, Running या Pending स्टेटस वाले मैचों को ही मैनेजमेंट लिस्ट में दिखाएं
+            if (match.status === 'Open' || match.status === 'Running' || match.status === 'running' || match.status === 'Result_Pending') {
+                const entry = parseFloat(match.entry_fee || 0);
+                const prize = parseFloat(match.winning_prize || 0);
+                
+                html += `
+                    <div style="background:#1a0828; border:2px solid #ccd8ff; border-radius:12px; padding:15px; display:flex; flex-direction:column; gap:8px; color:#fff;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="background:#399aff; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:bold;">${match.status.toUpperCase()}</span>
+                            <span style="font-size:12px; color:#aaa;">ID: ${match.id.substring(0,8)}...</span>
+                        </div>
+                        <div style="font-size:14px;">🪙 Entry: <b>₹${entry}</b> | 🎁 Prize: <b>₹${prize}</b></div>
+                        <div style="font-size:12px; color:#ddd;">👤 Creator: ${match.creator_email || 'N/A'}</div>
+                        <div style="font-size:12px; color:#ddd;">🤝 Joiner: ${match.joiner_email || '⏳ कोई नहीं'}</div>
+                        <div style="display:flex; gap:10px; margin-top:5px;">
+                            <!-- 🗑️ यह जादुई लाल बटन एडमिन को किसी भी मैच को 1 सेकंड में रिफंड के साथ डिलीट करने की पावर देगा -->
+                            <button type="button" class="btn" style="background:#e74c3c; color:#fff; font-weight:bold; padding:8px 15px; border-radius:6px; font-size:13px; cursor:pointer; width:100%; border:0;" onclick="window.adminDeleteAnyBattle('${match.id}')">Delete Battle 🗑️</button>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+        html += '</div>';
+        container.innerHTML = html;
+    } catch(e) {
+        console.log("एडमिन लाइव बैटल लोड एरर: " + e.message);
+    }
+};
+
+// एडमिन पैनल लोड होते ही इस लिस्ट को ऑटोमैटिक चालू करें
+document.addEventListener('DOMContentLoaded', function() {
+    setInterval(function() {
+        if (typeof window.fetchAdminLiveMatches === 'function' && document.getElementById('adminLiveMatchesList')) {
+            window.fetchAdminLiveMatches();
+        }
+    }, 4000);
+});
+
 // 🔑 3. लूडो किंग रूम कोड देने और लेने का लाइव रीयल-टाइम रेंडरर (रनिंग टेबल फिक्स)
 window.syncRoomCodeSystem = async function() {
     try {
