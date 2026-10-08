@@ -4246,6 +4246,71 @@ window.openModernProfile=function(btn){ window.openProfileScreen(btn); };
     }
   };
 })();
+</script> 
+  <!-- 🚨 🛠️ एडमिन मास्टर फोर्स डिलीट बैटल्स कंट्रोल (नया स्वतंत्र डिब्बा) -->
+<div class="admin-card" style="margin-top: 20px; border: 2px solid #ff3b3b; border-radius: 12px; padding: 15px; background: #12001a; box-shadow: 0 0 15px rgba(255,59,59,0.3); color: #fff;">
+    <h3 style="color: #ff3b3b; margin: 0 0 10px; font-size: 16px; display: flex; justify-content: space-between; align-items: center; font-weight: bold;">
+        <span>🛑 Master Force Delete Battles Control</span>
+        <button type="button" class="btn" style="background: #ff3b3b; color: #fff; padding: 4px 10px; font-size: 11px; border-radius: 4px;" onclick="window.fetchAdminMasterDeleteMatches()">🔄 Refresh List</button>
+    </h3>
+    <p style="color: #ff9e9e; font-size: 12px; margin: 0 0 12px;">चेतावनी: यहाँ से किसी भी मैच को डिलीट करने पर खिलाड़ियों की एंट्री充ीस उनके वॉलेट में तुरंत ऑटो-रिफंड हो जाएगी।</p>
+    <div id="adminMasterDeleteMatchesList" style="max-height: 350px; overflow-y: auto; font-size: 13px; display: flex; flex-direction: column; gap: 10px;">
+        <p style="color: #aaa; text-align: center; padding: 10px;">लाइव मैच इतिहास लोड हो रहा है...</p>
+    </div>
+</div>
+
+<script>
+// 🔄 👑 नए डिब्बे में सभी लाइव मैचों की सूची और 'Delete Battle 🗑️' बटन लोड करने का लाइव इंजन
+window.fetchAdminMasterDeleteMatches = async function() {
+    const client = getSupabaseClient();
+    if (!client) return;
+
+    try {
+        const { data: matches, error } = await client.from('battles').select('*').order('created_at', { ascending: false }).limit(20);
+        if (error) throw error;
+
+        const container = document.getElementById('adminMasterDeleteMatchesList');
+        if (!container) return;
+
+        const activeMatches = matches ? matches.filter(m => m.status === 'Open' || m.status === 'Running' || m.status === 'running' || m.status === 'Result_Pending') : [];
+
+        if (activeMatches.length === 0) {
+            container.innerHTML = `<p style="color: #ff9e9e; text-align: center; padding: 15px; background: rgba(255,0,0,0.1); border-radius: 8px;">✅ वर्तमान में डेटाबेस में कोई भी लाइव या फंसा हुआ मैच नहीं है।</p>`;
+            return;
+        }
+
+        let html = '';
+        activeMatches.forEach(match => {
+            const entry = parseFloat(match.entry_fee || 0);
+            const prize = parseFloat(match.winning_prize || 0);
+            
+            html += `
+                <div style="background: #1e002a; border: 1px solid #ff5252; border-radius: 10px; padding: 12px; color: #fff; box-shadow: inset 0 0 5px rgba(255,0,0,0.2); margin-bottom: 8px; text-align: left;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="background: #ff3b3b; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase;">${match.status}</span>
+                        <span style="font-size: 11px; color: #ffb3b3; font-family: monospace;">ID: ${match.id.substring(0,8)}</span>
+                    </div>
+                    <div style="font-size: 13px; margin-bottom: 4px;">🪙 फीस: <b>₹${entry}</b> | प्राइज़: <b>₹${prize}</b></div>
+                    <div style="font-size: 11px; color: #ccc;">👤 चैलेंजर: ${match.creator_email || 'N/A'}</div>
+                    <div style="font-size: 11px; color: #ccc;">🤝 जॉइनर: ${match.joiner_email || '⏳ कोई नहीं'}</div>
+                    <button type="button" class="btn" style="background: #ff3b3b; color: #fff; font-weight: bold; padding: 8px; border-radius: 6px; font-size: 12px; cursor: pointer; width: 100%; border: 0; margin-top: 8px; box-shadow: 0 3px 6px rgba(0,0,0,0.3);" onclick="window.adminDeleteAnyBattle('${match.id}')">Delete Battle & Refund 🗑️</button>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    } catch(e) {
+        console.log("मास्टर डिलीट सूची लोड त्रुटि: " + e.message);
+    }
+};
+
+// एडमिन पैनल खोलते ही हर 3 सेकंड में इस नए डिब्बे को लाइव रिफ्रेश करें
+document.addEventListener('DOMContentLoaded', function() {
+    setInterval(function() {
+        if (typeof window.fetchAdminMasterDeleteMatches === 'function' && document.getElementById('adminMasterDeleteMatchesList')) {
+            window.fetchAdminMasterDeleteMatches();
+        }
+    }, 3000);
+});
 </script>
 </body>
 </html>
