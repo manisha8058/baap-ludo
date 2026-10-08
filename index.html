@@ -1171,6 +1171,50 @@ window.joinLudoBattle = async function(matchId) {
         alert("❌ जॉइनिंग क्रैश एरर: " + e.message); 
     }
 };
+  // 👑 🔓 एडमिन द्वारा किसी भी मैच (Open/Running/Pending) को 1 सेकंड में डिलीट करने का लाइव इंजन
+window.adminDeleteAnyBattle = async function(matchId) {
+    if (!confirm("⚠️ चेतावनी: क्या आप इस बैटल को हमेशा के लिए डिलीट करना चाहते हैं? खिलाड़ियों का कटा हुआ बैलेंस उनके वॉलेट में वापस चला जाएगा।")) return;
+    
+    const client = getSupabaseClient();
+    if (!client) { alert("❌ डेटाबेस कनेक्शन त्रुटि!"); return; }
+
+    try {
+        alert("🔄 मैच की जांच और खिलाड़ियों का बैलेंस रिफंड किया जा रहा है...");
+        
+        // 1. मैच की डिटेल्स निकालें
+        const { data: match, error: mErr } = await client.from('battles').select('*').eq('id', matchId).single();
+        if (mErr || !match) { alert("❌ यह मैच डेटाबेस में नहीं मिला!"); return; }
+
+        const fee = parseFloat(match.entry_fee || 0);
+
+        // 💰 2. रिफंड इंजन: मैच सेट करने वाले (Creator) का पैसा वापस करें
+        if (match.creator_id) {
+            const { data: c } = await client.from('profiles').select('balance').eq('id', match.creator_id).single();
+            if (c) {
+                const newCBal = parseFloat(c.balance || 0) + fee;
+                await client.from('profiles').update({ balance: newCBal }).eq('id', match.creator_id);
+            }
+        }
+
+        // 💰 3. रिफंड इंजन: मैच जॉइन करने वाले (Joiner) का पैसा वापस करें (अगर मैच Running था)
+        if (match.joiner_id) {
+            const { data: j } = await client.from('profiles').select('balance').eq('id', match.joiner_id).single();
+            if (j) {
+                const newJBal = parseFloat(j.balance || 0) + fee;
+                await client.from('profiles').update({ balance: newJBal }).eq('id', match.joiner_id);
+            }
+        }
+
+        // 🗑️ 4. मैच को सुपाबेस डेटाबेस से हमेशा के लिए डिलीट (साफ) करें
+        const { error: delErr } = await client.from('battles').delete().eq('id', matchId);
+        if (delErr) throw delErr;
+
+        alert("🗑️ बैटल सफलतापूर्वक डिलीट कर दी गई है और खिलाड़ियों का पैसा उनके वॉलेट में वापस आ गया है!");
+        window.location.reload();
+    } catch(e) {
+        alert("❌ डिलीट परमिशन एरर: " + e.message);
+    }
+};
   
 // 🔑 3. लूडो किंग रूम कोड देने और लेने का लाइव रीयल-टाइम रेंडरर (रनिंग टेबल फिक्स)
 window.syncRoomCodeSystem = async function() {
